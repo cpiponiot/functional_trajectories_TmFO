@@ -1,11 +1,6 @@
 ---
 title: "What drives the functional response to disturbance in Paracou?"
-output: 
-  html_document:
-    theme: yeti
-    toc: yes
-    toc_float: yes
-    keep_md: true
+output: github_document
 ---
 
 ```{r global_options, include=FALSE}
