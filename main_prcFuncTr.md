@@ -65,3 +65,4 @@ Late pioneer = ingas + miconias + tapiriras + vismias (SLA ++ // seed mass - // 
 -   WD peaks quickly (low *t**m**a**x*) but stays low for long (low *θ*)
 
 -   SLA peaks after a long time (high *t**m**a**x*) but stays low for longer (low *θ*)
+adding a line
