@@ -1,0 +1,156 @@
+---
+title: "What drives the functional response to disturbance in Paracou?"
+output: 
+  html_document:
+    theme: yeti
+    toc: yes
+    toc_float: yes
+    keep_md: true
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning=FALSE, message=FALSE, results='hide',
+                      root.dir = "C:/Users/camille.piponiot/gitR/functional_trajectories_paracou")
+library(rstan)
+rstan_options(auto_write = TRUE)
+options(mc.cores = parallel::detectCores())
+
+library(data.table)
+library(ggplot2)
+library(gridExtra)
+library(tidyr)
+
+inference_stan = FALSE
+```
+
+# Data visualisation
+
+```{r, traits_traj, fig.height=10, fig.width=10}
+# to get the data: source("C:/Users/camille.piponiot/Google Drive/biodiversity/codes/get_metadata_paracou.R")
+
+load("data/genusData.Rdata")
+load("data/plotInfo.Rdata")
+name_traits = c("woodDensity","logSeedMass","SLA","DBH95")
+
+
+### reorganize data -> gather dataframes
+genusData_melt = melt(genusData, variable.name = "trait", value.name = "value", 
+                      measure.vars = grep("D|Seed|SLA",colnames(genusData)), 
+                      variable.factor = FALSE)
+dfTraits = genusData_melt[,.(value = weighted.mean(value, agb)),.(idplot, year, trait, cohort)]
+
+## add plot info (plot size, treatment)
+dfTraits = merge(dfTraits, plotInfo)
+
+## initial value
+md_0 = dfTraits[year < 1987,.(value=mean(value)),.(idplot, trait, treat)]
+
+```
+
+## Traits trajectory 
+
+Traits chosen: 
+
+- $DBH95$: DBH 95th percentile (per species) as a proxy of the stature
+
+- $logSeedMass$: median seed mass (log-transformed) as a proxy of the dispersal strategy
+
+- $SLA$: median specific leaf area, as a proxy of the assimilation strategy
+
+- $WD$: median wood density (tradeoff between growth rate and mortality rate)
+
+Cohorts: 
+
+- Survivors, ie trees that survived logging
+
+- Recruits, ie trees that passed the 10 cm DBH threshold after logging
+
+Here are represented for each cohort the mean trait value, weighted by the estimated above ground biomass (AGB) of each individual.
+
+```{r recr_traj,fig.height=10, fig.width=10}
+
+dfTraits$cohort <- factor(dfTraits$cohort)
+levels(dfTraits$cohort) <- c("Recruits", "Survivors")
+
+ggplot(dfTraits, aes(x = year - 1986, y = value, group = idplot, colour = treat)) + 
+  geom_line() + geom_point() + 
+  geom_point(data = md_0, aes(x = 0), pch = 1, cex = 5) + 
+  ylab("MWT") + xlab("Time since logging (yr)") +
+  facet_grid(trait~cohort, scales = "free")
+
+```
+
+For $D$: there seems to be no effect of logging gaps on recruitment, the only effect is on survivors (direct removal of big trees + higher growth rates of big survivors): worth including in the study? 
+
+We can exclude $D$ from the study later. 
+
+
+## Recruits most common genuses and their impact on mean weighted traits {.tabset .tabset-pills}
+
+### AGB per genus
+
+```{r, fig.height=10, fig.width=12}
+
+recrData = merge(genusData, genusData[cohort=="recr",.(agbR = sum(agb)),.(idplot, year, cohort)])
+
+## genuses that at least once represent 10% of the total biomass of recruits
+genus_common = unique(as.character(subset(recrData, agb/agbR > 0.15 & !(genus %in% c("Oenocarpus", "Indet")))$genus)) 
+
+recrData$genus2 = as.character(recrData$genus)
+recrData$genus2[!(recrData$genus %in% genus_common)] <- "other"
+
+recrData_agb = recrData[, .(agb = sum(agb)), .(genus2,idplot,year,agbR)]
+recrData = merge(recrData_agb, recrData[, .(woodDensity = weighted.mean(woodDensity, agb),
+                                        logSeedMass = weighted.mean(logSeedMass, agb),
+                                        SLA = weighted.mean(SLA, agb)), .(genus2)])
+
+recrData = merge(recrData, plotInfo, by="idplot")
+recrData = merge(recrData, data.table(treat = c("ctrl","CL","silv","silv+"), treatment = paste("T",0:3,sep="")), by="treat")
+recrData$bloc = rep(1:3,each=4)[as.numeric(recrData$idplot)]
+
+recrData$genus2 = factor(recrData$genus2, levels = c(as.character(genus_common), "other") )
+ggplot(recrData, aes(x=year, y=agb, fill=genus2)) + geom_area(colour = 1) + facet_grid(treatment ~ bloc)
+
+## mean traits (weighted by biomass) of recruited genuses in control plots -> reference (= white color in plots)
+ref = recrData[treat=="ctrl", .(woodDensity = weighted.mean(woodDensity, agb),
+                                logSeedMass = weighted.mean(logSeedMass, agb),
+                                SLA = weighted.mean(SLA, agb))]
+```
+
+### Proportion of total AGB 
+
+```{r, fig.height=10, fig.width=12}
+ggplot(recrData, aes(x = year, y = agb/agbR, fill = genus2)) + geom_area(colour = 1) + facet_grid(treatment ~ bloc, scales= "free")
+```
+
+### Seed mass
+
+```{r, fig.height=10, fig.width=12}
+ggplot(recrData, aes(x = year, y = agb/agbR, group = genus2, fill = logSeedMass)) + geom_area(colour = 1) + facet_grid(treatment ~ bloc, scales= "free") + scale_fill_gradient2(low = "firebrick4", mid = "white", high = "#104E8B", midpoint = ref$logSeedMass)
+```
+
+### SLA
+
+```{r, fig.height=10, fig.width=12}
+ggplot(recrData, aes(x = year, y = agb/agbR, group = genus2, fill = SLA)) + geom_area(colour = 1) + facet_grid(treatment ~ bloc, scales= "free") + scale_fill_gradient2(low = "firebrick4", mid = "white", high = "#104E8B", midpoint = ref$SLA)
+```
+
+
+
+### WD
+
+```{r, fig.height=10, fig.width=12}
+ggplot(recrData, aes(x = year, y = agb/agbR, group = genus2, fill = woodDensity)) + geom_area(colour = 1) + facet_grid(treatment ~ bloc, scales= "free") + scale_fill_gradient2(low = "firebrick4", mid = "white", high = "#104E8B", midpoint = ref$woodDensity)
+```
+
+### Conclusions 
+
+Early pioneer = cecropias (SLA 0 // seed mass -- // WD -- )
+
+Late pioneer = ingas + miconias + tapiriras + vismias (SLA ++ // seed mass - // WD - )
+
+- seed mass follows exactly cecropias dynamics: peaks quickly (low $tmax$, around 10 years) and recovers fast (high $\theta$)
+
+- WD peaks quickly (low $tmax$) but stays low for long (low $\theta$)
+
+- SLA peaks after a long time (high $tmax$) but stays low for longer (low $\theta$)
