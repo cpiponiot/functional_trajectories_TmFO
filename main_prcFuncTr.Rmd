@@ -1,6 +1,9 @@
 ---
 title: "What drives the functional response to disturbance in Paracou?"
-output: github_document
+output: 
+  html_document:
+    theme: yeti
+    keep_md: true
 ---
 
 ```{r global_options, include=FALSE}
@@ -32,13 +35,13 @@ name_traits = c("woodDensity","logSeedMass","SLA","DBH95")
 genusData_melt = melt(genusData, variable.name = "trait", value.name = "value", 
                       measure.vars = grep("D|Seed|SLA",colnames(genusData)), 
                       variable.factor = FALSE)
-dfTraits = genusData_melt[,.(value = weighted.mean(value, agb)),.(idplot, year, trait, cohort)]
+dfTraits = genusData_melt[,.(WMT = weighted.mean(value, agb)),.(idplot, year, trait, cohort)]
 
 ## add plot info (plot size, treatment)
 dfTraits = merge(dfTraits, plotInfo)
 
 ## initial value
-md_0 = dfTraits[year < 1987,.(value=mean(value)),.(idplot, trait, treat)]
+md_0 = dfTraits[year < 1987,.(WMT0 = mean(WMT)),.(idplot, trait, treat)]
 
 ```
 
@@ -50,9 +53,9 @@ Traits chosen:
 
 - $logSeedMass$: median seed mass (log-transformed) as a proxy of the dispersal strategy
 
-- $SLA$: median specific leaf area, as a proxy of the assimilation strategy
+- $SLA$: median specific leaf area, as a proxy of the assimilation strategy and leaf economic spectrum
 
-- $WD$: median wood density (tradeoff between growth rate and mortality rate)
+- $WD$: median wood density, as a proxy of growth rate and mechanical support
 
 Cohorts: 
 
@@ -67,9 +70,9 @@ Here are represented for each cohort the mean trait value, weighted by the estim
 dfTraits$cohort <- factor(dfTraits$cohort)
 levels(dfTraits$cohort) <- c("Recruits", "Survivors")
 
-ggplot(dfTraits, aes(x = year - 1986, y = value, group = idplot, colour = treat)) + 
+ggplot(dfTraits, aes(x = year - 1986, y = WMT, group = idplot, colour = treat)) + 
   geom_line() + geom_point() + 
-  geom_point(data = md_0, aes(x = 0), pch = 1, cex = 5) + 
+  geom_point(data = md_0, aes(x = 0, y = WMT0), pch = 1, cex = 5) + 
   ylab("MWT") + xlab("Time since logging (yr)") +
   facet_grid(trait~cohort, scales = "free")
 
@@ -78,7 +81,6 @@ ggplot(dfTraits, aes(x = year - 1986, y = value, group = idplot, colour = treat)
 For $D$: there seems to be no effect of logging gaps on recruitment, the only effect is on survivors (direct removal of big trees + higher growth rates of big survivors): worth including in the study? 
 
 We can exclude $D$ from the study later. 
-
 
 ## Recruits most common genuses and their impact on mean weighted traits {.tabset .tabset-pills}
 
@@ -130,8 +132,6 @@ ggplot(recrData, aes(x = year, y = agb/agbR, group = genus2, fill = logSeedMass)
 ggplot(recrData, aes(x = year, y = agb/agbR, group = genus2, fill = SLA)) + geom_area(colour = 1) + facet_grid(treatment ~ bloc, scales= "free") + scale_fill_gradient2(low = "firebrick4", mid = "white", high = "#104E8B", midpoint = ref$SLA)
 ```
 
-
-
 ### WD
 
 ```{r, fig.height=10, fig.width=12}
@@ -149,3 +149,20 @@ Late pioneer = ingas + miconias + tapiriras + vismias (SLA ++ // seed mass - // 
 - WD peaks quickly (low $tmax$) but stays low for long (low $\theta$)
 
 - SLA peaks after a long time (high $tmax$) but stays low for longer (low $\theta$)
+
+## Identity of trees logged and devitalised
+
+```{r mortSurvTraits, fig.height = 3, fig.width = 10}
+load("data/mortLogging.Rdata")
+
+dfMort = melt(mortLogging, id.vars = c("eventMort","idplot","agb"), variable.name = "trait", value.name = "WMT")
+
+dfMort = merge(dfMort, md_0, by = c("idplot", "trait"))
+
+ggplot(dfMort, aes(y = (WMT - WMT0)/WMT0*100, x = eventMort, colour=treat )) + 
+  geom_hline(yintercept = 0, lty = 2) + 
+  geom_boxplot() + 
+  ylab("Difference between killed trees'\nand prelogging trait values (%)") +
+  xlab("Type of tree mortality") + 
+  facet_wrap( ~ trait, scales = "free")
+```
