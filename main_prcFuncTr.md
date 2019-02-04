@@ -48,7 +48,7 @@ We can exclude $D$ from the study later.
 
 ![](main_prcFuncTr_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
 
-### Seed mass
+### Seed mass (log-transformed)
 
 ![](main_prcFuncTr_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
 
@@ -56,7 +56,7 @@ We can exclude $D$ from the study later.
 
 ![](main_prcFuncTr_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
 
-### WD
+### Wood Density
 
 ![](main_prcFuncTr_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
 
@@ -72,5 +72,26 @@ Late pioneer = ingas + miconias + tapiriras + vismias (SLA ++ // seed mass - // 
 
 - SLA peaks after a long time (high $tmax$) but stays low for longer (low $\theta$)
 
-## Indentity of trees logged and devitalised
+## What can explain survivors' changes in WMT? (especially with SLA)
 
+### Logging direct effect
+
+Here we investigate the WMT of trees killed during logging operations and compare it to the community WMT. 
+
+The categories are: 
+
+- "logged": trees intentionally logged 
+
+- "devitalized": big trees intentionally poisoned and girdled 
+
+- "damage": non-intentional damage caused by logging operations (skid trails opening, tree felling) / should be random but affects smaller trees more, which have a slightly different functional composition
+
+![](main_prcFuncTr_files/figure-html/mortSurvTraits-1.png)<!-- -->
+
+Devitalized trees have a SLA lower than the community's, especially in T2 (that shows the highest change in terms of survivors' SLA), which could partly explain why the SLA of survivors increases sharply in treatments 2 and 3.
+
+### Post-logging survivors dynamics
+
+Here we analyse the WMT of the additional biomass from survivors' growth and the WMT of survivors' mortality, to see if some patterns in survivors dynamics can explain the changes in survivors' traits. 
+
+![](main_prcFuncTr_files/figure-html/survDynTraits-1.png)<!-- -->

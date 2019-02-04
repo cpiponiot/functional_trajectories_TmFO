@@ -39,9 +39,10 @@ dfTraits = genusData_melt[,.(WMT = weighted.mean(value, agb)),.(idplot, year, tr
 
 ## add plot info (plot size, treatment)
 dfTraits = merge(dfTraits, plotInfo)
+dfTraits = merge(dfTraits, data.table(treat = c("ctrl","CL","silv","silv+"), treatment = paste("T",0:3,sep="")), by="treat")
 
 ## initial value
-md_0 = dfTraits[year < 1987,.(WMT0 = mean(WMT)),.(idplot, trait, treat)]
+md_0 = dfTraits[year < 1987,.(WMT0 = mean(WMT)),.(idplot, trait, treatment)]
 
 ```
 
@@ -70,7 +71,7 @@ Here are represented for each cohort the mean trait value, weighted by the estim
 dfTraits$cohort <- factor(dfTraits$cohort)
 levels(dfTraits$cohort) <- c("Recruits", "Survivors")
 
-ggplot(dfTraits, aes(x = year - 1986, y = WMT, group = idplot, colour = treat)) + 
+ggplot(dfTraits, aes(x = year - 1986, y = WMT, group = idplot, colour = treatment)) + 
   geom_line() + geom_point() + 
   geom_point(data = md_0, aes(x = 0, y = WMT0), pch = 1, cex = 5) + 
   ylab("MWT") + xlab("Time since logging (yr)") +
@@ -120,7 +121,7 @@ ref = recrData[treat=="ctrl", .(woodDensity = weighted.mean(woodDensity, agb),
 ggplot(recrData, aes(x = year, y = agb/agbR, fill = genus2)) + geom_area(colour = 1) + facet_grid(treatment ~ bloc, scales= "free")
 ```
 
-### Seed mass
+### Seed mass (log-transformed)
 
 ```{r, fig.height=10, fig.width=12}
 ggplot(recrData, aes(x = year, y = agb/agbR, group = genus2, fill = logSeedMass)) + geom_area(colour = 1) + facet_grid(treatment ~ bloc, scales= "free") + scale_fill_gradient2(low = "firebrick4", mid = "white", high = "#104E8B", midpoint = ref$logSeedMass)
@@ -132,7 +133,7 @@ ggplot(recrData, aes(x = year, y = agb/agbR, group = genus2, fill = logSeedMass)
 ggplot(recrData, aes(x = year, y = agb/agbR, group = genus2, fill = SLA)) + geom_area(colour = 1) + facet_grid(treatment ~ bloc, scales= "free") + scale_fill_gradient2(low = "firebrick4", mid = "white", high = "#104E8B", midpoint = ref$SLA)
 ```
 
-### WD
+### Wood Density
 
 ```{r, fig.height=10, fig.width=12}
 ggplot(recrData, aes(x = year, y = agb/agbR, group = genus2, fill = woodDensity)) + geom_area(colour = 1) + facet_grid(treatment ~ bloc, scales= "free") + scale_fill_gradient2(low = "firebrick4", mid = "white", high = "#104E8B", midpoint = ref$woodDensity)
@@ -150,19 +151,48 @@ Late pioneer = ingas + miconias + tapiriras + vismias (SLA ++ // seed mass - // 
 
 - SLA peaks after a long time (high $tmax$) but stays low for longer (low $\theta$)
 
-## Identity of trees logged and devitalised
+## What can explain survivors' changes in WMT? (especially with SLA)
+
+### Logging direct effect
+
+Here we investigate the WMT of trees killed during logging operations and compare it to the community WMT. 
+
+The categories are: 
+
+- "logged": trees intentionally logged 
+
+- "devitalized": big trees intentionally poisoned and girdled 
+
+- "damage": non-intentional damage caused by logging operations (skid trails opening, tree felling) / should be random but affects smaller trees more, which have a slightly different functional composition
 
 ```{r mortSurvTraits, fig.height = 3, fig.width = 10}
 load("data/mortLogging.Rdata")
 
-dfMort = melt(mortLogging, id.vars = c("eventMort","idplot","agb"), variable.name = "trait", value.name = "WMT")
-
-dfMort = merge(dfMort, md_0, by = c("idplot", "trait"))
-
-ggplot(dfMort, aes(y = (WMT - WMT0)/WMT0*100, x = eventMort, colour=treat )) + 
+ggplot(mortLogging, aes(y = (WMT - WMT0)/WMT0*100, x = eventMort, colour=treatment)) + 
   geom_hline(yintercept = 0, lty = 2) + 
   geom_boxplot() + 
   ylab("Difference between killed trees'\nand prelogging trait values (%)") +
   xlab("Type of tree mortality") + 
   facet_wrap( ~ trait, scales = "free")
+```
+
+Devitalized trees have a SLA lower than the community's, especially in T2 (that shows the highest change in terms of survivors' SLA), which could partly explain why the SLA of survivors increases sharply in treatments 2 and 3.
+
+### Post-logging survivors dynamics
+
+Here we analyse the WMT of the additional biomass from survivors' growth and the WMT of survivors' mortality, to see if some patterns in survivors dynamics can explain the changes in survivors' traits. 
+
+```{r survDynTraits, fig.height = 10, fig.width = 12}
+load("data/dynData.Rdata")
+
+dynData = melt(dynData, measure.vars = grep("WMT", colnames(dynData)))
+
+dynData2 = dynData[, .(value = mean(value)), .(year, treatment, cohort, trait, variable)]
+  
+  
+ggplot(subset(dynData2, cohort == "surv"), aes(x = year, y = value, colour=treatment)) +
+  geom_vline(xintercept = 1986, lty = 2) + 
+  geom_line() + geom_point() + 
+  facet_grid(trait ~ variable, scales = "free") 
+
 ```
