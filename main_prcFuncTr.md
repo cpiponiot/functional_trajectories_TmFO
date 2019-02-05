@@ -134,10 +134,6 @@ with
 
 
 
-## Calibrating recruits model
-
-![](main_prcFuncTr_files/figure-html/calibration_recruits-1.png)<!-- -->
-
 ## Plotting predictions {.tabset .tabset-pills}
 
 
@@ -145,14 +141,6 @@ with
 
 
 
-### Treatment 1 
-
 ![](main_prcFuncTr_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
 
-### Treatment 2 
-
-![](main_prcFuncTr_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
-
-### Treatment 3 
-
-![](main_prcFuncTr_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
+![](main_prcFuncTr_files/figure-html/parameters_value_recruits-1.png)<!-- -->

@@ -18,6 +18,7 @@ library(ggplot2)
 library(gridExtra)
 library(tidyr)
 
+inference_stan = FALSE
 ```
 
 # Data visualisation
@@ -98,8 +99,8 @@ recrData$genus2[!(recrData$genus %in% genus_common)] <- "other"
 
 recrData_agb = recrData[, .(agb = sum(agb)), .(genus2,idplot,year,agbR)]
 recrData = merge(recrData_agb, recrData[, .(woodDensity = weighted.mean(woodDensity, agb),
-                                        logSeedMass = weighted.mean(logSeedMass, agb),
-                                        SLA = weighted.mean(SLA, agb)), .(genus2)])
+                                            logSeedMass = weighted.mean(logSeedMass, agb),
+                                            SLA = weighted.mean(SLA, agb)), .(genus2)])
 
 recrData = merge(recrData, plotInfo, by="idplot")
 recrData = merge(recrData, data.table(treat = c("ctrl","CL","silv","silv+"), treatment = paste("T",0:3,sep="")), by="treat")
@@ -193,7 +194,7 @@ with $I_{c-1} \setminus I_{c}$ the set of trees alive at censuses $c-1$ and dead
 load("data/dynData.Rdata")
 
 dynData = melt(subset(dynData, trait!="DBH95"), measure.vars = grep("WMT", colnames(dynData)))
-  
+
 ggplot(subset(dynData, cohort == "surv"), aes(x = year, y = value, colour=treatment)) +
   geom_vline(xintercept = 1986, lty = 2) + 
   stat_summary(fun.y=mean,geom="line", alpha=1,lwd=1) + 
@@ -240,10 +241,6 @@ curve(TS0*(1 + (TR0/TS0-1)*(exp(-lambda*x))), add=T)
 legend(x="topright", col=c(2), legend = c("Boom and bust"), lty=1)
 ```
 
-
-
-## Calibrating recruits model
-
 ```{r, calibration_recruits}
 load("data/dynData.Rdata")
 name_traits = c("woodDensity","logSeedMass","SLA")
@@ -253,17 +250,22 @@ tlogging = 1986
 source("codes/inference_data.R")
 
 ## model inference with stan
-init_f <- function() {list(mu_lambda = 0.1, mu_tmax = c(10,10,30), mu_theta=1, mu_Delta = c(-0.1,-0.1, 0.1)); }
+if (inference_stan) {
+  init_f <- function() {list(mu_lambda = 0.1, mu_tmax = c(10,10,30), mu_theta=1, mu_Delta = c(-0.1,-0.1, 0.1)); }
+  
+  stan_recruits <- stan(file = "codes/recruits_model.stan", init = init_f)
+  # traceplot(stan_recruits, pars = c("mu_Delta","mu_tmax","theta"))
+  pars = rstan::extract(stan_recruits)
+  save(pars, file = "data/parsRecruits.Rdata")
+}
 
-stan_recruits <- stan(file = "codes/recruits_model.stan", init = init_f)
-traceplot(stan_recruits, pars = c("mu_Delta","mu_tmax","theta"))
 ```
 
 ## Plotting predictions {.tabset .tabset-pills}
 
 ```{r maxL_params}
 ## max likelihood parameters
-pars = rstan::extract(stan_recruits)
+load("data/parsRecruits.Rdata")
 maxL = which.max(pars$lp__)
 Delta = pars$Delta[maxL,,]
 tmax = pars$tmax[maxL,,]
@@ -291,37 +293,43 @@ df_CI_pred = df_pred[,.(inf = quantile(TR_pred, 0.025),
                         sup = quantile(TR_pred, 0.975)), .(np,t,trait,T0)]
 
 ## observations 
-df_obs = dynData_recr[,c("trait","WMT","year","np","treatment","idplot")]
+df_obs = dynData_recr[,c("trait","WMT","year","np")]
 df_obs$t = df_obs$year - tlogging
+
 df_CI_pred = merge(df_CI_pred, df_obs, by = c("np","t","trait"), all=T)
+
+df_CI_pred = merge(df_CI_pred, unique(dynData_inf[,c("treatment","idplot","np")]), by = "np")
 ```
 
-### Treatment 1 
-
 ```{r, fig.height=8, fig.width=10}
-ggplot(subset(df_CI_pred, treatment=="T1"), aes(x=t, y = med, colour=idplot)) + 
-  facet_grid(trait~idplot, scale = "free") + 
+ggplot(df_CI_pred, aes(x=t, y = med, colour=idplot)) + 
+  facet_grid(trait~treatment, scale = "free") + 
   geom_ribbon(aes(ymin=inf, ymax = sup, fill=idplot), colour=NA, alpha=0.2) + 
   geom_line() + geom_point(aes(y=WMT))  + 
   geom_hline(aes(yintercept=T0), lty=2) 
 ```
 
-### Treatment 2 
+#### Exploring parameters values
 
-```{r, fig.height=8, fig.width=10}
-ggplot(subset(df_CI_pred, treatment=="T2"), aes(x=t, y = med, colour=idplot)) + 
-  facet_grid(trait~idplot, scale = "free") + 
-  geom_ribbon(aes(ymin=inf, ymax = sup, fill=idplot), colour=NA, alpha=0.2) + 
-  geom_line() + geom_point(aes(y=WMT))  + 
-  geom_hline(aes(yintercept=T0), lty=2)
-```
+```{r parameters_value_recruits}
+df_Delta_tmax = data.table(Delta = c(pars$Delta[1:100,,]), 
+                           tmax = c(pars$tmax[1:100,,]),
+                           iter = rep(1:100, K*P),
+                           np = rep(rep(1:P,each=100),K) , 
+                           trait = rep(name_traits, each = 100*P))
+df_theta = data.table(theta = c(pars$theta[1:100,]),  
+                      iter = rep(1:100, K),
+                      trait = rep(name_traits, each = 100))
 
-### Treatment 3 
+df_pars_recruits = merge(df_Delta_tmax, df_theta, by = c("iter","trait"))
 
-```{r, fig.height=8, fig.width=10}
-ggplot(subset(df_CI_pred, treatment=="T3"), aes(x=t, y = med, colour=idplot)) + 
-  facet_grid(trait~idplot, scale = "free") + 
-  geom_ribbon(aes(ymin=inf, ymax = sup, fill=idplot), colour=NA, alpha=0.2) + 
-  geom_line() + geom_point(aes(y=WMT))  + 
-  geom_hline(aes(yintercept=T0), lty=2)
+df_pars_recruits = melt(df_pars_recruits, id.vars = c("iter","trait","np"),
+                        variable.name = "parameter")
+
+
+df_pars_recruits = merge(df_pars_recruits, unique(dynData_inf[,c("np","treatment")]))
+
+ggplot(df_pars_recruits, aes(group = np,  y = value, colour = treatment)) + 
+  geom_boxplot() + facet_grid( parameter ~ trait, scales = "free")
+
 ```
