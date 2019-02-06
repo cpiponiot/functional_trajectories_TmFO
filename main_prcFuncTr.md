@@ -143,4 +143,23 @@ with
 
 ![](main_prcFuncTr_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
 
+## Exploring parameters values
+
 ![](main_prcFuncTr_files/figure-html/parameters_value_recruits-1.png)<!-- -->
+
+**tmax** for the seed mass and wood density, the "boom and bust" pattern is primarly driven by early pioneers (cecropias), so tmax is around 12 years. For SLA, cecropias have a rather average SLA (around 11 m2/kg) but secondary pioneers like ingas exhibit high SLA values: the boom-and-bust pattern is thus driven by the dynamics of this second group of pioneers, and is around 30 years. 
+
+One possibility is to set only one $tmax$ per trait and site, reflecting the local dynamics of pioneers according to their trait value. This could be interesting 
+
+### Delta
+
+![](main_prcFuncTr_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
+Strong correlation between $\Delta$ for wood densty and seed mass: linked by the max density of cecropias. 
+
+$\Delta$ for SLA correlates less but still strongly with other traits: logging intensity effect? 
+
+### Effect of logging intensity and size of removed trees
+
+![](main_prcFuncTr_files/figure-html/Delta_vs_loss-1.png)<!-- -->![](main_prcFuncTr_files/figure-html/Delta_vs_loss-2.png)<!-- -->
+
+Neat correlation between the amount of AGB loss after logging operations and the maximum trait value reached after logging.

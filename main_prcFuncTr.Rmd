@@ -309,7 +309,7 @@ ggplot(df_CI_pred, aes(x=t, y = med, colour=idplot)) +
   geom_hline(aes(yintercept=T0), lty=2) 
 ```
 
-#### Exploring parameters values
+## Exploring parameters values
 
 ```{r parameters_value_recruits}
 df_Delta_tmax = data.table(Delta = c(pars$Delta[1:100,,]), 
@@ -333,3 +333,76 @@ ggplot(df_pars_recruits, aes(group = np,  y = value, colour = treatment)) +
   geom_boxplot() + facet_grid( parameter ~ trait, scales = "free")
 
 ```
+
+**tmax** for the seed mass and wood density, the "boom and bust" pattern is primarly driven by early pioneers (cecropias), so tmax is around 12 years. For SLA, cecropias have a rather average SLA (around 11 m2/kg) but secondary pioneers like ingas exhibit high SLA values: the boom-and-bust pattern is thus driven by the dynamics of this second group of pioneers, and is around 30 years. 
+
+One possibility is to set only one $tmax$ per trait and site, reflecting the local dynamics of pioneers according to their trait value. This could be interesting 
+
+### Delta
+
+```{r , fig.height=3, fig.width=10}
+library(ggpubr)
+library(ggpmisc)
+
+df_Delta = subset(df_pars_recruits, parameter == "Delta")
+df_Delta = df_Delta[,.(inf = quantile(value, 0.025), 
+                       med = quantile(value, 0.5), 
+                       sup = quantile(value, 0.975)), .(np, treatment, trait)]
+df_Delta = melt(df_Delta, id.vars = c("np", "treatment","trait"), variable.name = "stat")
+df_Delta = dcast(df_Delta, np + treatment ~ trait + stat, value.var = "value")
+
+g1 <- ggplot(df_Delta, aes(x=SLA_med, y=woodDensity_med, 
+                           xmin=SLA_inf, ymin=woodDensity_inf, 
+                           xmax=SLA_sup, ymax=woodDensity_sup)) + 
+  geom_pointrange(aes(colour=treatment)) + geom_errorbarh(aes(colour=treatment)) + 
+  theme(legend.position = "none") + geom_smooth(method="lm", se=FALSE) +
+  stat_fit_glance(method = 'lm', geom = 'text', aes(label = round(..p.value.., 3))) 
+g2 <- ggplot(df_Delta, aes(x=woodDensity_med, y=logSeedMass_med, 
+                           xmin=woodDensity_inf, ymin=logSeedMass_inf, 
+                           xmax=woodDensity_sup, ymax=logSeedMass_sup)) + 
+  geom_pointrange(aes(colour=treatment)) + geom_errorbarh(aes(colour=treatment)) + 
+  theme(legend.position = "none") + geom_smooth(method="lm", se=FALSE) +
+  stat_fit_glance(method = 'lm', geom = 'text', aes(label = round(..p.value.., 3)))
+g3 <- ggplot(df_Delta, aes(x=logSeedMass_med, y=SLA_med, 
+                           xmin=logSeedMass_inf, ymin=SLA_inf, 
+                           xmax=logSeedMass_sup, ymax=SLA_sup)) + 
+  geom_pointrange(aes(colour=treatment)) + geom_errorbarh(aes(colour=treatment)) + 
+  theme(legend.position = "none") + geom_smooth(method="lm", se=FALSE) +
+  stat_fit_glance(method = 'lm', geom = 'text', aes(label = round(..p.value.., 3)))
+ggarrange(g1,g2,g3, ncol = 3)
+
+```
+Strong correlation between $\Delta$ for wood densty and seed mass: linked by the max density of cecropias. 
+
+$\Delta$ for SLA correlates less but still strongly with other traits: logging intensity effect? 
+
+### Effect of logging intensity and size of removed trees
+
+```{r Delta_vs_loss, fig.height = 3, fig.width=10 }
+agbData = dynData_inf[trait=="SLA",.(agb = sum(agb) ),.(np, year)]
+df_loss = agbData[,.(loss_abs = agb[year == 1986] - min(agb[year>1986 & year < 1991]), 
+                     loss_rel = (agb[year == 1986] - min(agb[year>1986 & year < 1991]))/agb[year == 1986]) ,.(np)]
+  
+df_Delta = subset(df_pars_recruits, parameter == "Delta")
+df_Delta = df_Delta[,.(inf = quantile(value, 0.025), 
+                       med = quantile(value, 0.5), 
+                       sup = quantile(value, 0.975)), .(np, treatment, trait)]
+df_Delta = melt(df_Delta, id.vars = c("np", "treatment","trait"), variable.name = "stat")
+df_Delta = dcast(df_Delta, trait + np + treatment ~  stat, value.var = "value")
+df_Delta = merge(df_Delta, df_loss, by="np")
+
+ggplot(df_Delta, aes(x=loss_abs, y = med, ymin = inf, ymax = sup)) + 
+  geom_smooth(method="lm", se=FALSE, lty = 2, colour = 1) +
+  geom_pointrange(aes(colour=treatment)) + facet_wrap( ~ trait, scales = "free") + 
+  stat_fit_glance(method = 'lm', geom = 'text', aes(label = round(..p.value.., 3))) + 
+  labs(x = "AGB loss (absolute value)", y = "Delta")
+
+ggplot(df_Delta, aes(x=loss_rel*100, y = med, ymin = inf, ymax = sup)) + 
+  geom_smooth(method="lm", se=FALSE, lty = 2, colour = 1) +
+  geom_pointrange(aes(colour=treatment)) + facet_wrap( ~ trait, scales = "free") + 
+  stat_fit_glance(method = 'lm', geom = 'text', aes(label = round(..p.value.., 3))) + 
+  labs(x = "AGB loss (% initial value)", y = "Delta")
+
+```
+
+Neat correlation between the amount of AGB loss after logging operations and the maximum trait value reached after logging.
