@@ -158,8 +158,17 @@ Strong correlation between $\Delta$ for wood densty and seed mass: linked by the
 
 $\Delta$ for SLA correlates less but still strongly with other traits: logging intensity effect? 
 
-### Effect of logging intensity and size of removed trees
+### Effect of logging intensity
 
 ![](main_prcFuncTr_files/figure-html/Delta_vs_loss-1.png)<!-- -->![](main_prcFuncTr_files/figure-html/Delta_vs_loss-2.png)<!-- -->
 
 Neat correlation between the amount of AGB loss after logging operations and the maximum trait value reached after logging.
+
+$\rightarrow$ add as covariable
+
+
+### Effect of initial composition in recruits' trajectory
+
+![](main_prcFuncTr_files/figure-html/initial_compo-1.png)<!-- -->![](main_prcFuncTr_files/figure-html/initial_compo-2.png)<!-- -->
+
+**Conclusions** The pre-logging functional composition does not seem to impact significantly the post-logging trajectory in Paracou. 

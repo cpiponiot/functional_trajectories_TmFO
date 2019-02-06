@@ -354,20 +354,23 @@ df_Delta = dcast(df_Delta, np + treatment ~ trait + stat, value.var = "value")
 g1 <- ggplot(df_Delta, aes(x=SLA_med, y=woodDensity_med, 
                            xmin=SLA_inf, ymin=woodDensity_inf, 
                            xmax=SLA_sup, ymax=woodDensity_sup)) + 
-  geom_pointrange(aes(colour=treatment)) + geom_errorbarh(aes(colour=treatment)) + 
-  theme(legend.position = "none") + geom_smooth(method="lm", se=FALSE) +
+  geom_smooth(method="lm", se=FALSE, lty=2, colour=1) + 
+  geom_pointrange(aes(colour=treatment)) + geom_errorbarh(aes(colour=treatment)) +
+  theme(legend.position = "none") + 
   stat_fit_glance(method = 'lm', geom = 'text', aes(label = round(..p.value.., 3))) 
 g2 <- ggplot(df_Delta, aes(x=woodDensity_med, y=logSeedMass_med, 
                            xmin=woodDensity_inf, ymin=logSeedMass_inf, 
                            xmax=woodDensity_sup, ymax=logSeedMass_sup)) + 
+  geom_smooth(method="lm", se=FALSE, lty=2, colour=1) +
   geom_pointrange(aes(colour=treatment)) + geom_errorbarh(aes(colour=treatment)) + 
-  theme(legend.position = "none") + geom_smooth(method="lm", se=FALSE) +
+  theme(legend.position = "none") + 
   stat_fit_glance(method = 'lm', geom = 'text', aes(label = round(..p.value.., 3)))
 g3 <- ggplot(df_Delta, aes(x=logSeedMass_med, y=SLA_med, 
                            xmin=logSeedMass_inf, ymin=SLA_inf, 
                            xmax=logSeedMass_sup, ymax=SLA_sup)) + 
+  geom_smooth(method="lm", se=FALSE, lty=2, colour=1) +
   geom_pointrange(aes(colour=treatment)) + geom_errorbarh(aes(colour=treatment)) + 
-  theme(legend.position = "none") + geom_smooth(method="lm", se=FALSE) +
+  theme(legend.position = "none") + 
   stat_fit_glance(method = 'lm', geom = 'text', aes(label = round(..p.value.., 3)))
 ggarrange(g1,g2,g3, ncol = 3)
 
@@ -376,7 +379,7 @@ Strong correlation between $\Delta$ for wood densty and seed mass: linked by the
 
 $\Delta$ for SLA correlates less but still strongly with other traits: logging intensity effect? 
 
-### Effect of logging intensity and size of removed trees
+### Effect of logging intensity
 
 ```{r Delta_vs_loss, fig.height = 3, fig.width=10 }
 agbData = dynData_inf[trait=="SLA",.(agb = sum(agb) ),.(np, year)]
@@ -394,15 +397,52 @@ df_Delta = merge(df_Delta, df_loss, by="np")
 ggplot(df_Delta, aes(x=loss_abs, y = med, ymin = inf, ymax = sup)) + 
   geom_smooth(method="lm", se=FALSE, lty = 2, colour = 1) +
   geom_pointrange(aes(colour=treatment)) + facet_wrap( ~ trait, scales = "free") + 
-  stat_fit_glance(method = 'lm', geom = 'text', aes(label = round(..p.value.., 3))) + 
+  stat_fit_glance(method = 'lm', geom = 'text', aes(label = paste("p-value", round(..p.value.., 3)))) +
+  stat_poly_eq(formula = y ~ x, aes(label = paste(..rr.label..)), parse=TRUE, label.x.npc = "right") +
   labs(x = "AGB loss (absolute value)", y = "Delta")
 
 ggplot(df_Delta, aes(x=loss_rel*100, y = med, ymin = inf, ymax = sup)) + 
   geom_smooth(method="lm", se=FALSE, lty = 2, colour = 1) +
   geom_pointrange(aes(colour=treatment)) + facet_wrap( ~ trait, scales = "free") + 
-  stat_fit_glance(method = 'lm', geom = 'text', aes(label = round(..p.value.., 3))) + 
-  labs(x = "AGB loss (% initial value)", y = "Delta")
+  stat_fit_glance(method = 'lm', geom = 'text', aes(label = paste("p-value", round(..p.value.., 3)))) +
+  stat_poly_eq(formula = y ~ x, aes(label = paste(..rr.label..)), parse=TRUE, label.x.npc = "right") + labs(x = "AGB loss (% initial value)", y = "Delta")
+
 
 ```
 
 Neat correlation between the amount of AGB loss after logging operations and the maximum trait value reached after logging.
+
+$\rightarrow$ add as covariable
+
+
+### Effect of initial composition in recruits' trajectory
+
+```{r initial_compo, fig.height = 3, fig.width=10}
+
+load("data/dynData.Rdata")
+md0 = dynData_inf[cohort=="surv" & year < 1987, 
+              .(WMT0 = mean(WMT), WTV0 = mean(WTV)), .(np, trait)]
+
+df_Delta = subset(df_pars_recruits, parameter == "Delta")
+df_Delta = df_Delta[,.(inf = quantile(value, 0.025), 
+                       med = quantile(value, 0.5), 
+                       sup = quantile(value, 0.975)), .(np, treatment, trait)]
+df_Delta = melt(df_Delta, id.vars = c("np", "treatment","trait"), variable.name = "stat")
+df_Delta = dcast(df_Delta, trait + np + treatment ~  stat, value.var = "value")
+df_Delta = merge(df_Delta, md0, by = c("np","trait"))
+
+ggplot(df_Delta, aes(x=WMT0, y = med, ymin = inf, ymax = sup)) + 
+  geom_smooth(method="lm", se=FALSE, lty = 2, colour = 1) +
+  geom_pointrange(aes(colour=treatment)) + facet_wrap( ~ trait, scales = "free") + 
+  stat_fit_glance(method = 'lm', geom = 'text', aes(label = paste("p-value", round(..p.value.., 3)))) +
+  stat_poly_eq(formula = y ~ x, aes(label = paste(..rr.label..)), parse=TRUE, label.x.npc = "right") + labs(x = "Initial weighted mean trait", y = "Delta")
+
+ggplot(df_Delta, aes(x=WTV0, y = med, ymin = inf, ymax = sup)) + 
+  geom_smooth(method="lm", se=FALSE, lty = 2, colour = 1) +
+  geom_pointrange(aes(colour=treatment)) + facet_wrap( ~ trait, scales = "free") + 
+  stat_fit_glance(method = 'lm', geom = 'text', aes(label = paste("p-value", round(..p.value.., 3)))) +
+  stat_poly_eq(formula = y ~ x, aes(label = paste(..rr.label..)), parse=TRUE, label.x.npc = "right") + labs(x = "Initial weighted trait variation (sd)", y = "Delta")
+
+```
+
+**Conclusion** The pre-logging functional composition does not seem to impact significantly the post-logging trajectory in Paracou. 
