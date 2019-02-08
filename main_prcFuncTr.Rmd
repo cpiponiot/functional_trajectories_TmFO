@@ -385,7 +385,7 @@ $\Delta$ for SLA correlates less but still strongly with other traits: logging i
 agbData = dynData_inf[trait=="SLA",.(agb = sum(agb) ),.(np, year)]
 df_loss = agbData[,.(loss_abs = agb[year == 1986] - min(agb[year>1986 & year < 1991]), 
                      loss_rel = (agb[year == 1986] - min(agb[year>1986 & year < 1991]))/agb[year == 1986]) ,.(np)]
-  
+
 df_Delta = subset(df_pars_recruits, parameter == "Delta")
 df_Delta = df_Delta[,.(inf = quantile(value, 0.025), 
                        med = quantile(value, 0.5), 
@@ -421,7 +421,7 @@ $\rightarrow$ add as covariable
 
 load("data/dynData.Rdata")
 md0 = dynData_inf[cohort=="surv" & year < 1987, 
-              .(WMT0 = mean(WMT), WTV0 = mean(WTV)), .(np, trait)]
+                  .(WMT0 = mean(WMT), WTV0 = mean(WTV)), .(np, trait)]
 
 df_Delta = subset(df_pars_recruits, parameter == "Delta")
 df_Delta = df_Delta[,.(inf = quantile(value, 0.025), 
@@ -446,3 +446,104 @@ ggplot(df_Delta, aes(x=WTV0, y = med, ymin = inf, ymax = sup)) +
 ```
 
 **Conclusion** The pre-logging functional composition does not seem to impact significantly the post-logging trajectory in Paracou. 
+
+## New recruits modelling: with 2 cohorts (test)
+
+```{r, calibration_recruits2c}
+load("data/dynData.Rdata")
+name_traits = c("woodDensity","logSeedMass","SLA")
+tlogging = 1986
+
+## inference data
+source("codes/inference_data.R")
+
+## model inference with stan
+if (inference_stan) {
+  init_f <- function() {list(mu_tmax = c(10,30), mu_theta=1, mu_Delta = c(0.2, 0.2)); }
+  
+  stan_recruits_2c <- stan(file = "codes/recruits_model_2cohorts.stan", init = init_f)
+  traceplot(stan_recruits_2c, pars = c("mu_Delta","mu_tmax","theta"))
+  pars_2c = rstan::extract(stan_recruits_2c)
+  save(pars_2c, file = "data/parsRecruits_2cohorts.Rdata")
+}
+
+```
+
+
+```{r plot_pred_recruits_2c, fig.height=8, fig.width=20}
+### 
+load("data/parsRecruits_2cohorts.Rdata")
+
+df_pred = data.table(expand.grid(t = 0:100, np = 1:P, k=1:K, iter = sample(length(pars$lp__), 100)))
+
+df_pred$trait = name_traits[df_pred$k]
+
+df_pred = merge(df_pred, df_pred[,.(T0 = T0[np,k]),.(np,k)], by=c("np","k"))
+
+df_pred = merge(df_pred, df_pred[,.(Delta1 = pars_2c$Delta[iter,np,1], 
+                                    tmax1 = pars_2c$tmax1[iter,np],
+                                    theta1 = pars_2c$theta[iter,1],
+                                    Delta2 = pars_2c$Delta[iter,np,2], 
+                                    tmax2 = pars_2c$tmax2[iter,np],
+                                    theta2 = pars_2c$theta[iter,2]), 
+                                 .(iter,np)], by=c("iter","np"))
+df_pred = merge(df_pred, df_pred[,.(dT1 = pars_2c$dT[iter,k,1],
+                                    dT2 = pars_2c$dT[iter,k,2]), 
+                                 .(iter,k)], by=c("iter","k"))
+
+df_pred$TR_pred = df_pred$T0 * (1 + 
+                                  df_pred$dT1 * df_pred$Delta1 * ( df_pred$t / df_pred$tmax1 * exp( 1 - df_pred$t / df_pred$tmax1))^df_pred$theta1 + 
+                                  df_pred$dT2 * df_pred$Delta2 * ( df_pred$t / df_pred$tmax2 * exp( 1 - df_pred$t / df_pred$tmax2))^df_pred$theta2 )
+
+df_CI_pred = df_pred[,.(inf = quantile(TR_pred, 0.025), 
+                        med = quantile(TR_pred, 0.5),
+                        sup = quantile(TR_pred, 0.975)), .(np,t,trait,T0)]
+
+## observations 
+df_obs = dynData_recr[,c("trait","WMT","year","np")]
+df_obs$t = df_obs$year - tlogging
+
+df_CI_pred = merge(df_CI_pred, df_obs, by = c("np","t","trait"), all=T)
+
+df_CI_pred = merge(df_CI_pred, unique(dynData_inf[,c("treatment","idplot","np")]), by = "np")
+```
+
+```{r, fig.height=8, fig.width=10}
+ggplot(df_CI_pred, aes(x=t, y = med, colour=idplot)) + 
+  facet_grid(trait~treatment, scale = "free") + 
+  geom_ribbon(aes(ymin=inf, ymax = sup, fill=idplot), colour=NA, alpha=0.2) + 
+  geom_line() + geom_point(aes(y=WMT))  + 
+  geom_hline(aes(yintercept=T0), lty=2) 
+```
+
+### Parameters value
+
+```{r parameters_recruits_2groups}
+df_pars_recruits_2c = data.table(Delta = c(pars_2c$Delta[1:100,,]),
+                                 tmax = c(pars_2c$tmax1[1:100,], pars_2c$tmax2[1:100,]),
+                                 iter = rep(1:100, 2*P),
+                                 np = rep(rep(1:P,each = 100),2),
+                                 pioneer = rep(paste("group",1:2), each = 100*P))
+
+df_pars_recruits_2c = melt(df_pars_recruits_2c, id.vars = c("iter","pioneer","np"),
+                           variable.name = "parameter")
+
+df_pars_recruits_2c = merge(df_pars_recruits_2c, unique(dynData_inf[,c("np","treatment")]))
+
+ggplot(df_pars_recruits_2c, aes(group = np,  y = value, colour = treatment)) + 
+  geom_boxplot() + facet_grid( parameter ~ pioneer, scales = "free")
+```
+
+```{r parameters_recruits_2groups_traits}
+df_pars_recruits_2cK = data.table(theta = c(rep(c(pars_2c$theta[1:100,1]),3), rep(c(pars_2c$theta[1:100,2]),3)),
+                                 dT = c(pars_2c$dT[1:100,,]),
+                                 iter = rep(1:100, 2*K),
+                                 trait = rep(rep(name_traits,each = 100),2),
+                                 pioneer = rep(paste("group",1:2), each = 100*K))
+
+df_pars_recruits_2cK = melt(df_pars_recruits_2cK, id.vars = c("iter","pioneer","trait"),
+                           variable.name = "parameter")
+
+ggplot(df_pars_recruits_2cK, aes(x = trait,  y = value)) + 
+  geom_boxplot() + facet_grid( parameter ~ pioneer, scales = "free")
+```

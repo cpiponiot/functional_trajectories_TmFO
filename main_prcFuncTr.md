@@ -171,4 +171,19 @@ $\rightarrow$ add as covariable
 
 ![](main_prcFuncTr_files/figure-html/initial_compo-1.png)<!-- -->![](main_prcFuncTr_files/figure-html/initial_compo-2.png)<!-- -->
 
-**Conclusions** The pre-logging functional composition does not seem to impact significantly the post-logging trajectory in Paracou. 
+**Conclusion** The pre-logging functional composition does not seem to impact significantly the post-logging trajectory in Paracou. 
+
+## New recruits modelling: with 2 cohorts (test)
+
+
+
+
+
+
+![](main_prcFuncTr_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
+
+### Parameters value
+
+![](main_prcFuncTr_files/figure-html/parameters_recruits_2groups-1.png)<!-- -->
+
+![](main_prcFuncTr_files/figure-html/parameters_recruits_2groups_traits-1.png)<!-- -->
