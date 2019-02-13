@@ -175,6 +175,12 @@ $\rightarrow$ add as covariable
 
 ## New recruits modelling: with 2 cohorts (test)
 
+$$  TR_{k,p,c} = \underbrace{TR0_{k,p}}_{\text{pre-logging value}}\left(1  +   dT 1_k \cdot \underbrace{\left(\Delta 1_{p} \cdot  \frac{t_c}{tmax 1_{p}} \cdot exp\left(1-\frac{t_c}{tmax 1_{p}}\right)\right)^{\theta 1}}_{\text{hump - first "cohort"}} + \\ 
+dT 2_k \cdot \underbrace{\left(\Delta 2_{p} \cdot  \frac{t_c}{tmax 2_{p}} \cdot exp\left(1-\frac{t_c}{tmax 2_{p}}\right)\right)^{\theta 2}}_{\text{second "cohort"}} \right)$$
+
+with $tmax 1 < tmax 2$; $dT 1_k$ and $dT2_k$ are the difference to the initial trait value of the first and second cohort respectively. 
+
+
 
 
 

@@ -17,8 +17,8 @@ data {
 parameters {
   
   matrix<lower=0,upper=0.5>[P,2] Delta;               // max value of the hump (relative to TS0)
-  real<lower=5, upper=30> tmax1[P];                // time of maximum value for each trait
-  real<lower=max(tmax1), upper=100> tmax2[P];     // time of maximum value for each trait
+  real<lower=5, upper=30> tmax1;                // time of maximum value for each trait
+  real<lower=tmax1, upper=100> tmax2;     // time of maximum value for each trait
   real<lower=0, upper=3> theta[2];                 // shape parameter for the hump
   real<lower=-1, upper=1> dT[K,2];                // shape parameter for the hump
   real<lower=0> sigmaT[K];                       // trait variability in time 
@@ -26,8 +26,8 @@ parameters {
   // hyperparameters
   real<lower=0,upper=0.5> mu_Delta[2];
   real<lower=0,upper=0.25> sigma_Delta;
-  real<lower=5,upper=100> mu_tmax[2];
-  real<lower=0,upper=10> sigma_tmax;
+  // real<lower=5,upper=100> mu_tmax[2];
+  // real<lower=0,upper=10> sigma_tmax;
   real<lower=0,upper=3> mu_theta;
   real<lower=0,upper=0.25> sigma_theta;
   real<lower=-1,upper=1> mu_dT;
@@ -43,8 +43,8 @@ model{
       for (i in 1:N)
     { 
       muT[i,k] = T0[np[i],k] * ( 1 + 
-        dT[k,1] * Delta[np[i],1] * ( t[i] / tmax1[np[i]] * exp( 1 - t[i] / tmax1[np[i]]))^theta[1] + 
-        dT[k,2] * Delta[np[i],2] * ( t[i] / tmax2[np[i]] * exp( 1 - t[i] / tmax2[np[i]]))^theta[2] ) ;
+        dT[k,1] * Delta[np[i],1] * ( t[i] / tmax1 * exp( 1 - t[i] / tmax1))^theta[1] + 
+        dT[k,2] * Delta[np[i],2] * ( t[i] / tmax2 * exp( 1 - t[i] / tmax2))^theta[2] ) ;
       
       target += normal_lpdf(log(TR[i,k]) | log(muT[i,k]), sigmaT[k]/agbR[i]);
       
@@ -57,13 +57,13 @@ model{
     }
   }
   
-  tmax1 ~ normal(mu_tmax[1],sigma_tmax);
-  tmax2 ~ normal(mu_tmax[2],sigma_tmax);
+  // tmax1 ~ normal(mu_tmax[1],sigma_tmax);
+  // tmax2 ~ normal(mu_tmax[2],sigma_tmax);
   theta ~ normal(mu_theta,sigma_theta);
   
   // Priors
   sigmaT ~ normal(0,1);
   sigma_Delta ~ normal(0,1);
-  sigma_tmax ~ normal(0,1);
+  // sigma_tmax ~ normal(0,1);
   sigma_theta ~ normal(0,1);
 }
