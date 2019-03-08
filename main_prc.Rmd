@@ -4,6 +4,8 @@ output:
   html_document:
     theme: yeti
     keep_md: true
+    toc: true
+    toc_float: true
 ---
 
 ```{r global_options, include=FALSE}

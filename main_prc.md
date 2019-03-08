@@ -4,6 +4,8 @@ output:
   html_document:
     theme: yeti
     keep_md: true
+    toc: true
+    toc_float: true
 ---
 
 
@@ -32,7 +34,7 @@ Cohorts:
 
 Here are represented for each cohort the mean trait value, weighted by the estimated above ground biomass (AGB) of each individual.
 
-![](main_prcFuncTr_files/figure-html/recr_traj-1.png)<!-- -->
+![](main_prc_files/figure-html/recr_traj-1.png)<!-- -->
 
 For $D$: there seems to be no effect of logging gaps on recruitment, the only effect is on survivors (direct removal of big trees + higher growth rates of big survivors): worth including in the study? 
 
@@ -42,23 +44,23 @@ We can exclude $D$ from the study later.
 
 ### AGB per genus
 
-![](main_prcFuncTr_files/figure-html/unnamed-chunk-1-1.png)<!-- -->
+![](main_prc_files/figure-html/unnamed-chunk-1-1.png)<!-- -->
 
 ### Proportion of total AGB 
 
-![](main_prcFuncTr_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
+![](main_prc_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
 
 ### Seed mass (log-transformed)
 
-![](main_prcFuncTr_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
+![](main_prc_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
 
 ### SLA
 
-![](main_prcFuncTr_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
+![](main_prc_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
 
 ### Wood Density
 
-![](main_prcFuncTr_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
+![](main_prc_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
 
 ### Conclusions 
 
@@ -86,7 +88,7 @@ The categories are:
 
 - "damage": non-intentional damage caused by logging operations (skid trails opening, tree felling) / should be random but affects smaller trees more, which have a slightly different functional composition
 
-![](main_prcFuncTr_files/figure-html/mortSurvTraits-1.png)<!-- -->
+![](main_prc_files/figure-html/mortSurvTraits-1.png)<!-- -->
 
 Devitalized trees have a SLA lower than the community's, especially in T2 (that shows the highest change in terms of survivors' SLA), which could partly explain why the SLA of survivors increases sharply in treatments 2 and 3.
 
@@ -102,7 +104,7 @@ $$ WMTMort_{c} = \frac{\sum_{i\in I_{c-1} \setminus I_{c}} (agb_{i,c-1} \cdot TR
 with $I_{c-1} \setminus I_{c}$ the set of trees alive at censuses $c-1$ and dead at $c$, $agb_{i,c-1}$ the above ground biomass gain of tree $i$ at census $c-1$, and $TR_i$ the trait value of tree $i$. 
 
 
-![](main_prcFuncTr_files/figure-html/surv_dyn_traits-1.png)<!-- -->
+![](main_prc_files/figure-html/surv_dyn_traits-1.png)<!-- -->
 
 **Conclusions** 
 
@@ -130,7 +132,7 @@ with
 - $\theta_k$ is a shape parameter that controls the width of the hump; when it increases, the hump is narrower.  
 
 
-![](main_prcFuncTr_files/figure-html/illustration_r_trait-1.png)<!-- -->
+![](main_prc_files/figure-html/illustration_r_trait-1.png)<!-- -->
 
 
 
@@ -141,11 +143,11 @@ with
 
 
 
-![](main_prcFuncTr_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
+![](main_prc_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
 
 ## Exploring parameters values
 
-![](main_prcFuncTr_files/figure-html/parameters_value_recruits-1.png)<!-- -->
+![](main_prc_files/figure-html/parameters_value_recruits-1.png)<!-- -->
 
 **tmax** for the seed mass and wood density, the "boom and bust" pattern is primarly driven by early pioneers (cecropias), so tmax is around 12 years. For SLA, cecropias have a rather average SLA (around 11 m2/kg) but secondary pioneers like ingas exhibit high SLA values: the boom-and-bust pattern is thus driven by the dynamics of this second group of pioneers, and is around 30 years. 
 
@@ -153,14 +155,14 @@ One possibility is to set only one $tmax$ per trait and site, reflecting the loc
 
 ### Delta
 
-![](main_prcFuncTr_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
+![](main_prc_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
 Strong correlation between $\Delta$ for wood densty and seed mass: linked by the max density of cecropias. 
 
 $\Delta$ for SLA correlates less but still strongly with other traits: logging intensity effect? 
 
 ### Effect of logging intensity
 
-![](main_prcFuncTr_files/figure-html/Delta_vs_loss-1.png)<!-- -->![](main_prcFuncTr_files/figure-html/Delta_vs_loss-2.png)<!-- -->
+![](main_prc_files/figure-html/Delta_vs_loss-1.png)<!-- -->![](main_prc_files/figure-html/Delta_vs_loss-2.png)<!-- -->
 
 Neat correlation between the amount of AGB loss after logging operations and the maximum trait value reached after logging.
 
@@ -169,7 +171,7 @@ $\rightarrow$ add as covariable
 
 ### Effect of initial composition in recruits' trajectory
 
-![](main_prcFuncTr_files/figure-html/initial_compo-1.png)<!-- -->![](main_prcFuncTr_files/figure-html/initial_compo-2.png)<!-- -->
+![](main_prc_files/figure-html/initial_compo-1.png)<!-- -->![](main_prc_files/figure-html/initial_compo-2.png)<!-- -->
 
 **Conclusion** The pre-logging functional composition does not seem to impact significantly the post-logging trajectory in Paracou. 
 
@@ -186,10 +188,10 @@ with $tmax 1 < tmax 2$; $dT 1_k$ and $dT2_k$ are the difference to the initial t
 
 
 
-![](main_prcFuncTr_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
+![](main_prc_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
 
 ### Parameters value
 
-![](main_prcFuncTr_files/figure-html/parameters_recruits_2groups-1.png)<!-- -->
+![](main_prc_files/figure-html/parameters_recruits_2groups-1.png)<!-- -->
 
-![](main_prcFuncTr_files/figure-html/parameters_recruits_2groups_traits-1.png)<!-- -->
+![](main_prc_files/figure-html/parameters_recruits_2groups_traits-1.png)<!-- -->
