@@ -10,7 +10,7 @@ output:
 
 ```{r global_options, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, warning=FALSE, message=FALSE, results='hide',
-                      root.dir = "C:/Users/camille.piponiot/gitR/functional_trajectories_paracou")
+                      root.dir = "C:/Users/camille.piponiot/gitR/functional_trajectories_TmFO")
 library(rstan)
 rstan_options(auto_write = TRUE)
 options(mc.cores = parallel::detectCores())
