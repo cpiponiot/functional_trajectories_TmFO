@@ -19,36 +19,44 @@ library(data.table)
 library(ggplot2)
 library(gridExtra)
 library(tidyr)
+library(knitr)
+library(ggpubr)
 
 inference_stan = FALSE
 ```
+
+
+In this study we model the functional resistance and resilience of trees recruitement to disturbance (here selective logging), and their spatial variation in Amazonia. 
 
 # Data visualisation
 
 ```{r, traits_traj, fig.height=10, fig.width=10}
 # to get the data: source("C:/Users/camille.piponiot/Google Drive/biodiversity/codes/get_metadata.R")
-
 load("data/genusData_TmFO.Rdata")
 load("data/plotInfo_TmFO.Rdata")
 name_traits = c("woodDensity","logSeedMass","SLA","DBH95")
 
+plotInfo = merge(plotInfo, genusData[,.(tlog = min(year)), .(idplot)], by = "idplot")
+plotInfo$tlog[plotInfo$site == "prc"] = 1986
+plotInfo$tlog[plotInfo$site == "tor"] = 2006
+plotInfo$tlog[plotInfo$site == "cum"] = 2004
 
 ### reorganize data -> gather dataframes
 genusData_melt = melt(genusData, variable.name = "trait", value.name = "value", 
                       measure.vars = grep("D|Seed|SLA",colnames(genusData)), 
                       variable.factor = FALSE)
-dfTraits = genusData_melt[,.(WMT = weighted.mean(value, agb)),.(idplot, year, trait, cohort)]
+dfTraits = genusData_melt[,.(WMT = weighted.mean(value, agb), agb_tot = sum(agb)),.(idplot, year, trait, cohort)]
 
 ## add plot info (plot size, treatment)
-dfTraits = merge(dfTraits, plotInfo)
-dfTraits = merge(dfTraits, data.table(treat = c("ctrl","CL","silv","silv+"), treatment = paste("T",0:3,sep="")), by="treat")
+dfTraits = merge(dfTraits, plotInfo, by = c("idplot"))
+dfTraits[, agb := agb_tot/idplot.size]
 
 ## initial value
-md_0 = dfTraits[year < 1987,.(WMT0 = mean(WMT)),.(idplot, trait, treatment)]
+md_0 = dfTraits[year <= tlog,.(WMT0 = mean(WMT)),.(site, idplot, trait, treat)]
 
 ```
 
-## Traits trajectory {.tabset .tabset-pills}
+## Traits trajectory {.tabset .tabset-fade .tabset-pills}
 
 Traits chosen: 
 
@@ -68,76 +76,177 @@ Cohorts:
 
 Here are represented for each cohort the mean trait value, weighted by the estimated above ground biomass (AGB) of each individual.
 
-### Paracou (French Guiana)
-
-```{r recr_traj,fig.height=10, fig.width=10}
-
+```{r}
 dfTraits$cohort <- factor(dfTraits$cohort)
 levels(dfTraits$cohort) <- c("Recruits", "Survivors")
 
-ggplot(subset(dfTraits, site=="prc"), aes(x = year - 1986, y = WMT, group = idplot, colour = treatment)) + 
-  geom_line() + geom_point() + 
-  geom_point(data = md_0, aes(x = 0, y = WMT0), pch = 1, cex = 5) + 
-  ylab("MWT") + xlab("Time since logging (yr)") +
-  facet_grid(trait~cohort, scales = "free")
+graph_traits <- function(sit) {
+  ggplot(subset(dfTraits, site == sit & cohort == "Recruits"), aes(x = year - tlog, y = WMT, group = idplot, colour = treat)) + 
+    geom_line() + geom_point() + 
+    geom_point(data = subset(md_0, site == sit), aes(x = 0, y = WMT0), pch = 1, cex = 5) + 
+    ylab("MWT") + xlab("Time since logging (yr)") +
+    facet_wrap(~trait, scales = "free")
+}
+
+tmfo_sites <- as.character(unique(dfTraits$site))
+```
+
+### Jenaro 
+```{r, fig.height=8, fig.width = 10}
+graph_traits("bsl")
+```
+
+### Chico Bocao 
+```{r, fig.height=10, fig.width = 10}
+graph_traits("chb")
+```
+
+### Cumaru 
+```{r, fig.height=10, fig.width = 10}
+graph_traits("cum")
+```
+
+### INPA 
+```{r, fig.height=10, fig.width = 10}
+graph_traits("inp")
+```
+
+### Iracema 
+```{r, fig.height=10, fig.width = 10}
+graph_traits("ira")
+```
+
+### La Chonta 
+```{r, fig.height=10, fig.width = 10}
+graph_traits("lch")
+```
+
+### Peteco 
+```{r, fig.height=10, fig.width = 10}
+graph_traits("pet")
+```
+
+### Paracou 
+```{r, fig.height=10, fig.width = 10}
+graph_traits("prc")
+```
+
+### Paragominas 
+```{r, fig.height=10, fig.width = 10}
+graph_traits("prg")
+```
+
+### Tabocal 
+```{r, fig.height=10, fig.width = 10}
+graph_traits("tbc")
+```
+
+### Tapajos 
+```{r, fig.height=10, fig.width = 10}
+graph_traits("tpj")
+```
+
+### Tortue 
+```{r, fig.height=10, fig.width = 10}
+graph_traits("tor")
+```
+
+
+## Recruits most common genuses and their impact on mean weighted traits {.tabset .tabset-pills}
+
+```{r, fig.height=20, fig.width=12}
+
+recrData = merge(genusData, genusData[cohort=="recr",.(agbR = sum(agb)),
+                                      .(idplot, year, cohort)])
+
+recrData = merge(recrData, plotInfo, by=c("site", "idplot"))
+```
+
+```{r}
+graph_genus <- function(sit) {
+  
+  dat = subset(recrData, site == sit)
+  ## genuses that at least once represent 10% of the total biomass of recruits
+  genus_common = unique(as.character(subset(dat, agb/agbR > 0.1 & !(genus %in% c("Oenocarpus", "Indet", NA)))$genus))
+  dat$genus2 = as.character(dat$genus)
+  dat$genus2[!(dat$genus %in% genus_common)] <- "other"
+  dat$genus2 = factor(dat$genus2, levels = c(as.character(genus_common), "other") )
+  
+  dat_agb = dat[, .(agb = sum(agb)), .(genus2,idplot,year,agbR)]
+  dat = merge(dat_agb, dat[, .(woodDensity = weighted.mean(woodDensity, agb),
+                                    logSeedMass = weighted.mean(logSeedMass, agb),
+                                    SLA = weighted.mean(SLA, agb)), .(genus2)])
+  
+  g1 = ggplot(dat, aes(x=year, y=agb, fill=genus2)) + 
+    geom_area(colour = 1) + facet_wrap( ~ idplot, scales = "free")
+  g1
+  ## mean traits (weighted by biomass) of recruited genuses in control plots -> reference (= white color in plots)
+  # ref = dat[treat=="ctrl", .(woodDensity = weighted.mean(woodDensity, agb),
+  #                            logSeedMass = weighted.mean(logSeedMass, agb),
+  #                            SLA = weighted.mean(SLA, agb))]
+}
 
 ```
 
-### Jenaro (Peru) 
+genus2: genuses with > 10% of the recruits biomass
 
-```{r recr_traj,fig.height=10, fig.width=10}
-ggplot(subset(dfTraits, site=="bsl"), aes(x = year - 1986, y = WMT, group = idplot, colour = treatment)) + 
-  geom_line() + geom_point() + 
-  geom_point(data = md_0, aes(x = 0, y = WMT0), pch = 1, cex = 5) + 
-  ylab("MWT") + xlab("Time since logging (yr)") +
-  facet_grid(trait~cohort, scales = "free")
+### Jenaro 
+```{r, fig.height=4, fig.width = 10}
+graph_genus("bsl")
 ```
 
+### Chico Bocao 
+```{r, fig.height=4, fig.width = 6}
+graph_genus("chb")
+```
 
-<!-- For $D$: there seems to be no effect of logging gaps on recruitment, the only effect is on survivors (direct removal of big trees + higher growth rates of big survivors): worth including in the study?  -->
+### Cumaru 
+```{r, fig.height=10, fig.width = 10}
+graph_genus("cum")
+```
 
-<!-- We can exclude $D$ from the study later.  -->
+### INPA 
+```{r, fig.height=10, fig.width = 10}
+graph_genus("inp")
+```
 
-<!-- ## Recruits most common genuses and their impact on mean weighted traits {.tabset .tabset-pills} -->
+### Iracema 
+```{r, fig.height=10, fig.width = 10}
+graph_genus("ira")
+```
 
-<!-- ### AGB per genus -->
+### La Chonta 
+```{r, fig.height=10, fig.width = 10}
+graph_genus("lch")
+```
 
-<!-- ```{r, fig.height=10, fig.width=12} -->
+### Peteco 
+```{r, fig.height=10, fig.width = 10}
+graph_genus("pet")
+```
 
-<!-- recrData = merge(genusData, genusData[cohort=="recr",.(agbR = sum(agb)),.(idplot, year, cohort)]) -->
+### Paracou 
+```{r, fig.height=10, fig.width = 10}
+graph_genus("prc")
+```
 
-<!-- ## genuses that at least once represent 10% of the total biomass of recruits -->
-<!-- genus_common = unique(as.character(subset(recrData, agb/agbR > 0.15 & !(genus %in% c("Oenocarpus", "Indet")))$genus))  -->
+### Paragominas 
+```{r, fig.height=10, fig.width = 10}
+graph_genus("prg")
+```
 
-<!-- recrData$genus2 = as.character(recrData$genus) -->
-<!-- recrData$genus2[!(recrData$genus %in% genus_common)] <- "other" -->
+### Tabocal 
+```{r, fig.height=10, fig.width = 10}
+graph_genus("tbc")
+```
 
-<!-- recrData_agb = recrData[, .(agb = sum(agb)), .(genus2,idplot,year,agbR)] -->
-<!-- recrData = merge(recrData_agb, recrData[, .(woodDensity = weighted.mean(woodDensity, agb), -->
-<!--                                             logSeedMass = weighted.mean(logSeedMass, agb), -->
-<!--                                             SLA = weighted.mean(SLA, agb)), .(genus2)]) -->
+### Tapajos 
+```{r, fig.height=10, fig.width = 10}
+graph_genus("tpj")
+```
 
-<!-- recrData = merge(recrData, plotInfo, by="idplot") -->
-<!-- recrData = merge(recrData, data.table(treat = c("ctrl","CL","silv","silv+"), treatment = paste("T",0:3,sep="")), by="treat") -->
-<!-- recrData$bloc = rep(1:3,each=4)[as.numeric(recrData$idplot)] -->
+### Tortue 
+```{r, fig.height=10, fig.width = 10}
+graph_genus("tor")
+```
 
-<!-- recrData$genus2 = factor(recrData$genus2, levels = c(as.character(genus_common), "other") ) -->
-<!-- ggplot(recrData, aes(x=year, y=agb, fill=genus2)) + geom_area(colour = 1) + facet_grid(treatment ~ bloc) -->
-
-<!-- ## mean traits (weighted by biomass) of recruited genuses in control plots -> reference (= white color in plots) -->
-<!-- ref = recrData[treat=="ctrl", .(woodDensity = weighted.mean(woodDensity, agb), -->
-<!--                                 logSeedMass = weighted.mean(logSeedMass, agb), -->
-<!--                                 SLA = weighted.mean(SLA, agb))] -->
-<!-- ``` -->
-
-<!-- ### Proportion of total AGB  -->
-
-<!-- ```{r, fig.height=10, fig.width=12} -->
-<!-- ggplot(recrData, aes(x = year, y = agb/agbR, fill = genus2)) + geom_area(colour = 1) + facet_grid(treatment ~ bloc, scales= "free") -->
-<!-- ``` -->
-
-<!-- ### Seed mass (log-transformed) -->
-
-<!-- ```{r, fig.height=10, fig.width=12} -->
-<!-- ggplot(recrData, aes(x = year, y = agb/agbR, group = genus2, fill = logSeedMass)) + geom_area(colour = 1) + facet_grid(treatment ~ bloc, scales= "free") + scale_fill_gradient2(low = "firebrick4", mid = "white", high = "#104E8B", midpoint = ref$logSeedMass) -->
-<!-- ``` -->
