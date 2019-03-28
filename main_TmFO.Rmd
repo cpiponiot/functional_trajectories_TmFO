@@ -30,22 +30,23 @@ In this study we model the functional resistance and resilience of trees recruit
 
 # Data visualisation
 
+## by cohort
 ```{r, traits_traj, fig.height=10, fig.width=10}
 # to get the data: source("C:/Users/camille.piponiot/Google Drive/biodiversity/codes/get_metadata.R")
-load("data/genusData_TmFO.Rdata")
+load("data/sizeData_TmFO.Rdata")
 load("data/plotInfo_TmFO.Rdata")
 name_traits = c("woodDensity","logSeedMass","SLA","DBH95")
 
-plotInfo = merge(plotInfo, genusData[,.(tlog = min(year)), .(idplot)], by = "idplot")
+plotInfo = merge(plotInfo, sizeData[,.(tlog = min(year)), .(idplot)], by = "idplot")
 plotInfo$tlog[plotInfo$site == "prc"] = 1986
 plotInfo$tlog[plotInfo$site == "tor"] = 2006
 plotInfo$tlog[plotInfo$site == "cum"] = 2004
 
 ### reorganize data -> gather dataframes
-genusData_melt = melt(genusData, variable.name = "trait", value.name = "value", 
-                      measure.vars = grep("D|Seed|SLA",colnames(genusData)), 
+sizeData_melt = melt(sizeData, variable.name = "trait", value.name = "value", 
+                      measure.vars = grep("D|Seed|SLA",colnames(sizeData)), 
                       variable.factor = FALSE)
-dfTraits = genusData_melt[,.(WMT = weighted.mean(value, agb), agb_tot = sum(agb)),.(idplot, year, trait, cohort)]
+dfTraits = sizeData_melt[,.(WMT = weighted.mean(value, agb), agb_tot = sum(agb)),.(idplot, year, trait, size)]
 
 ## add plot info (plot size, treatment)
 dfTraits = merge(dfTraits, plotInfo, by = c("idplot"))
@@ -68,24 +69,25 @@ Traits chosen:
 
 - $WD$: median wood density, as a proxy of growth rate and mechanical support
 
-Cohorts: 
+We separate two size classes: 
 
-- Survivors, ie trees that survived logging
+- Small trees, ie trees $\leq$ 30 cm dbh
 
-- Recruits, ie trees that passed the 10 cm DBH threshold after logging
+- Big trees, ie trees $>$ 50 cm dbh
 
-Here are represented for each cohort the mean trait value, weighted by the estimated above ground biomass (AGB) of each individual.
+Here are represented for each size class the mean trait value, weighted by the estimated above ground biomass (AGB) of each individual.
 
 ```{r}
-dfTraits$cohort <- factor(dfTraits$cohort)
-levels(dfTraits$cohort) <- c("Recruits", "Survivors")
+dfTraits$size <- factor(dfTraits$size)
+levels(dfTraits$size) <- c("small", "big")
 
 graph_traits <- function(sit) {
-  ggplot(subset(dfTraits, site == sit & cohort == "Recruits"), aes(x = year - tlog, y = WMT, group = idplot, colour = treat)) + 
+  ggplot(subset(dfTraits, site == sit), aes(x = year - tlog, y = WMT, 
+                                            group = idplot, colour = treat)) + 
     geom_line() + geom_point() + 
     geom_point(data = subset(md_0, site == sit), aes(x = 0, y = WMT0), pch = 1, cex = 5) + 
     ylab("MWT") + xlab("Time since logging (yr)") +
-    facet_wrap(~trait, scales = "free")
+    facet_grid(trait ~ size, scales = "free")
 }
 
 tmfo_sites <- as.character(unique(dfTraits$site))
@@ -155,7 +157,7 @@ graph_traits("tor")
 ## Recruits most common genuses and their impact on mean weighted traits {.tabset .tabset-pills}
 
 ```{r, fig.height=20, fig.width=12}
-
+load("data/genusData_TmFo.Rdata")
 recrData = merge(genusData, genusData[cohort=="recr",.(agbR = sum(agb)),
                                       .(idplot, year, cohort)])
 
@@ -178,7 +180,7 @@ graph_genus <- function(sit) {
                                     SLA = weighted.mean(SLA, agb)), .(genus2)])
   
   g1 = ggplot(dat, aes(x=year, y=agb, fill=genus2)) + 
-    geom_area(colour = 1) + facet_wrap( ~ idplot, scales = "free")
+    geom_area(colour = 1) + facet_wrap( ~ idplot)
   g1
   ## mean traits (weighted by biomass) of recruited genuses in control plots -> reference (= white color in plots)
   # ref = dat[treat=="ctrl", .(woodDensity = weighted.mean(woodDensity, agb),
@@ -250,3 +252,52 @@ graph_genus("tpj")
 graph_genus("tor")
 ```
 
+
+## Calibrating the stan model
+
+For each trait $k$, the mean biomass-weighted trait of small trees (MWT) trajectory at census $c$ in plot $p$ in site $s$ was modelled as:
+
+$$  T_{k,c,p,s} = \underbrace{T0_{k,p,s}}_{\text{pre-logging value}}\left(1  +   \underbrace{\left(\Delta_{k,p,s} \cdot  \frac{t_c}{tmax_{k,p,s}} \cdot exp\left(1-\frac{t_c}{tmax_{k,p,s}}\right)\right)^{\theta_{k,p,s}}}_{\text{boom and bust pattern}} \right)$$
+
+with 
+
+- $c$ the census, and $t_c$ the time since logging (in years) at census $c$, 
+
+- $T0_{k,p,s}$ the pre-logging trait value of the community in plot $p$ in site $s$.
+
+- $\Delta_{k,p,s}$ is the maximum value (relative to the final value) of the hump that follows logging and the creation of logging gaps. $\Delta_{k,p,s} \sim \mathcal{N} (\mu_{\Delta ks}, \sigma_{\Delta}^2)$, with $\mu_{\Delta ks}$ and $\sigma_{\Delta}$ are respectively the mean and standard deviation of $\Delta$ for trait $k$ in site $s$.
+
+- $tmax_{k,p,s}$ is the time when the maximum value of the hump is reached. $tmax_{k,p} = 0$ for control plots and in logged plots $tmax_{k,p} \sim \mathcal{N} (\mu m_{ k}, \sigma m^2)$ where $\mu m_{k}$ and $\sigma m$ are respectively the mean and standard deviation of $tmax$ for trait $k$.
+
+- $\theta_k$ is a shape parameter that controls the width of the hump; when it increases, the hump is narrower.  
+
+```{r}
+if (inference_stan){
+  
+  df = subset(dfTraits, size=="small")
+  name_traits = unique(df$trait)
+  df = dcast(df, site + idplot + tlog + year + idplot.size ~ trait , value.var = "WMT")
+  df0 = subset(df, year <= tlog)
+  df = subset(df, year > tlog)
+  
+  N = nrow(df)
+  K = length(name_traits)
+  np = as.numeric(as.factor(df$idplot))
+  P = length(unique(np))
+  ns = as.numeric(as.factor(df$site))
+  S = length(unique(ns))
+  ps = unique(cbind(ns, np))[,1]
+  plot_size = unique(cbind(df$idplot.size, np))[,1]
+  
+  t = df$year - df$tlog
+  TR = as.matrix(df[, name_traits, with = FALSE])
+  dfT0 = melt(df0, measure.vars = name_traits, id.vars = "idplot")
+  dfT0 = dfT0[,.(value = mean(value)),.(variable,idplot)]
+  T0 = as.matrix(dcast(dfT0, idplot ~variable, value.var = "value")[,-"idplot"])
+  
+  stan("codes/recruits_model.stan")
+  
+}
+
+
+```
