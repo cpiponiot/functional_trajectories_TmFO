@@ -44,8 +44,8 @@ plotInfo$tlog[plotInfo$site == "cum"] = 2004
 
 ### reorganize data -> gather dataframes
 sizeData_melt = melt(sizeData, variable.name = "trait", value.name = "value", 
-                      measure.vars = grep("D|Seed|SLA",colnames(sizeData)), 
-                      variable.factor = FALSE)
+                     measure.vars = grep("D|Seed|SLA",colnames(sizeData)), 
+                     variable.factor = FALSE)
 dfTraits = sizeData_melt[,.(WMT = weighted.mean(value, agb), agb_tot = sum(agb)),.(idplot, year, trait, size)]
 
 ## add plot info (plot size, treatment)
@@ -71,9 +71,9 @@ Traits chosen:
 
 We separate two size classes: 
 
-- Small trees, ie trees $\leq$ 30 cm dbh
+- Small trees, ie trees $\leq$ 35 cm dbh
 
-- Big trees, ie trees $>$ 50 cm dbh
+- Big trees, ie trees $>$ 35 cm dbh
 
 Here are represented for each size class the mean trait value, weighted by the estimated above ground biomass (AGB) of each individual.
 
@@ -176,8 +176,8 @@ graph_genus <- function(sit) {
   
   dat_agb = dat[, .(agb = sum(agb)), .(genus2,idplot,year,agbR)]
   dat = merge(dat_agb, dat[, .(woodDensity = weighted.mean(woodDensity, agb),
-                                    logSeedMass = weighted.mean(logSeedMass, agb),
-                                    SLA = weighted.mean(SLA, agb)), .(genus2)])
+                               logSeedMass = weighted.mean(logSeedMass, agb),
+                               SLA = weighted.mean(SLA, agb)), .(genus2)])
   
   g1 = ggplot(dat, aes(x=year, y=agb, fill=genus2)) + 
     geom_area(colour = 1) + facet_wrap( ~ idplot)
@@ -272,9 +272,10 @@ with
 - $\theta_k$ is a shape parameter that controls the width of the hump; when it increases, the hump is narrower.  
 
 ```{r}
+
 if (inference_stan){
   
-  df = subset(dfTraits, size=="small")
+  df = subset(dfTraits, size=="small" & treat != "ctrl")
   name_traits = unique(df$trait)
   df = dcast(df, site + idplot + tlog + year + idplot.size ~ trait , value.var = "WMT")
   df0 = subset(df, year <= tlog)
@@ -282,9 +283,9 @@ if (inference_stan){
   
   N = nrow(df)
   K = length(name_traits)
-  np = as.numeric(as.factor(df$idplot))
+  np = as.numeric(as.factor(as.character(df$idplot)))
   P = length(unique(np))
-  ns = as.numeric(as.factor(df$site))
+  ns = as.numeric(as.factor(as.character(df$site)))
   S = length(unique(ns))
   ps = unique(cbind(ns, np))[,1]
   plot_size = unique(cbind(df$idplot.size, np))[,1]
@@ -295,9 +296,270 @@ if (inference_stan){
   dfT0 = dfT0[,.(value = mean(value)),.(variable,idplot)]
   T0 = as.matrix(dcast(dfT0, idplot ~variable, value.var = "value")[,-"idplot"])
   
-  stan("codes/recruits_model.stan")
-  
-}
-
+  small_model = stan("codes/recruits_model.stan")
+  traceplot(small_model, "lp__")
+  pars_small = data.table(do.call(cbind, rstan::extract(small_model, 
+                                                        pars = c("sigma_Delta", "sigma_tmax", 
+                                                                 "mu_theta", "sigma_theta", "lp__" )))[1:1000])
+  pars_small$iter = 1:1000
+  pars_smallb = data.table(Delta = c(rstan::extract(small_model, pars= "Delta")[[1]][1:1000,,]), 
+                           theta = c(rstan::extract(small_model, pars= "theta")[[1]][1:1000,,]),
+                           tmax = c(rstan::extract(small_model, pars= "tmax")[[1]][1:1000,,]), 
+                           iter = rep(1:1000, P*K), 
+                           p = rep(rep(1:P, each = 1000), K), 
+                           s = rep(rep(ps, each = 1000), K), 
+                           k = rep(1:K, each = 1000*P))
+  pars_small = merge(pars_small, pars_smallb, by = "iter")
+  pars_smallb = data.table(sigmaT = c(rstan::extract(small_model, pars= "sigmaT")[[1]][1:1000,]),
+                           mu_Delta = c(rstan::extract(small_model, pars= "mu_Delta")[[1]][1:1000,]),
+                           iter = rep(1:1000, K), 
+                           k = rep(1:K, each = 1000))
+  pars_small = merge(pars_small, pars_smallb, by = c("iter", "k"))
+  pars_smallb = data.table(mu_tmax = c(rstan::extract(small_model, pars= "mu_tmax")[[1]][1:1000,,]), 
+                           iter = rep(1:1000, S*K), 
+                           s = rep(rep(1:S, each = 1000), K), 
+                           k = rep(1:K, each = 1000*S))
+  pars_small = merge(pars_small, pars_smallb, by = c("iter","s","k"))
+  pars_small$trait = name_traits[pars_small$k]
+  pars_small$site = levels(as.factor(as.character(df$site)))[pars_small$s]
+  pars_small$idplot = levels(as.factor(as.character(df$idplot)))[pars_small$p]
+  save(pars_small, file = "data/parsSmall.Rdata")
+} else { load("data/parsSmall.Rdata")}
 
 ```
+
+## Parameters {.tabset .tabset-pills}
+(check parameters correlation)
+
+### Delta
+```{r, fig.height = 6, fig.width = 12}
+ggplot(pars_small, aes(x = idplot, y = Delta)) + geom_hline(yintercept = 0, lty=2) +
+  geom_boxplot() + facet_grid(trait ~ site, scales = "free")
+```
+
+### tmax
+```{r, fig.height = 6, fig.width = 12}
+ggplot(pars_small, aes(x = idplot, y = tmax)) +
+  geom_boxplot() + facet_grid(trait ~ site, scales = "free")
+```
+
+### theta
+```{r, fig.height = 6, fig.width = 12}
+ggplot(pars_small, aes(x = idplot, y = theta)) +
+  geom_boxplot() + facet_grid(trait ~ site, scales = "free")
+```
+
+### theta vs tmax
+```{r, fig.height = 6, fig.width = 12}
+ggplot(pars_small, aes(x = tmax, y = theta, col = idplot)) + 
+  geom_point(alpha = 0.2) + facet_grid(trait ~ site, scales = "free") + theme(legend.position = "none")
+```
+
+### Delta vs tmax
+```{r, fig.height = 6, fig.width = 12}
+ggplot(pars_small, aes(x = tmax, y = Delta, col = idplot)) + 
+  geom_point(alpha = 0.2) + facet_grid(trait ~ site, scales = "free") + theme(legend.position = "none")
+```
+
+### theta vs Delta
+```{r, fig.height = 6, fig.width = 12}
+ggplot(pars_small, aes(x = Delta, y = theta, col = idplot)) + 
+  geom_point(alpha = 0.2) + facet_grid(trait ~ site, scales = "free") + theme(legend.position = "none")
+```
+
+## Predictions {.tabset .tabset-pills}
+
+```{r}
+df_pred = data.table(expand.grid(iter = 1:100, trait = unique(dfTraits$trait), t = 0:35, idplot = unique(dfTraits$idplot)))
+df_pred = merge(df_pred, pars_small[,c("iter", "idplot", "trait","site", "Delta", "tmax", "theta")], by = c("trait","iter","idplot"))
+df0 = subset(dfTraits, size=="small" & year <= tlog)[,.(T0 = mean(WMT)), .(idplot, trait)]
+df_pred = merge(df_pred, df0, by = c("idplot","trait"))
+
+df_pred[, tr := T0 * ( 1 + Delta * ( t / tmax * exp( 1 - t / tmax))^theta )]
+df_ci = df_pred[,.(inf = quantile(tr, 0.025), 
+                   med = quantile(tr, 0.5), 
+                   sup = quantile(tr, 0.975)), .(trait,idplot,t)]
+df_ci = merge(df_ci, plotInfo, by = "idplot")
+```
+
+```{r}
+graph_pred = function(sit){
+  ggplot(subset(dfTraits, size=="small" & site == sit & treat!="ctrl"), aes(x = year - tlog, y = WMT, colour = idplot)) + 
+    geom_ribbon(data = subset(df_ci, site == sit), aes(x = t, ymin = inf, ymax = sup, fill = idplot, y = med), colour = NA, alpha = 0.2) +
+    geom_line(data = subset(df_ci, site == sit), aes(x = t, y = med, colour = idplot), lty = 2) +
+    geom_point() + facet_grid(trait ~ treat, scales = "free") +
+    theme(legend.position = "none")
+}
+```
+
+### Jenaro 
+```{r, fig.height=8, fig.width = 8}
+graph_pred("bsl")
+```
+
+### Chico Bocao 
+```{r, fig.height=8, fig.width = 4}
+graph_pred("chb")
+```
+
+### Cumaru 
+```{r, fig.height=8, fig.width = 4}
+graph_pred("cum")
+```
+
+### INPA 
+```{r, fig.height=8, fig.width = 10}
+graph_pred("inp")
+```
+
+### Iracema 
+```{r, fig.height=8, fig.width = 4}
+graph_pred("ira")
+```
+
+### La Chonta 
+```{r, fig.height=8, fig.width = 10}
+graph_pred("lch")
+```
+
+### Peteco 
+```{r, fig.height=8, fig.width = 4}
+graph_pred("pet")
+```
+
+### Paracou 
+```{r, fig.height=8, fig.width = 10}
+graph_pred("prc")
+```
+
+### Paragominas 
+```{r, fig.height=8, fig.width = 10}
+graph_pred("prg")
+```
+
+### Tabocal 
+```{r, fig.height=8, fig.width = 4}
+graph_pred("tbc")
+```
+
+### Tapajos 
+```{r, fig.height=8, fig.width = 8}
+graph_pred("tpj")
+```
+
+### Tortue 
+```{r, fig.height=8, fig.width = 8}
+graph_pred("tor")
+```
+
+
+## Effect of covariates {.tabset .tabset-pills}
+
+```{r}
+# source("codes/get_env_covariates.R")
+load("data/site_coord.Rdata")
+pars_melt = melt(pars_small, measure.vars = c("Delta","tmax","theta"), 
+                 id.vars = c("iter","site","trait","idplot"), variable.name = "parameter")
+df_covar = merge(pars_melt[,.(mean = mean(value), sd = sd(value)), .(site, trait, parameter, idplot)],
+                 site_coord, by = "site")
+
+## agb loss
+df_agb = dfTraits[trait == "SLA" & treat != "ctrl",
+                  .(agb = sum(agb_tot)), .(site,idplot,year,tlog)]
+df_dist = df_agb[,.(agb0 = mean(agb[year <= tlog]), 
+                    agbmin = min(agb[year>tlog & year <= tlog + 4])),.(idplot)]
+df_dist[, loss_rel := (agb0-agbmin)/agb0]
+df_dist[, loss_abs := (agb0-agbmin)]
+df_covar = merge(df_covar,  df_dist, by = "idplot")
+
+df_covar = melt(df_covar, id.vars = c("site", "trait","parameter","mean","sd"), 
+                measure.vars = c("prec","seas","dry","rad","BkD","Psand","CFr","Depth","CEC","loss_rel","loss_abs"), variable.name = "covariate")
+
+df_covar$covar_typ = "soil"
+df_covar$covar_typ[df_covar$covariate %in% c("prec","seas","dry","rad")] = "clim"
+df_covar$covar_typ[grep("loss",df_covar$covariate)] = "dist"
+
+```
+
+### Disturbance {.tabset .tabset-pills}
+
+#### Delta
+```{r, fig.height=8, fig.width=6}
+ggplot(subset(df_covar, parameter == "Delta" & covar_typ == "dist"), aes(x = value, y = mean, size = 1/sd, weight = 1/sd)) + 
+  geom_smooth(method = "lm", formula = y ~ poly(x, 2)) + 
+  geom_point(aes(colour = site)) + facet_grid( trait ~ covariate, scale = "free") + theme(legend.position = "top") 
+```
+
+
+#### abs(Delta)
+```{r, fig.height=8, fig.width=6}
+ggplot(subset(df_covar, parameter == "Delta" & covar_typ == "dist"), aes(x = value, y = abs(mean), size = 1/sd, weight = 1/sd)) + 
+  geom_smooth(method = "lm", formula = y ~ poly(x, 2)) + 
+  geom_point(aes(colour = site)) + facet_grid( trait ~ covariate, scale = "free") + theme(legend.position = "top") 
+```
+
+
+#### tmax
+```{r, fig.height=8, fig.width=6}
+ggplot(subset(df_covar, parameter == "tmax" & covar_typ == "dist"), aes(x = value, y = mean, size = 1/sd, weight = 1/sd)) + 
+  geom_smooth(method = "lm", formula = y ~ poly(x, 2)) + 
+  geom_point(aes(colour = site)) + facet_grid( trait ~ covariate, scale = "free") + theme(legend.position = "top") 
+```
+
+### Climate {.tabset .tabset-pills}
+
+#### Delta
+```{r, fig.height=8, fig.width=10}
+ggplot(subset(df_covar, parameter == "Delta" & covar_typ == "clim"), aes(x = value, y = mean, size = 1/sd, weight = 1/sd)) + 
+  geom_smooth(method = "lm", formula = y ~ poly(x, 2)) + 
+  geom_point(aes(colour = site)) + facet_grid( trait ~ covariate, scale = "free") + theme(legend.position = "top") 
+```
+
+
+#### abs(Delta)
+```{r, fig.height=8, fig.width=10}
+ggplot(subset(df_covar, parameter == "Delta" & covar_typ == "clim"), aes(x = value, y = abs(mean), size = 1/sd, weight = 1/sd)) + 
+  geom_smooth(method = "lm", formula = y ~ poly(x, 2)) + 
+  geom_point(aes(colour = site)) + facet_grid( trait ~ covariate, scale = "free") + theme(legend.position = "top") 
+```
+
+
+#### tmax
+```{r, fig.height=8, fig.width=10}
+ggplot(subset(df_covar, parameter == "tmax" & covar_typ == "clim"), aes(x = value, y = mean, size = 1/sd, weight = 1/sd)) + 
+  geom_smooth(method = "lm", formula = y ~ poly(x, 2)) + 
+  geom_point(aes(colour = site)) + facet_grid( trait ~ covariate, scale = "free") + theme(legend.position = "top") 
+```
+
+### Soil {.tabset .tabset-pills}
+
+#### Delta
+```{r, fig.height=8, fig.width=10}
+ggplot(subset(df_covar, parameter == "Delta" & covar_typ == "soil"), aes(x = value, y = mean, size = 1/sd, weight = 1/sd)) + 
+  geom_smooth(method = "lm", formula = y ~ poly(x, 2)) + 
+  geom_point(aes(colour = site)) + facet_grid( trait ~ covariate, scale = "free") + theme(legend.position = "top") 
+```
+
+
+#### abs(Delta)
+```{r, fig.height=8, fig.width=10}
+ggplot(subset(df_covar, parameter == "Delta" & covar_typ == "soil"), aes(x = value, y = abs(mean), size = 1/sd, weight = 1/sd)) + 
+  geom_smooth(method = "lm", formula = y ~ poly(x, 2)) + 
+  geom_point(aes(colour = site)) + facet_grid( trait ~ covariate, scale = "free") + theme(legend.position = "top") 
+```
+
+
+#### tmax
+```{r, fig.height=8, fig.width=10}
+ggplot(subset(df_covar, parameter == "tmax" & covar_typ == "soil"), aes(x = value, y = mean, size = 1/sd, weight = 1/sd)) + 
+  geom_smooth(method = "lm", formula = y ~ poly(x, 2)) + 
+  geom_point(aes(colour = site)) + facet_grid( trait ~ covariate, scale = "free") + theme(legend.position = "top") 
+```
+
+
+
+> comparer distribution de tmax et Delta **entre** traits
+
+> Lien Delta et intensité de perturbation <=> resilience
+
+> lien est-il spatialement défini? 
