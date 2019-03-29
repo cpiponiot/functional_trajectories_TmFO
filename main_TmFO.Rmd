@@ -168,8 +168,8 @@ recrData = merge(recrData, plotInfo, by=c("site", "idplot"))
 graph_genus <- function(sit) {
   
   dat = subset(recrData, site == sit)
-  ## genuses that at least once represent 10% of the total biomass of recruits
-  genus_common = unique(as.character(subset(dat, agb/agbR > 0.1 & !(genus %in% c("Oenocarpus", "Indet", NA)))$genus))
+  ## 5 most common genuses
+  genus_common = dat[ !(genus %in% c("Oenocarpus", "Indet", NA,"ni")), .(agb = sum(agb)),.(genus)][order(agb, decreasing = TRUE)][1:5]$genus
   dat$genus2 = as.character(dat$genus)
   dat$genus2[!(dat$genus %in% genus_common)] <- "other"
   dat$genus2 = factor(dat$genus2, levels = c(as.character(genus_common), "other") )
@@ -203,7 +203,7 @@ graph_genus("chb")
 ```
 
 ### Cumaru 
-```{r, fig.height=10, fig.width = 10}
+```{r, fig.height=4, fig.width = 6}
 graph_genus("cum")
 ```
 
@@ -213,42 +213,42 @@ graph_genus("inp")
 ```
 
 ### Iracema 
-```{r, fig.height=10, fig.width = 10}
+```{r, fig.height=4, fig.width = 6}
 graph_genus("ira")
 ```
 
 ### La Chonta 
-```{r, fig.height=10, fig.width = 10}
+```{r, fig.height=8, fig.width = 10}
 graph_genus("lch")
 ```
 
 ### Peteco 
-```{r, fig.height=10, fig.width = 10}
+```{r, fig.height=4, fig.width = 6}
 graph_genus("pet")
 ```
 
 ### Paracou 
-```{r, fig.height=10, fig.width = 10}
+```{r, fig.height=8, fig.width = 10}
 graph_genus("prc")
 ```
 
 ### Paragominas 
-```{r, fig.height=10, fig.width = 10}
+```{r, fig.height=4, fig.width = 10}
 graph_genus("prg")
 ```
 
 ### Tabocal 
-```{r, fig.height=10, fig.width = 10}
+```{r, fig.height=4, fig.width = 6}
 graph_genus("tbc")
 ```
 
 ### Tapajos 
-```{r, fig.height=10, fig.width = 10}
+```{r, fig.height=4, fig.width = 10}
 graph_genus("tpj")
 ```
 
 ### Tortue 
-```{r, fig.height=10, fig.width = 10}
+```{r, fig.height=4, fig.width = 10}
 graph_genus("tor")
 ```
 
@@ -257,9 +257,11 @@ graph_genus("tor")
 
 For each trait $k$, the mean biomass-weighted trait of small trees (MWT) trajectory at census $c$ in plot $p$ in site $s$ was modelled as:
 
-$$  T_{k,c,p,s} = \underbrace{T0_{k,p,s}}_{\text{pre-logging value}}\left(1  +   \underbrace{\left(\Delta_{k,p,s} \cdot  \frac{t_c}{tmax_{k,p,s}} \cdot exp\left(1-\frac{t_c}{tmax_{k,p,s}}\right)\right)^{\theta_{k,p,s}}}_{\text{boom and bust pattern}} \right)$$
+$$  dT_{k,c,p,s} = \frac{T_{k,c,p,s} - T0_{k,p,s}}{T0_{k,p,s}} \sim \mathcal{N}\left( \mu_{k,c,p,s}\text{ , } \left(\frac{\sigma_k}{size_p}\right)^2\right)$$
 
 with 
+
+$$ \mu_{k,c,p,s} = \left(\Delta_{k,p,s} \cdot  \frac{t_c}{tmax_{k,p,s}} \cdot exp\left(1-\frac{t_c}{tmax_{k,p,s}}\right)\right)^{\theta_{k,p,s}} $$
 
 - $c$ the census, and $t_c$ the time since logging (in years) at census $c$, 
 
@@ -270,6 +272,8 @@ with
 - $tmax_{k,p,s}$ is the time when the maximum value of the hump is reached. $tmax_{k,p} = 0$ for control plots and in logged plots $tmax_{k,p} \sim \mathcal{N} (\mu m_{ k}, \sigma m^2)$ where $\mu m_{k}$ and $\sigma m$ are respectively the mean and standard deviation of $tmax$ for trait $k$.
 
 - $\theta_k$ is a shape parameter that controls the width of the hump; when it increases, the hump is narrower.  
+
+- $size_p$ is the size of plot $p$
 
 ```{r}
 
@@ -372,28 +376,32 @@ ggplot(pars_small, aes(x = Delta, y = theta, col = idplot)) +
 ```{r}
 df_pred = data.table(expand.grid(iter = 1:100, trait = unique(dfTraits$trait), t = 0:35, idplot = unique(dfTraits$idplot)))
 df_pred = merge(df_pred, pars_small[,c("iter", "idplot", "trait","site", "Delta", "tmax", "theta")], by = c("trait","iter","idplot"))
-df0 = subset(dfTraits, size=="small" & year <= tlog)[,.(T0 = mean(WMT)), .(idplot, trait)]
-df_pred = merge(df_pred, df0, by = c("idplot","trait"))
+dfT0 = subset(dfTraits, size=="small" & year <= tlog)[,.(T0 = mean(WMT)), .(idplot, trait)]
+df_pred = merge(df_pred, dfT0, by = c("idplot","trait"))
 
-df_pred[, tr := T0 * ( 1 + Delta * ( t / tmax * exp( 1 - t / tmax))^theta )]
-df_ci = df_pred[,.(inf = quantile(tr, 0.025), 
-                   med = quantile(tr, 0.5), 
-                   sup = quantile(tr, 0.975)), .(trait,idplot,t)]
+df_pred[, dtr := Delta * ( t / tmax * exp( 1 - t / tmax))^theta ]
+df_ci = df_pred[,.(inf = quantile(dtr, 0.025), 
+                   med = quantile(dtr, 0.5), 
+                   sup = quantile(dtr, 0.975)), .(trait,idplot,t)]
 df_ci = merge(df_ci, plotInfo, by = "idplot")
+
+dfTraits = merge(dfTraits, dfT0, by = c("idplot","trait"))
+dfTraits[, dtr := (WMT-T0)/T0]
 ```
 
 ```{r}
 graph_pred = function(sit){
-  ggplot(subset(dfTraits, size=="small" & site == sit & treat!="ctrl"), aes(x = year - tlog, y = WMT, colour = idplot)) + 
+  ggplot(subset(dfTraits, size=="small" & site == sit & treat!="ctrl"), aes(x = year - tlog, y = dtr, colour = idplot)) + 
     geom_ribbon(data = subset(df_ci, site == sit), aes(x = t, ymin = inf, ymax = sup, fill = idplot, y = med), colour = NA, alpha = 0.2) +
     geom_line(data = subset(df_ci, site == sit), aes(x = t, y = med, colour = idplot), lty = 2) +
     geom_point() + facet_grid(trait ~ treat, scales = "free") +
+    labs(y = "Relative trait change", x = "Time since logging (yr)") +
     theme(legend.position = "none")
 }
 ```
 
 ### Jenaro 
-```{r, fig.height=8, fig.width = 8}
+```{r, fig.height=8, fig.width = 4}
 graph_pred("bsl")
 ```
 
@@ -455,9 +463,11 @@ graph_pred("tor")
 
 ## Effect of covariates {.tabset .tabset-pills}
 
+
 ```{r}
 # source("codes/get_env_covariates.R")
 load("data/site_coord.Rdata")
+
 pars_melt = melt(pars_small, measure.vars = c("Delta","tmax","theta"), 
                  id.vars = c("iter","site","trait","idplot"), variable.name = "parameter")
 df_covar = merge(pars_melt[,.(mean = mean(value), sd = sd(value)), .(site, trait, parameter, idplot)],
@@ -472,8 +482,9 @@ df_dist[, loss_rel := (agb0-agbmin)/agb0]
 df_dist[, loss_abs := (agb0-agbmin)]
 df_covar = merge(df_covar,  df_dist, by = "idplot")
 
-df_covar = melt(df_covar, id.vars = c("site", "trait","parameter","mean","sd"), 
-                measure.vars = c("prec","seas","dry","rad","BkD","Psand","CFr","Depth","CEC","loss_rel","loss_abs"), variable.name = "covariate")
+df_covar = melt(df_covar, id.vars = c("site", "idplot","trait","parameter","mean","sd"), 
+                measure.vars = c(colnames(site_coord)[6:length(site_coord)],"loss_rel","loss_abs"), 
+                variable.name = "covariate")
 
 df_covar$covar_typ = "soil"
 df_covar$covar_typ[df_covar$covariate %in% c("prec","seas","dry","rad")] = "clim"
@@ -485,9 +496,10 @@ df_covar$covar_typ[grep("loss",df_covar$covariate)] = "dist"
 
 #### Delta
 ```{r, fig.height=8, fig.width=6}
-ggplot(subset(df_covar, parameter == "Delta" & covar_typ == "dist"), aes(x = value, y = mean, size = 1/sd, weight = 1/sd)) + 
-  geom_smooth(method = "lm", formula = y ~ poly(x, 2)) + 
-  geom_point(aes(colour = site)) + facet_grid( trait ~ covariate, scale = "free") + theme(legend.position = "top") 
+ggplot(subset(df_covar, parameter == "Delta" & covar_typ == "dist"), 
+       aes(x = value, y = mean, size = 1/sd, weight = 1/sd, colour=site)) + 
+  geom_smooth(method = "lm", formula = y ~ x-1) + 
+  geom_point() + facet_grid( trait ~ covariate, scale = "free") + theme(legend.position = "top") 
 ```
 
 
@@ -557,9 +569,210 @@ ggplot(subset(df_covar, parameter == "tmax" & covar_typ == "soil"), aes(x = valu
 ```
 
 
-
 > comparer distribution de tmax et Delta **entre** traits
 
 > Lien Delta et intensité de perturbation <=> resilience
 
 > lien est-il spatialement défini? 
+
+## Environmental covariates correlation {.tabset .tabset-pills}
+
+```{r}
+library(GGally)
+ggcorr(site_coord[,6:14], nbreaks = 4, label = TRUE)
+
+# library(ggbiplot)
+rownames(site_coord) = site_coord$site
+biplot(princomp(site_coord[,6:9], cor=TRUE))
+biplot(princomp(site_coord[,10:14], cor=TRUE))
+```
+
+### Option 1
+```{r}
+ggcorr(site_coord[,c(6,7,13,14)], nbreaks = 4, label = TRUE)
+```
+
+### Option 2
+```{r}
+ggcorr(site_coord[,c(8,9,11,13:14)], nbreaks = 4, label = TRUE)
+```
+
+### Maps
+```{r}
+site_coord_melt = melt(site_coord, id.vars = c("site","Long","Lat"), 
+                       measure.vars = colnames(site_coord)[6:14], 
+                       variable.name = "covariate")
+library(plyr)
+col <- c('yellow', 'orange', 'red')
+d_ply(site_coord_melt, .(covariate), function(cv){
+  g = ggplot(cv , aes(x = Long, y = Lat, colour = value)) + borders() + 
+  geom_point(size = 10) + lims(x=c(-80,-40), y =c(-20,10))  + coord_equal() +
+    labs(colour=unique(cv$covariate)) + scale_colour_gradientn(colours = col)
+  print(g)
+})
+```
+
+
+## Variable selection - Delta {.tabset .tabset-pills}
+
+```{r, fig.height=10, fig.width=10}
+
+df_Delta = subset(df_covar, parameter == "Delta")
+df_Delta = dcast(unique(df_Delta[,c("site","idplot","mean","sd","covariate","value","trait")]), 
+                 site + idplot + trait + mean + sd ~ covariate, value.var = "value")
+cov_sc = data.table(scale(site_coord[,6:14]))
+colnames(cov_sc) = paste0(colnames(cov_sc), "_sc")
+cov_sc$site = rownames(site_coord)
+df_Delta = merge(df_Delta, cov_sc, by = "site")
+
+library(sjPlot)
+library(RcmdrMisc)
+```
+
+### Option 1 {.tabset .tabset-pills}
+
+#### DBH95
+```{r}
+reg = lm(formula = mean ~ (prec_sc + seas_sc + Depth_sc + CEC_sc) : loss_rel + loss_rel - 1, 
+          weights = 1/sd, data = subset(df_Delta, trait == "DBH95"))
+select = stepwise(reg, criterion = "BIC")
+```
+
+```{r, results = "asis"}
+tab_model(select)
+```
+
+#### SLA
+```{r}
+reg = lm(formula = mean ~ (prec_sc + seas_sc + Depth_sc + CEC_sc) : loss_rel + loss_rel - 1, 
+          weights = 1/sd, data = subset(df_Delta, trait == "SLA"))
+select = stepwise(reg, criterion = "BIC")
+```
+
+```{r, results = "asis"}
+tab_model(select)
+```
+
+#### logSeedMass
+```{r}
+reg = lm(formula = mean ~ (prec_sc + seas_sc + Depth_sc + CEC_sc) : loss_rel + loss_rel - 1, 
+          weights = 1/sd, data = subset(df_Delta, trait == "logSeedMass"))
+select = stepwise(reg, criterion = "BIC")
+```
+
+```{r, results = "asis"}
+tab_model(select)
+```
+
+#### woodDensity
+```{r}
+reg = lm(formula = mean ~ (prec_sc + seas_sc + Depth_sc + CEC_sc) : loss_rel + loss_rel - 1, 
+          weights = 1/sd, data = subset(df_Delta, trait == "woodDensity"))
+select = stepwise(reg, criterion = "BIC")
+```
+
+```{r, results = "asis"}
+tab_model(select)
+```
+
+### All covariates {.tabset .tabset-pills}
+
+#### DBH95
+```{r}
+reg = lm(formula = mean ~ (prec_sc + seas_sc + dry_sc + rad_sc + Depth_sc + Psand_sc + CEC_sc + BkD_sc + CFr_sc) : loss_rel + loss_rel - 1, 
+          weights = 1/sd, data = subset(df_Delta, trait == "DBH95"))
+select = stepwise(reg, criterion = "BIC")
+```
+
+```{r, results = "asis"}
+tab_model(select)
+```
+
+#### SLA
+```{r}
+reg = lm(formula = mean ~ (prec_sc + seas_sc + dry_sc + rad_sc + Depth_sc + Psand_sc + CEC_sc + BkD_sc + CFr_sc) : loss_rel + loss_rel - 1, 
+          weights = 1/sd, data = subset(df_Delta, trait == "SLA"))
+select = stepwise(reg, criterion = "BIC")
+```
+
+```{r, results = "asis"}
+tab_model(select)
+```
+
+#### logSeedMass
+```{r}
+reg = lm(formula = mean ~ (prec_sc + seas_sc + dry_sc + rad_sc + Depth_sc + Psand_sc + CEC_sc + BkD_sc + CFr_sc) : loss_rel + loss_rel - 1, 
+          weights = 1/sd, data = subset(df_Delta, trait == "logSeedMass"))
+select = stepwise(reg, criterion = "BIC")
+```
+
+```{r, results = "asis"}
+tab_model(select)
+```
+
+#### woodDensity
+```{r}
+reg = lm(formula = mean ~ (prec_sc + seas_sc + dry_sc + rad_sc + Depth_sc + Psand_sc + CEC_sc + BkD_sc + CFr_sc) : loss_rel + loss_rel - 1, 
+          weights = 1/sd, data = subset(df_Delta, trait == "woodDensity"))
+select = stepwise(reg, criterion = "BIC")
+```
+
+```{r, results = "asis"}
+tab_model(select)
+```
+
+### Option 2 {.tabset .tabset-pills}
+
+#### DBH95
+```{r}
+reg = lm(formula = mean ~ (dry_sc + rad_sc + Depth_sc + Psand_sc + CEC_sc) : loss_rel + loss_rel - 1, 
+          weights = 1/sd, data = subset(df_Delta, trait == "DBH95"))
+select = stepwise(reg, criterion = "BIC")
+```
+
+```{r, results = "asis"}
+tab_model(select)
+```
+
+#### SLA
+```{r}
+reg = lm(formula = mean ~ (dry_sc + rad_sc + Depth_sc + Psand_sc + CEC_sc) : loss_rel + loss_rel - 1, 
+          weights = 1/sd, data = subset(df_Delta, trait == "SLA"))
+select = stepwise(reg, criterion = "BIC")
+```
+
+```{r, results = "asis"}
+tab_model(select)
+```
+
+#### logSeedMass
+```{r}
+reg = lm(formula = mean ~ (dry_sc + rad_sc + Depth_sc + Psand_sc + CEC_sc) : loss_rel + loss_rel - 1, 
+          weights = 1/sd, data = subset(df_Delta, trait == "logSeedMass"))
+select = stepwise(reg, criterion = "BIC")
+```
+
+```{r, results = "asis"}
+tab_model(select)
+```
+
+#### woodDensity
+```{r}
+reg = lm(formula = mean ~ (dry_sc + rad_sc + Depth_sc + Psand_sc + CEC_sc) : loss_rel + loss_rel - 1, 
+          weights = 1/sd, data = subset(df_Delta, trait == "woodDensity"))
+select = stepwise(reg, criterion = "BIC")
+```
+
+```{r, results = "asis"}
+tab_model(select)
+```
+
+
+## Integrating covariates to the stan model 
+
+```{r}
+library(rstanarm)
+#https://cran.r-project.org/web/packages/rstanarm/vignettes/lm.html
+
+
+```

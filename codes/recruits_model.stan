@@ -45,9 +45,9 @@ model{
     
       for (i in 1:N)
     { 
-      muT[i,k] = T0[np[i],k] * ( 1 + Delta[np[i],k] * ( t[i] / tmax[np[i],k] * exp( 1 - t[i] / tmax[np[i],k]))^theta[np[i],k] ) ;
+      muT[i,k] =  Delta[np[i],k] * ( t[i] / tmax[np[i],k] * exp( 1 - t[i] / tmax[np[i],k]))^theta[np[i],k]  ;
       
-      target += normal_lpdf(log(TR[i,k]) | log(muT[i,k]), sigmaT[k]/plot_size[np[i]]);
+      target += normal_lpdf( ( TR[i,k] - T0[np[i],k] ) / T0[np[i],k]  | muT[i,k], sigmaT[k]/plot_size[np[i]]);
       
     }
 
