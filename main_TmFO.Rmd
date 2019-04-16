@@ -253,7 +253,7 @@ graph_genus("tor")
 ```
 
 
-## Calibrating the stan model
+# Calibrating the stan model
 
 For each trait $k$, the mean biomass-weighted trait of small trees (MWT) trajectory at census $c$ in plot $p$ in site $s$ was modelled as:
 
@@ -371,6 +371,7 @@ ggplot(pars_small, aes(x = Delta, y = theta, col = idplot)) +
   geom_point(alpha = 0.2) + facet_grid(trait ~ site, scales = "free") + theme(legend.position = "none")
 ```
 
+
 ## Predictions {.tabset .tabset-pills}
 
 ```{r}
@@ -461,12 +462,19 @@ graph_pred("tor")
 ```
 
 
-## Effect of covariates {.tabset .tabset-pills}
 
+# Adding covariates to the model
+
+## Model 
+
+$$ \Delta_{p,k} = loss \cdot (\lambda_0 + \sum \lambda_m Cov_{m,p}) $$
+Covariates are centered and scaled. 
 
 ```{r}
 # source("codes/get_env_covariates.R")
 load("data/site_coord.Rdata")
+site_coord = subset(site_coord, site %in% unique(plotInfo$site))
+rownames(site_coord) = site_coord$site
 
 pars_melt = melt(pars_small, measure.vars = c("Delta","tmax","theta"), 
                  id.vars = c("iter","site","trait","idplot"), variable.name = "parameter")
@@ -487,140 +495,17 @@ df_covar = melt(df_covar, id.vars = c("site", "idplot","trait","parameter","mean
                 variable.name = "covariate")
 
 df_covar$covar_typ = "soil"
-df_covar$covar_typ[df_covar$covariate %in% c("prec","seas","dry","rad")] = "clim"
-df_covar$covar_typ[grep("loss",df_covar$covariate)] = "dist"
-
+df_covar$covar_typ[df_covar$covariate %in% c("cwd","prec","seas","dry","rad")] = "clim"
+df_covar$covar_typ[grep("loss|mort",df_covar$covariate)] = "dist"
 ```
 
-### Disturbance {.tabset .tabset-pills}
-
-#### Delta
-```{r, fig.height=8, fig.width=6}
-ggplot(subset(df_covar, parameter == "Delta" & covar_typ == "dist"), 
-       aes(x = value, y = mean, size = 1/sd, weight = 1/sd, colour=site)) + 
-  geom_smooth(method = "lm", formula = y ~ x-1) + 
-  geom_point() + facet_grid( trait ~ covariate, scale = "free") + theme(legend.position = "top") 
-```
-
-
-#### abs(Delta)
-```{r, fig.height=8, fig.width=6}
-ggplot(subset(df_covar, parameter == "Delta" & covar_typ == "dist"), aes(x = value, y = abs(mean), size = 1/sd, weight = 1/sd)) + 
-  geom_smooth(method = "lm", formula = y ~ poly(x, 2)) + 
-  geom_point(aes(colour = site)) + facet_grid( trait ~ covariate, scale = "free") + theme(legend.position = "top") 
-```
-
-
-#### tmax
-```{r, fig.height=8, fig.width=6}
-ggplot(subset(df_covar, parameter == "tmax" & covar_typ == "dist"), aes(x = value, y = mean, size = 1/sd, weight = 1/sd)) + 
-  geom_smooth(method = "lm", formula = y ~ poly(x, 2)) + 
-  geom_point(aes(colour = site)) + facet_grid( trait ~ covariate, scale = "free") + theme(legend.position = "top") 
-```
-
-### Climate {.tabset .tabset-pills}
-
-#### Delta
-```{r, fig.height=8, fig.width=10}
-ggplot(subset(df_covar, parameter == "Delta" & covar_typ == "clim"), aes(x = value, y = mean, size = 1/sd, weight = 1/sd)) + 
-  geom_smooth(method = "lm", formula = y ~ poly(x, 2)) + 
-  geom_point(aes(colour = site)) + facet_grid( trait ~ covariate, scale = "free") + theme(legend.position = "top") 
-```
-
-
-#### abs(Delta)
-```{r, fig.height=8, fig.width=10}
-ggplot(subset(df_covar, parameter == "Delta" & covar_typ == "clim"), aes(x = value, y = abs(mean), size = 1/sd, weight = 1/sd)) + 
-  geom_smooth(method = "lm", formula = y ~ poly(x, 2)) + 
-  geom_point(aes(colour = site)) + facet_grid( trait ~ covariate, scale = "free") + theme(legend.position = "top") 
-```
-
-
-#### tmax
-```{r, fig.height=8, fig.width=10}
-ggplot(subset(df_covar, parameter == "tmax" & covar_typ == "clim"), aes(x = value, y = mean, size = 1/sd, weight = 1/sd)) + 
-  geom_smooth(method = "lm", formula = y ~ poly(x, 2)) + 
-  geom_point(aes(colour = site)) + facet_grid( trait ~ covariate, scale = "free") + theme(legend.position = "top") 
-```
-
-### Soil {.tabset .tabset-pills}
-
-#### Delta
-```{r, fig.height=8, fig.width=10}
-ggplot(subset(df_covar, parameter == "Delta" & covar_typ == "soil"), aes(x = value, y = mean, size = 1/sd, weight = 1/sd)) + 
-  geom_smooth(method = "lm", formula = y ~ poly(x, 2)) + 
-  geom_point(aes(colour = site)) + facet_grid( trait ~ covariate, scale = "free") + theme(legend.position = "top") 
-```
-
-
-#### abs(Delta)
-```{r, fig.height=8, fig.width=10}
-ggplot(subset(df_covar, parameter == "Delta" & covar_typ == "soil"), aes(x = value, y = abs(mean), size = 1/sd, weight = 1/sd)) + 
-  geom_smooth(method = "lm", formula = y ~ poly(x, 2)) + 
-  geom_point(aes(colour = site)) + facet_grid( trait ~ covariate, scale = "free") + theme(legend.position = "top") 
-```
-
-
-#### tmax
-```{r, fig.height=8, fig.width=10}
-ggplot(subset(df_covar, parameter == "tmax" & covar_typ == "soil"), aes(x = value, y = mean, size = 1/sd, weight = 1/sd)) + 
-  geom_smooth(method = "lm", formula = y ~ poly(x, 2)) + 
-  geom_point(aes(colour = site)) + facet_grid( trait ~ covariate, scale = "free") + theme(legend.position = "top") 
-```
-
-
-> comparer distribution de tmax et Delta **entre** traits
-
-> Lien Delta et intensité de perturbation <=> resilience
-
-> lien est-il spatialement défini? 
-
-## Environmental covariates correlation {.tabset .tabset-pills}
-
-```{r}
-library(GGally)
-ggcorr(site_coord[,6:14], nbreaks = 4, label = TRUE)
-
-# library(ggbiplot)
-rownames(site_coord) = site_coord$site
-biplot(princomp(site_coord[,6:9], cor=TRUE))
-biplot(princomp(site_coord[,10:14], cor=TRUE))
-```
-
-### Option 1
-```{r}
-ggcorr(site_coord[,c(6,7,13,14)], nbreaks = 4, label = TRUE)
-```
-
-### Option 2
-```{r}
-ggcorr(site_coord[,c(8,9,11,13:14)], nbreaks = 4, label = TRUE)
-```
-
-### Maps
-```{r}
-site_coord_melt = melt(site_coord, id.vars = c("site","Long","Lat"), 
-                       measure.vars = colnames(site_coord)[6:14], 
-                       variable.name = "covariate")
-library(plyr)
-col <- c('yellow', 'orange', 'red')
-d_ply(site_coord_melt, .(covariate), function(cv){
-  g = ggplot(cv , aes(x = Long, y = Lat, colour = value)) + borders() + 
-  geom_point(size = 10) + lims(x=c(-80,-40), y =c(-20,10))  + coord_equal() +
-    labs(colour=unique(cv$covariate)) + scale_colour_gradientn(colours = col)
-  print(g)
-})
-```
-
-
-## Variable selection - Delta {.tabset .tabset-pills}
+## Linear model variable selection {.tabset .tabset-pills}
 
 ```{r, fig.height=10, fig.width=10}
-
 df_Delta = subset(df_covar, parameter == "Delta")
 df_Delta = dcast(unique(df_Delta[,c("site","idplot","mean","sd","covariate","value","trait")]), 
                  site + idplot + trait + mean + sd ~ covariate, value.var = "value")
-cov_sc = data.table(scale(site_coord[,6:14]))
+cov_sc = data.table(scale(site_coord[,6:16]))
 colnames(cov_sc) = paste0(colnames(cov_sc), "_sc")
 cov_sc$site = rownames(site_coord)
 df_Delta = merge(df_Delta, cov_sc, by = "site")
@@ -629,12 +514,20 @@ library(sjPlot)
 library(RcmdrMisc)
 ```
 
-### Option 1 {.tabset .tabset-pills}
-
-#### DBH95
+### DBH95
 ```{r}
-reg = lm(formula = mean ~ (prec_sc + seas_sc + Depth_sc + CEC_sc) : loss_rel + loss_rel - 1, 
-          weights = 1/sd, data = subset(df_Delta, trait == "DBH95"))
+reg = lm(formula = mean ~ (prec_sc + seas_sc + dry_sc + rad_sc + cwd_sc + Depth_sc + Psand_sc + CEC_sc + BkD_sc + CFr_sc + smort_sc) : loss_rel + loss_rel - 1, 
+         weights = 1/sd, data = subset(df_Delta, trait == "DBH95"))
+select = stepwise(reg, criterion = "BIC")
+```
+```{r, results = "asis"}
+tab_model(select)
+```
+
+### SLA
+```{r}
+reg = lm(formula = mean ~ (prec_sc + seas_sc + dry_sc + rad_sc + cwd_sc + Depth_sc + Psand_sc + CEC_sc + BkD_sc + CFr_sc) : loss_rel + loss_rel - 1, 
+         weights = 1/sd, data = subset(df_Delta, trait == "SLA"))
 select = stepwise(reg, criterion = "BIC")
 ```
 
@@ -642,10 +535,10 @@ select = stepwise(reg, criterion = "BIC")
 tab_model(select)
 ```
 
-#### SLA
+### logSeedMass
 ```{r}
-reg = lm(formula = mean ~ (prec_sc + seas_sc + Depth_sc + CEC_sc) : loss_rel + loss_rel - 1, 
-          weights = 1/sd, data = subset(df_Delta, trait == "SLA"))
+reg = lm(formula = mean ~ (prec_sc + seas_sc + dry_sc + rad_sc + cwd_sc + Depth_sc + Psand_sc + CEC_sc + BkD_sc + CFr_sc) : loss_rel + loss_rel - 1, 
+         weights = 1/sd, data = subset(df_Delta, trait == "logSeedMass"))
 select = stepwise(reg, criterion = "BIC")
 ```
 
@@ -653,10 +546,10 @@ select = stepwise(reg, criterion = "BIC")
 tab_model(select)
 ```
 
-#### logSeedMass
+### woodDensity
 ```{r}
-reg = lm(formula = mean ~ (prec_sc + seas_sc + Depth_sc + CEC_sc) : loss_rel + loss_rel - 1, 
-          weights = 1/sd, data = subset(df_Delta, trait == "logSeedMass"))
+reg = lm(formula = mean ~ (prec_sc + seas_sc + dry_sc + rad_sc + cwd_sc + Depth_sc + Psand_sc + CEC_sc + BkD_sc + CFr_sc) : loss_rel + loss_rel - 1, 
+         weights = 1/sd, data = subset(df_Delta, trait == "woodDensity"))
 select = stepwise(reg, criterion = "BIC")
 ```
 
@@ -664,115 +557,97 @@ select = stepwise(reg, criterion = "BIC")
 tab_model(select)
 ```
 
-#### woodDensity
-```{r}
-reg = lm(formula = mean ~ (prec_sc + seas_sc + Depth_sc + CEC_sc) : loss_rel + loss_rel - 1, 
-          weights = 1/sd, data = subset(df_Delta, trait == "woodDensity"))
-select = stepwise(reg, criterion = "BIC")
-```
-
-```{r, results = "asis"}
-tab_model(select)
-```
-
-### All covariates {.tabset .tabset-pills}
-
-#### DBH95
-```{r}
-reg = lm(formula = mean ~ (prec_sc + seas_sc + dry_sc + rad_sc + Depth_sc + Psand_sc + CEC_sc + BkD_sc + CFr_sc) : loss_rel + loss_rel - 1, 
-          weights = 1/sd, data = subset(df_Delta, trait == "DBH95"))
-select = stepwise(reg, criterion = "BIC")
-```
-
-```{r, results = "asis"}
-tab_model(select)
-```
-
-#### SLA
-```{r}
-reg = lm(formula = mean ~ (prec_sc + seas_sc + dry_sc + rad_sc + Depth_sc + Psand_sc + CEC_sc + BkD_sc + CFr_sc) : loss_rel + loss_rel - 1, 
-          weights = 1/sd, data = subset(df_Delta, trait == "SLA"))
-select = stepwise(reg, criterion = "BIC")
-```
-
-```{r, results = "asis"}
-tab_model(select)
-```
-
-#### logSeedMass
-```{r}
-reg = lm(formula = mean ~ (prec_sc + seas_sc + dry_sc + rad_sc + Depth_sc + Psand_sc + CEC_sc + BkD_sc + CFr_sc) : loss_rel + loss_rel - 1, 
-          weights = 1/sd, data = subset(df_Delta, trait == "logSeedMass"))
-select = stepwise(reg, criterion = "BIC")
-```
-
-```{r, results = "asis"}
-tab_model(select)
-```
-
-#### woodDensity
-```{r}
-reg = lm(formula = mean ~ (prec_sc + seas_sc + dry_sc + rad_sc + Depth_sc + Psand_sc + CEC_sc + BkD_sc + CFr_sc) : loss_rel + loss_rel - 1, 
-          weights = 1/sd, data = subset(df_Delta, trait == "woodDensity"))
-select = stepwise(reg, criterion = "BIC")
-```
-
-```{r, results = "asis"}
-tab_model(select)
-```
-
-### Option 2 {.tabset .tabset-pills}
-
-#### DBH95
-```{r}
-reg = lm(formula = mean ~ (dry_sc + rad_sc + Depth_sc + Psand_sc + CEC_sc) : loss_rel + loss_rel - 1, 
-          weights = 1/sd, data = subset(df_Delta, trait == "DBH95"))
-select = stepwise(reg, criterion = "BIC")
-```
-
-```{r, results = "asis"}
-tab_model(select)
-```
-
-#### SLA
-```{r}
-reg = lm(formula = mean ~ (dry_sc + rad_sc + Depth_sc + Psand_sc + CEC_sc) : loss_rel + loss_rel - 1, 
-          weights = 1/sd, data = subset(df_Delta, trait == "SLA"))
-select = stepwise(reg, criterion = "BIC")
-```
-
-```{r, results = "asis"}
-tab_model(select)
-```
-
-#### logSeedMass
-```{r}
-reg = lm(formula = mean ~ (dry_sc + rad_sc + Depth_sc + Psand_sc + CEC_sc) : loss_rel + loss_rel - 1, 
-          weights = 1/sd, data = subset(df_Delta, trait == "logSeedMass"))
-select = stepwise(reg, criterion = "BIC")
-```
-
-```{r, results = "asis"}
-tab_model(select)
-```
-
-#### woodDensity
-```{r}
-reg = lm(formula = mean ~ (dry_sc + rad_sc + Depth_sc + Psand_sc + CEC_sc) : loss_rel + loss_rel - 1, 
-          weights = 1/sd, data = subset(df_Delta, trait == "woodDensity"))
-select = stepwise(reg, criterion = "BIC")
-```
-
-```{r, results = "asis"}
-tab_model(select)
-```
-
-
-## Integrating covariates to the stan model 
+## Adding a subset of environmental covariates to the Bayesian hierarchical model {.tabset .tabset-pills}
 
 ```{r}
-library(rstanarm)
-#https://cran.r-project.org/web/packages/rstanarm/vignettes/lm.html
+library(GGally)
+ggcorr(site_coord[,6:16], nbreaks = 4, label = TRUE) + labs(title = "Covariates correlation")
+```
 
+```{r}
+n_var = 3
+covars = colnames(site_coord[,c(6:11,13:16)])
+source("codes/less_corr_covar.R")
+options = less_corr_covar(site_coord[,covars], n = n_var, limit = 0.4)
+matrix(covars[options], nrow = n_var)
+```
 
+```{r}
+library(factoextra)
+fviz_pca_var(princomp(site_coord[,6:10], cor=TRUE), title = "Climate")
+fviz_pca_var(princomp(site_coord[,11:15], cor=TRUE), title = "Soil")
+```
+
+### Option 1
+
+```{r, fig.height=2, fig.width=3}
+cov_names = c("cwd","rad", "Depth")
+ggcorr(site_coord[,cov_names], nbreaks = 4, label = TRUE)
+```
+
+```{r}
+source("codes/map_covariates.R")
+map_covariates(site_coord[,cov_names], site_coord[,c("Long","Lat")])
+```
+
+```{r}
+if (inference_stan){
+  source("codes/inference_covariates_model.R")
+  traceplot(model_covar, "lambda")
+  save(pars_cov, file = "data/parsCov1.Rdata")
+} else { load("data/parsCov1.Rdata")}
+```
+
+```{r}
+df = unique(pars_cov[, c("trait", grep("lambda", colnames(pars_cov), value = TRUE)), with = F])
+source("codes/plot_lambda.R")
+plot_lambda(df$trait, df[,-"trait"], unique(df_covar[,c("covariate","covar_typ")])) + labs(title = "lambdas")
+```
+
+### Option 2
+```{r, fig.height=2, fig.width=3}
+cov_names = c("cwd","smort")
+ggcorr(site_coord[,cov_names], nbreaks = 4, label = TRUE)
+```
+
+```{r}
+source("codes/map_covariates.R")
+map_covariates(site_coord[,cov_names], site_coord[,c("Long","Lat")])
+```
+
+```{r}
+if (inference_stan){
+  source("codes/inference_covariates_model.R")
+  traceplot(model_covar, "lambda")
+  save(pars_cov, file = "data/parsCov2.Rdata")
+} else { load("data/parsCov2.Rdata")}
+```
+
+```{r}
+df = unique(pars_cov[, c("trait", grep("lambda", colnames(pars_cov), value = TRUE)), with = F])
+plot_lambda(df$trait, df[,-"trait"], unique(df_covar[,c("covariate","covar_typ")])) + labs(title = "lambdas")
+```
+
+### Option 3
+```{r, fig.height=2, fig.width=3}
+cov_names = c("cwd","Depth")
+ggcorr(site_coord[,cov_names], nbreaks = 4, label = TRUE)
+```
+
+```{r}
+source("codes/map_covariates.R")
+map_covariates(site_coord[,cov_names], site_coord[,c("Long","Lat")])
+```
+
+```{r}
+if (inference_stan){
+  source("codes/inference_covariates_model.R")
+  save(pars_cov, file = "data/parsCov3.Rdata")
+} else { load("data/parsCov3.Rdata")}
+```
+
+```{r}
+df = unique(pars_cov[, c("trait", grep("lambda", colnames(pars_cov), value = TRUE)), with = F])
+source("codes/plot_lambda.R")
+plot_lambda(df$trait, df[,-"trait"], unique(df_covar[,c("covariate","covar_typ")])) + labs(title = "lambdas")
 ```
