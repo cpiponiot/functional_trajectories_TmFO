@@ -1,0 +1,183 @@
+---
+title: Amazonian forests functional resistance to a selective logging disturbance
+author:
+  - name: Camille Piponiot
+    email: camille.piponiot@gmail.com
+    affiliation: 1
+    footnote: Corresponding Author
+  - name: TmFO authors
+  - name: Bruno Hérault
+    email: bruno.herault@cirad.fr
+    affiliation: 1, 2
+address:
+  - code: 1
+    address: Cirad, UR Forets et Societes, Montferrier-sur-Lez, France
+  - code: 2
+    address: INPHB, Yamoussoukro, Cote d'Ivoire
+abstract: |
+  This is the abstract.
+
+  It consists of two paragraphs.
+
+journal: "An awesome journal"
+date: "`r Sys.Date()`"
+bibliography: mybibfile.bib
+output: rticles::elsevier_article
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning=FALSE, message=FALSE, results='hide',
+                      root.dir = "C:/Users/camille.piponiot/gitR/functional_trajectories_TmFO")
+library(rstan)
+rstan_options(auto_write = TRUE)
+options(mc.cores = parallel::detectCores())
+inference_stan = FALSE
+
+library(data.table)
+library(ggplot2)
+library(gridExtra)
+library(tidyr)
+library(knitr)
+library(ggpubr)
+```
+
+
+Introduction
+==========================
+
+importance of tropical forests: ecosystem services (carbon, biodiversity conservation)
+
+but large uncertainties on their future: rapid changes in climatic conditions and land use $\rightarrow$ increasing frequency and intensity of disturbances
+
+one widespread disturbance = selective logging (xxx Mha/yr). XXx% of tropical forests have been logged at least once -> future of tropical forests. Logging in the tropics usually consists in the selective harvests of a few commercial species: maintains most of the forest cover but infrastructure (roads and skid trails) and tree felling can have large impacts on the forest. 
+
+disturbances such as selective logging can affect the composition and dynamics of tropical forests: change the global functioning of the ecosystem. // forest recovery after a disturbance -> carbon stocks [@Piponiot2016a], tree size distribution [xx], species composition [@DeAvila2015], biodiversity [xx]
+
+notion of resilience: measure of how well an ecosystem can cope with disturbances and return to its original (pre-disturbance) state. 2 components = change in state (or resistance to a disturbance) + return time [@Hodgson2015]. [introduce our conceptual framework, disturbance intensity]
+
+functional traits = xxx (definition). characterisation of ecosystem functioning $\rightarrow$ importance to understand how they are affected by disturbances. functional strategies and tradeoffs in forests: leaf and wood economic spectrum, stature, and seed dispersal strategy; explain most of the variation [@Baraloto2012a, @Costa-Saura2019]. selective logging disturbance -> canopy openings, light -> colonisation by small-seed light-wood species [@Poorter2005a,] -> changes in functional composition [@Carreno-Rocabado2012]. 
+
+environmental control: soil, climate, disturbance history -> affects functional composition [@Costa-Saura2019] and response to disturbance. => spatial variation. example: Amazonia, the largest tropical forest biome (50% of all tropical rainforest area) -> 2 large scale gradients that control the dynamics of old-growth forests: dryness gradient (NW-SE) [@Davidson2012] that constraints vegetation growth, and a tree mortality gradient (SW-NE) [@Johnson2016] due to lower soil stability [@Quesada2012] and higher frequency of windstorms [@Espirito-Santo2014] in the southwestern part of Amazonia. 
+
+Here we assess the resistance of 4 functional traits (namely wood density, seed mass, specific leaf area and maximum tree diameter) to selective logging in Amazonia. We calibrate an original Bayesian hierarchical model with data from xxx permanent forest plots from 15 long-term experimental sites. Our research questions are: (i) how are functional traits affected by disturbances in 
+
+
+Methods
+============
+
+## Study sites
+
+TmFO sites description
+
++ environmental covariates: table? maps in SM?
+
+## Functional trait data compilation
+
+grouping plots xxx (cf piponiot2019)
+
+Traits chosen: 
+
+- $DBH95$: DBH 95th percentile (per species) as a proxy of the stature
+
+- $logSeedMass$: median seed mass (log-transformed) as a proxy of the dispersal strategy
+
+- $SLA$: median specific leaf area, as a proxy of the assimilation strategy and leaf economic spectrum
+
+- $WD$: median wood density, as a proxy of growth rate and mechanical support
+
+retrieved from xxx and estimated for each individual: by species or genus or plot mean (see explanation package BIOMASS)
+
+Selective logging typically targets big trees (DBH $\geq$ 40~cm) belonging to a small group of species with commercial value.Those species usually have particular functional trait values, such as large maximum diameters and high wood density [xx]. The functional composition of the biggest trees is thus artificially modified because of the selectivity of harvests. Because we are more interested in the indirect effects of selective logging on the functional composition, i.e. the functional changes induced by tree felling and canopy openings, we excluded trees with DBH > 35 cm from the analysis. 
+
+Mean weighted trait: (weighted with biomass)
+
+\begin{equation}  
+MWT_{k,c,p,s} = \frac{\sum_{i \in I_{c,p,s}}(T_{k,i}\cdot agb_i)}{\sum_{i \in I_{c,p,s}}(agb_i)}
+\end{equation}
+
+with $T_{k,i}$ the value of trait $k$ (either $DBH95$, $logSeedMass$, $SLA$, or $WD$) for individual tree $i$, $agb_i$ the aboveground biomass of individual tree $i$, and $I_{c,p,s}$ all live trees with DBH $\geq$ 10~cm and $\leq$ 35~cm at census $c$ in plot $p$ in site $s$. 
+
+The aboveground biomass of each individual was estimated using the package BIOMASS [@Rejou-Mechain2017] (details xx). 
+
+
+## Model calibration
+
+For each trait $k$, the mean biomass-weighted trait of small trees (MWT) trajectory at census $c$ in plot $p$ in site $s$ was modelled as:
+
+\begin{equation}  
+dMWT_{k,c,p,s} = \frac{MWT_{k,c,p,s} - MWT0_{k,p,s}}{T0_{k,p,s}} \sim \mathcal{N}\left( \mu_{k,c,p,s}\text{ , } \left(\frac{\sigma_k}{size_p}\right)^2\right)
+\end{equation}
+
+with 
+
+\begin{equation}  
+\mu_{k,c,p,s} = \Delta_{k,p,s} \cdot \left( \frac{t_c}{tmax_{k,p,s}} \cdot exp\left(1-\frac{t_c}{tmax_{k,p,s}}\right) \right)^{\theta_{k,p,s}}
+\end{equation}
+
+- $c$ the census, and $t_c$ the time since logging (in years) at census $c$, 
+
+- $T0_{k,p,s}$ the pre-logging trait value of the community in plot $p$ in site $s$.
+
+- $\Delta_{k,p,s}$ is the maximum value (relative to the final value) of the hump that follows logging and the creation of logging gaps. $\Delta_{k,p,s} \sim \mathcal{N} (\mu_{\Delta ks}, \sigma_{\Delta}^2)$, with $\mu_{\Delta ks}$ and $\sigma_{\Delta}$ are respectively the mean and standard deviation of $\Delta$ for trait $k$ in site $s$.
+
+- $tmax_{k,p,s}$ is the time when the maximum value of the hump is reached. $tmax_{k,p} = 0$ for control plots and in logged plots $tmax_{k,p} \sim \mathcal{N} (\mu m_{ k}, \sigma m^2)$ where $\mu m_{k}$ and $\sigma m$ are respectively the mean and standard deviation of $tmax$ for trait $k$.
+
+- $\theta_k$ is a shape parameter that controls the width of the hump; when it increases, the hump is narrower.  
+
+- $size_p$ is the size of plot $p$
+
+```{r}
+Delta = -2
+tmax = 20
+theta = 2
+curve(Delta * (x/tmax * exp(1-x/tmax) ) ^ theta, xlim = c(0,100), xlab = "Time since logging (yr)", ylab = "dMWT")
+legend("bottomright", legend = expression(Delta*" = -2; tmax = 20 yr; "*theta*" = 2"))
+```
+
+
+$\Delta_{k,p,s}$ is the maximum change of trait $k$ after the disturbance: its absolute value is expected to increase with disturbance intensity. 
+We thus modelled it as: 
+
+\begin{equation} 
+\Delta_{k,p,s} = loss_p \cdot (\lambda_{0,k} + \sum \lambda_{m,k} Cov_{m,s}) 
+\end{equation}
+
+$loss_p$ is the relative aboveground biomass loss after logging in plot $p$, as a proxy of the disturbance intensity; it is estimated as the difference between the pre-logging aboveground biomass and the minimum biomass in the first 4 years after logging, divided by the pre-logging aboveground biomass. 
+$Cov_{m,s}$ is the value of covariate $m$ (either the mortality rate or the climatic water deficit) in site $s$. 
+
+
+
+
+Results
+============
+
+## Predictions fitness
+
+## Traits variation and resistance to logging
+
+```{r}
+if (inference_stan){
+  source("codes/inference_covariates_model.R")
+  traceplot(model_covar, "lambda")
+  save(pars_cov, file = "data/parsCov2.Rdata")
+} else { load("data/parsCov2.Rdata")}
+```
+
+```{r}
+df = unique(pars_cov[, c("trait", grep("lambda", colnames(pars_cov), value = TRUE)), with = F])
+plot_lambda(df$trait, df[,-"trait"], unique(df_covar[,c("covariate","covar_typ")])) + labs(title = "lambdas")
+```
+
+[predictions -> figure? ]
+
+## Spatial variation
+
+
+Discussion
+============
+
+
+
+
+References {#references .unnumbered}
+==========
