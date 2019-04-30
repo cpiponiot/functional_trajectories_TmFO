@@ -67,3 +67,23 @@ site_coord$smort = raster::extract(smort, site_coord[,c("Long","Lat")])
 
 save(site_coord, file = "data/site_coord.Rdata")
 
+
+## save maps for figures
+
+# ## polygon of Amazon biome
+amazonia = readOGR(dsn = "C:/Users/camille.piponiot/Google Drive/maps/amazonia", layer = "BassinAmazonien")
+amazonia = spTransform(amazonia, crs(cwd))
+
+## remove pixels outside Amazonia for stem mortality map (coarsest resolution)
+sMort_map = mask(smort, amazonia)
+
+## reduce resolution of CWD map and remove pixels outside amazonia
+CWD_map = aggregate(crop(cwd, extent(-80,-44,-20,10)), fac = 1/res(cwd)[1])
+
+grd_cov = merge(as.data.frame(sMort_map, xy = T), 
+                as.data.frame(CWD_map, xy = T), 
+                by = c("x","y"))
+grd_cov = data.table(subset(grd_cov, !is.na(stem_mort_krig) & !is.na(CWD)))
+colnames(grd_cov) = c("long","lat","smort","cwd")
+
+save(grd_cov, file = "data/maps_rticle.Rdata")

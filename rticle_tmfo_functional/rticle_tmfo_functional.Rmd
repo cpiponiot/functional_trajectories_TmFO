@@ -28,10 +28,6 @@ output: rticles::elsevier_article
 ```{r global_options, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, warning=FALSE, message=FALSE, results='hide',
                       root.dir = "C:/Users/camille.piponiot/gitR/functional_trajectories_TmFO")
-library(rstan)
-rstan_options(auto_write = TRUE)
-options(mc.cores = parallel::detectCores())
-inference_stan = FALSE
 
 library(data.table)
 library(ggplot2)
@@ -55,11 +51,11 @@ disturbances such as selective logging can affect the composition and dynamics o
 
 notion of resilience: measure of how well an ecosystem can cope with disturbances and return to its original (pre-disturbance) state. 2 components = change in state (or resistance to a disturbance) + return time [@Hodgson2015]. [introduce our conceptual framework, disturbance intensity]
 
-functional traits = xxx (definition). characterisation of ecosystem functioning $\rightarrow$ importance to understand how they are affected by disturbances. functional strategies and tradeoffs in forests: leaf and wood economic spectrum, stature, and seed dispersal strategy; explain most of the variation [@Baraloto2012a, @Costa-Saura2019]. selective logging disturbance -> canopy openings, light -> colonisation by small-seed light-wood species [@Poorter2005a,] -> changes in functional composition [@Carreno-Rocabado2012]. 
+functional traits = xxx (definition). characterisation of ecosystem functioning $\rightarrow$ importance to understand how they are affected by disturbances. functional strategies and tradeoffs in forests: leaf and wood economic spectrum, stature, and seed dispersal strategy; explain most of the variation [@Baraloto2012a, @Costa-Saura2019]. selective logging disturbance -> canopy openings, light -> colonisation by small-seed light-wood species [@Poorter2005a,@Poorter2019] cf successional theory -> changes in functional composition [@Carreno-Rocabado2012]. 
 
 environmental control: soil, climate, disturbance history -> affects functional composition [@Costa-Saura2019] and response to disturbance. => spatial variation. example: Amazonia, the largest tropical forest biome (50% of all tropical rainforest area) -> 2 large scale gradients that control the dynamics of old-growth forests: dryness gradient (NW-SE) [@Davidson2012] that constraints vegetation growth, and a tree mortality gradient (SW-NE) [@Johnson2016] due to lower soil stability [@Quesada2012] and higher frequency of windstorms [@Espirito-Santo2014] in the southwestern part of Amazonia. 
 
-Here we assess the resistance of 4 functional traits (namely wood density, seed mass, specific leaf area and maximum tree diameter) to selective logging in Amazonia. We calibrate an original Bayesian hierarchical model with data from xxx permanent forest plots from 15 long-term experimental sites. Our research questions are: (i) how are functional traits affected by disturbances in 
+Here we assess the resistance of 4 functional traits (namely wood density, seed mass, specific leaf area and maximum tree diameter) to selective logging in Amazonia. We calibrate an original Bayesian hierarchical model with data from xxx permanent forest plots from 12 long-term experimental sites. Our research questions are: (i) how are functional traits affected by disturbances in 
 
 
 Methods
@@ -151,26 +147,87 @@ $Cov_{m,s}$ is the value of covariate $m$ (either the mortality rate or the clim
 Results
 ============
 
-## Predictions fitness
+## Trait change predictions fitness
+
+tmax $\in$ xxx (95% confidence interval)
+
+
 
 ## Traits variation and resistance to logging
 
-```{r}
-if (inference_stan){
-  source("codes/inference_covariates_model.R")
-  traceplot(model_covar, "lambda")
-  save(pars_cov, file = "data/parsCov2.Rdata")
-} else { load("data/parsCov2.Rdata")}
+```{r fig_lambdas, fig.height=3, fig.width=6}
+load("C:/Users/camille.piponiot/gitR/functional_trajectories_TmFO/data/parsCov2.Rdata")
+
+df = unique(pars_cov[, c("iter","trait", grep("lambda", colnames(pars_cov), value = TRUE)), with = F])
+df_lambda = melt(df, id.vars = c("iter","trait"), variable.name = "covariate")
+# change parameter's name
+df_lambda[,covariate := gsub("lambda_", "", covariate)]
+df_lambda[,covariate := gsub("lambda0", "intercept", covariate)]
+
+## 95% confidence interval
+lambda_ci = df_lambda[, .(inf = quantile(value, 0.025), 
+                          med = quantile(value, 0.5), 
+                          sup = quantile(value, 0.975)), .(trait, covariate)]
+
+## order covariates in graph
+lambda_ci$covariate = factor(lambda_ci$covariate, levels = c("smort","cwd","intercept"))
+df_lambda$covariate = factor(df_lambda$covariate, levels = c("smort","cwd","intercept"))
+# plot
+ggplot(lambda_ci, aes(x = covariate)) + 
+  geom_hline(yintercept = 0, lty= 2) + 
+  geom_violin(data = df_lambda, aes(y = value, fill=covariate), colour=NA, alpha=0.3) +
+  geom_pointrange(aes(y = med, ymin = inf, ymax = sup, colour = covariate), lwd = 0.5) + 
+  coord_flip() + facet_wrap(~trait) +
+  labs(y = "Parameter value", x = "Covariate") + theme(legend.position = "none")
 ```
 
-```{r}
-df = unique(pars_cov[, c("trait", grep("lambda", colnames(pars_cov), value = TRUE)), with = F])
-plot_lambda(df$trait, df[,-"trait"], unique(df_covar[,c("covariate","covar_typ")])) + labs(title = "lambdas")
+- direction of changes: expected or not? 
+
+- which traits are predicted to be more resistant
+
+
+## Spatial configuration
+
+```{r fig_maps_pred}
+load("C:/Users/camille.piponiot/gitR/functional_trajectories_TmFO/data/maps_rticle.Rdata")
+
+## keep only pixels with cwd and smort inside our observed range of values
+load("C:/Users/camille.piponiot/gitR/functional_trajectories_TmFO/data/site_coord.Rdata")
+grd_cov = subset(grd_cov, cwd >= min(site_coord$cwd) & cwd <= max(site_coord$cwd) & 
+                   smort >= min(site_coord$smort) & smort <= max(site_coord$smort))
+
+#### standardize covariates values
+load("C:/Users/camille.piponiot/gitR/functional_trajectories_TmFO/data/plotInfo_TmFO.Rdata")
+site_coord2 = merge(site_coord, unique(plotInfo[,"site"]), by = "site")
+
+grd_cov$smort = (grd_cov$smort - mean(site_coord2$smort))/sd(site_coord2$smort)
+grd_cov$cwd = (grd_cov$cwd - mean(site_coord2$cwd))/sd(site_coord2$cwd)
+
+## prediction data table: pixel id * trait * iteration id
+grd_cov$idpix = 1:nrow(grd_cov)
+df_pred = data.table(expand.grid(idpix = 1:nrow(grd_cov), 
+                       iter = unique(df_lambda$iter),
+                       trait = unique(df_lambda$trait)))
+df_pred = merge(df_pred, grd_cov, by = "idpix")  ## + iter
+df_pred = merge(unique(pars_cov[,c("iter","trait","lambda0","lambda_cwd","lambda_smort")]), 
+                 df_pred, by = c("iter","trait"))
+df_pred[, Delta := lambda0 + lambda_cwd*cwd + lambda_smort*smort]
+
+grd_pred = df_pred[,.(inf = quantile(Delta, 0.025), 
+            med = quantile(Delta, 0.5), 
+            sup = quantile(Delta, 0.975)), 
+         .(trait, long, lat)]
+
+ggplot(grd_pred, aes(x = long, y = lat, fill = med)) + 
+  geom_raster() + scale_fill_gradientn(colours = c("firebrick","red","orange","yellow","white","lightblue","blue")) +
+  facet_wrap(~trait) + coord_equal()
+
+## error: also integrate the error on input maps
 ```
 
-[predictions -> figure? ]
+[predictions -> figure?]
+eg: map of most extreme dT predicted per trait (+95% Ci)
 
-## Spatial variation
 
 
 Discussion
