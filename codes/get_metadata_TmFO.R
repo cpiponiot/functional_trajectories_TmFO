@@ -130,9 +130,7 @@ data$agb = computeAGB(
 
 
 #### calculate ACS fluxes ####
-
-#### calculate ACS fluxes ####
-load("newdata/data_with_traits.Rdata")
+load("C:/Users/camille.piponiot/Google Drive/biodiversity/newdata/data_with_traits.Rdata")
 
 data$acs = data$agb / 2  ## acs relative to plot size
 data$ba <- (data$dbh_c / 2) ^ 2 * pi 
@@ -192,7 +190,7 @@ data = merge(data,dG,by=c("idtree","year"))
 ## functional diversity, per trait and for all traits together
 library(entropart)
 FD_T = function(Mtr,Nsp){
-  M = unique(cbind(Nsp,Mtr)[order(Nsp),])[,-1]
+  M = unique(cbind(Nsp,scale(Mtr))[order(Nsp),])[,-1]
   DistanceMatrix = as.matrix(dist(M))
   # Similarity = 1 - Normailized dissimilarity
   Z = 1 - DistanceMatrix/max(DistanceMatrix)
@@ -217,12 +215,6 @@ data$idplot[data$site=="bsl" & data$plot==7] <- "bsl l cntrl"
 data$treat[data$site=="bsl" & data$plot %in% c(4,7,9)] <- "ctrl"
 data$idplot.size[data$site=="bsl"] <- 1
 data$idplot.size[data$site=="bsl" & data$treat == "CL"] <- 2
-
-
-
-
-
-
 
 # year of minimum AGB
 metadata = data[, .(acstot = sum(acs)), .(idplot, site, year, tlog)]

@@ -651,3 +651,132 @@ df = unique(pars_cov[, c("trait", grep("lambda", colnames(pars_cov), value = TRU
 source("codes/plot_lambda.R")
 plot_lambda(df$trait, df[,-"trait"], unique(df_covar[,c("covariate","covar_typ")])) + labs(title = "lambdas")
 ```
+
+## Testing the initial composition and diversity of the community of resistance 
+
+```{r}
+# select censuses previous to logging
+if (length(sizeData$tlog)==0) 
+  sizeData = merge(sizeData, plotInfo, by = c("idplot", "site"))
+md0 = subset(sizeData, year <= tlog & size == "(0,35]")
+
+# add 'trait' column ie melt data table
+md0_FD = melt(md0, id.vars = c("site", "idplot","year","FDtot"),
+              measure.vars = c("FDDBH95","FDwoodDensity","FDSLA","FDlogSeedMass"), 
+              variable.name = "trait", value.name = "FDtrait")
+md0_FD$trait = gsub("FD","", md0_FD$trait)
+
+md0_WMT = melt(md0, id.vars = c("site", "idplot","year"), 
+               measure.vars = c("DBH95","woodDensity","SLA","logSeedMass"), 
+               variable.name = "trait", value.name = "WMT")
+
+md0 = merge(md0_FD, md0_WMT, by = c("trait","site","idplot","year"))
+
+md0 = md0[, .(FDtrait = mean(FDtrait), 
+              FDtot = mean(FDtot), 
+              WMT = mean(WMT)),
+          .(trait, idplot, site)]
+md0 = merge(md0, md0[, .(FDtrait_sc = (FDtrait-mean(FDtrait))/sd(FDtrait), 
+                         FDtot_sc = (FDtot-mean(FDtot))/sd(FDtot),
+                         WMT_sc = (WMT-mean(WMT))/sd(WMT), 
+                         idplot, site), 
+                     .(trait)],
+            by = c("idplot","site","trait"))
+
+if (length(df_Delta$WMT)==0) 
+  df_Delta = merge(df_Delta, md0, by = c("site","idplot","trait"))
+site_coord_trait = merge(data.table(site_coord), df_Delta[, .(FDtrait = mean(FDtrait), 
+                                                              FDtot = mean(FDtot),
+                                                              WMT = mean(WMT)), 
+                                                          .(site, trait)], by = "site")
+```
+
+### Correlations per site {.tabset .tabset-pills}
+
+#### Wood density
+```{r, fig.height=6, fig.width=7}
+ggcorr(site_coord_trait[trait=="woodDensity",c(10,16,18:20)], nbreaks = 4, label = TRUE) + labs(title = "Covariates correlation") 
+source("codes/makePairs.R")
+makePairs(data.frame(site_coord_trait[trait=="woodDensity",c(10,16,18:20)]), group = site_coord_trait[trait=="woodDensity"]$site)
+```
+
+#### DBH95
+```{r}
+ggcorr(site_coord_trait[trait=="DBH95",c(10,16,18:20)], nbreaks = 4, label = TRUE) + labs(title = "Covariates correlation") 
+source("codes/makePairs.R")
+makePairs(data.frame(site_coord_trait[trait=="DBH95",c(10,16,18:20)]), group = site_coord_trait[trait=="woodDensity"]$site)
+```
+
+#### SLA
+```{r}
+ggcorr(site_coord_trait[trait=="SLA",c(10,16,18:20)], nbreaks = 4, label = TRUE) + labs(title = "Covariates correlation") 
+source("codes/makePairs.R")
+makePairs(data.frame(site_coord_trait[trait=="SLA",c(10,16,18:20)]), group = site_coord_trait[trait=="woodDensity"]$site)
+```
+
+#### seed mass
+```{r}
+ggcorr(site_coord_trait[trait=="logSeedMass",c(10,16,18:20)], nbreaks = 4, label = TRUE) + labs(title = "Covariates correlation") 
+source("codes/makePairs.R")
+makePairs(data.frame(site_coord_trait[trait=="logSeedMass",c(10,16,18:20)]), group = site_coord_trait[trait=="woodDensity"]$site)
+```
+
+### Correlations per plot {.tabset .tabset-pills}
+
+#### Wood density
+```{r}
+ggcorr(df_Delta[trait=="woodDensity",c("FDtrait","FDtot","WMT")], nbreaks = 4, label = TRUE) + labs(title = "Covariates correlation") 
+```
+
+#### DBH95
+```{r}
+ggcorr(df_Delta[trait=="DBH95",c("FDtrait","FDtot","WMT")], nbreaks = 4, label = TRUE) + labs(title = "Covariates correlation") 
+```
+
+#### SLA
+```{r}
+ggcorr(df_Delta[trait=="SLA",c("FDtrait","FDtot","WMT")], nbreaks = 4, label = TRUE) + labs(title = "Covariates correlation") 
+```
+
+#### seed mass
+```{r}
+ggcorr(df_Delta[trait=="logSeedMass",c("FDtrait","FDtot","WMT")], nbreaks = 4, label = TRUE) + labs(title = "Covariates correlation") 
+```
+
+
+### with FD per trait
+
+```{r}
+cov_names = c("FDtrait","WMT")
+
+if (inference_stan){
+  source("codes/inference_covariates_model.R")
+  save(pars_cov, file = "data/parsCov4.Rdata")
+} else { load("data/parsCov4.Rdata")}
+```
+
+```{r}
+df = unique(pars_cov[, c("trait", grep("lambda", colnames(pars_cov), value = TRUE)), with = F])
+source("codes/plot_lambda.R")
+plot_lambda(df$trait, df[,-"trait"], unique(df_covar[,c("covariate","covar_typ")])) + 
+  labs(title = "lambdas") + theme(legend.position="none")
+```
+
+### with FD of all trees < 35 cm dbh (all 4 traits together)
+
+```{r}
+cov_names = c("FDtot","WMT")
+
+if (inference_stan){
+  source("codes/inference_covariates_model.R")
+  save(pars_cov, file = "data/parsCov5.Rdata")
+} else { load("data/parsCov5.Rdata")}
+```
+
+```{r}
+df = unique(pars_cov[, c("trait", grep("lambda", colnames(pars_cov), value = TRUE)), with = F])
+source("codes/plot_lambda.R")
+plot_lambda(df$trait, df[,-"trait"], unique(df_covar[,c("covariate","covar_typ")])) + 
+  labs(title = "lambdas") + theme(legend.position="none")
+```
+

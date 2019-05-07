@@ -19,7 +19,7 @@ abstract: |
 
   It consists of two paragraphs.
 
-journal: "An awesome journal"
+journal: "xxx"
 date: "`r Sys.Date()`"
 bibliography: mybibfile.bib
 output: rticles::elsevier_article
@@ -35,27 +35,33 @@ library(gridExtra)
 library(tidyr)
 library(knitr)
 library(ggpubr)
+library(raster)
+library(sp)
+library(rgdal)
 ```
 
 
 Introduction
 ==========================
 
-importance of tropical forests: ecosystem services (carbon, biodiversity conservation)
+Tropical forests are crucial for most global ecological cycles. They hold xx% of the total carbon in terrestrial ecosystems and are estimated to have sequestered an annual 1.19 $\pm$ 0.41 Pg of carbon between 1990-2007 [@Pan2011], about 15% of total anthropogenic carbon emissions, playing a major role in climate change mitigation [@IPCC2014]. Tropical forests are also key in water cycles, acting as water pumps through vegetation transpiration and thus buffering droughts in adjacent regions [some numbers] (refs: [@Fisher2009,@Staal2018], etc). Moreover, tropical forests harbour xx% of known terrestial species (ref xx). The future of tropical forests will thus largely determine the functioning of Earth ecosystems and, in turn, human well-being. 
 
-but large uncertainties on their future: rapid changes in climatic conditions and land use $\rightarrow$ increasing frequency and intensity of disturbances
+The future of tropical forests is however highly uncertain: since the mid-twentieth century, humans have triggered rapid changes in the global environment [@Crutzen2002]. Tropical forests are being clearcut for agricultural or mining purposes at unprecedented rates, and most remaining forests have or will be heavily impacted by human activities [@Malhi2014]. Disturbances such as droughts, fires, selective logging, or hunting, are increasing in intensity and frequency [@Lewis2015]. Human disturbances modify forest functioning, but the intensity, direction and duration of these changes are still largely unknown. 
 
-one widespread disturbance = selective logging (xxx Mha/yr). XXx% of tropical forests have been logged at least once -> future of tropical forests. Logging in the tropics usually consists in the selective harvests of a few commercial species: maintains most of the forest cover but infrastructure (roads and skid trails) and tree felling can have large impacts on the forest. 
+One predomininat human activity in tropical forest is the selective logging of a few merchantable trees: xxx Mha are selectively logged every year in the tropics, and XXx% of tropical forests have been logged at least once. Because selective logging focuses on a few individual trees (typically 5-10 trees per ha), XXX% of the forest cover is maintenained after logging operations. Damage to the forest is concentrated in infrastructure (roads and skid trails to get machines in then logs out of the forest), and in logging gaps created by tree felling. 
 
-disturbances such as selective logging can affect the composition and dynamics of tropical forests: change the global functioning of the ecosystem. // forest recovery after a disturbance -> carbon stocks [@Piponiot2016a], tree size distribution [xx], species composition [@DeAvila2015], biodiversity [xx]
+Disturbances such as selective logging alter the composition and dynamics of tropical forests. A typical disturbance provokes a higher-than-normal tree mortality. This mortality can affect some trees more than others: large trees of commercial value with good mechanical properties and high wood density are the focus of selective loggers (ref xx); droughts affect particularly large trees with low-density wood [@Mcdowell2018,@Aleixo2019]; (other examples: fires?). 
+
+This high mortality strongly decreases the tree density, and, when large canopy trees are killed, it creates gaps in the forest canopy in which more light gets to the soil. These new local conditions can select for species that have different characteristics such as high growth rates and high light requirements. This indirect effect of the disturbance can modify the forest composition and functioning during several decades [@DeAvila2015] (other ref: functioning xx). 
 
 notion of resilience: measure of how well an ecosystem can cope with disturbances and return to its original (pre-disturbance) state. 2 components = change in state (or resistance to a disturbance) + return time [@Hodgson2015]. [introduce our conceptual framework, disturbance intensity]
 
 functional traits = xxx (definition). characterisation of ecosystem functioning $\rightarrow$ importance to understand how they are affected by disturbances. functional strategies and tradeoffs in forests: leaf and wood economic spectrum, stature, and seed dispersal strategy; explain most of the variation [@Baraloto2012a, @Costa-Saura2019]. selective logging disturbance -> canopy openings, light -> colonisation by small-seed light-wood species [@Poorter2005a,@Poorter2019] cf successional theory -> changes in functional composition [@Carreno-Rocabado2012]. 
 
-environmental control: soil, climate, disturbance history -> affects functional composition [@Costa-Saura2019] and response to disturbance. => spatial variation. example: Amazonia, the largest tropical forest biome (50% of all tropical rainforest area) -> 2 large scale gradients that control the dynamics of old-growth forests: dryness gradient (NW-SE) [@Davidson2012] that constraints vegetation growth, and a tree mortality gradient (SW-NE) [@Johnson2016] due to lower soil stability [@Quesada2012] and higher frequency of windstorms [@Espirito-Santo2014] in the southwestern part of Amazonia. 
+environmental control: soil, climate, disturbance history -> affects functional composition [@Costa-Saura2019] and response to disturbance. => spatial variation. example: Amazon = largest tropical forest biome on Earth (50% of tropical rainforests, total area: 600 Mha).  -> 2 large scale gradients that control the dynamics of old-growth forests: dryness gradient (NW-SE) [@Davidson2012] that constraints vegetation growth, and a tree mortality gradient (SW-NE) [@Johnson2016] due to lower soil stability [@Quesada2012] and higher frequency of windstorms [@Espirito-Santo2014] in the southwestern part of Amazonia. 
 
-Here we assess the resistance of 4 functional traits (namely wood density, seed mass, specific leaf area and maximum tree diameter) to selective logging in Amazonia. We calibrate an original Bayesian hierarchical model with data from xxx permanent forest plots from 12 long-term experimental sites. Our research questions are: (i) how are functional traits affected by disturbances in 
+Here we assess the resistance of 4 functional traits (namely wood density, seed mass, specific leaf area and maximum tree diameter) to selective logging in Amazonia. We calibrate an original Bayesian hierarchical model with data from xxx permanent forest plots from 12 long-term experimental sites. Our research questions are: (i) how is the functional composition of Amazonian forests affected by disturbances such as selective logging? (ii) are some functional traits more resistant than others? (iii) does the functional resistance vary across Amazonia, and what factors could explain those variations?
+
 
 
 Methods
@@ -63,13 +69,13 @@ Methods
 
 ## Study sites
 
-TmFO sites description
+Our study includes data from twelve long-term (8–30 year) experimental forest sites located in the Amazon Basin and the Guiana Shield (Figure XXX). All sites are located in tropical forests with mean annual precipitation $\geq$ 1000 mm. Sites were logged once and permanent forest plots (xx-xx ha per site) were censused at least once before and at least twice after logging. For each site, we extracted the climatic water deficit from Chave et al. [@Chave2014], at a 30 arc-seconds resolution. [kriging -> smort]
 
 + environmental covariates: table? maps in SM?
 
-## Functional trait data compilation
+For sites with plots $\leq$ 1 ha, data from those with the same treatment 113 were aggregated to mitigate the small plot effect on the variation in density of large trees.
 
-grouping plots xxx (cf piponiot2019)
+## Functional trait data compilation
 
 Traits chosen: 
 
@@ -83,7 +89,7 @@ Traits chosen:
 
 retrieved from xxx and estimated for each individual: by species or genus or plot mean (see explanation package BIOMASS)
 
-Selective logging typically targets big trees (DBH $\geq$ 40~cm) belonging to a small group of species with commercial value.Those species usually have particular functional trait values, such as large maximum diameters and high wood density [xx]. The functional composition of the biggest trees is thus artificially modified because of the selectivity of harvests. Because we are more interested in the indirect effects of selective logging on the functional composition, i.e. the functional changes induced by tree felling and canopy openings, we excluded trees with DBH > 35 cm from the analysis. 
+Selective logging typically targets big trees (DBH $\geq$ 40 cm) belonging to a small group of species with commercial value.Those species usually have particular functional trait values, such as large maximum diameters and high wood density [xx]. The functional composition of the biggest trees is thus artificially modified because of the selectivity of harvests. Because we are more interested in the indirect effects of selective logging on the functional composition, i.e. the functional changes induced by tree felling and canopy openings, we excluded trees with DBH > 35 cm from the analysis. 
 
 Mean weighted trait: (weighted with biomass)
 
@@ -91,7 +97,7 @@ Mean weighted trait: (weighted with biomass)
 MWT_{k,c,p,s} = \frac{\sum_{i \in I_{c,p,s}}(T_{k,i}\cdot agb_i)}{\sum_{i \in I_{c,p,s}}(agb_i)}
 \end{equation}
 
-with $T_{k,i}$ the value of trait $k$ (either $DBH95$, $logSeedMass$, $SLA$, or $WD$) for individual tree $i$, $agb_i$ the aboveground biomass of individual tree $i$, and $I_{c,p,s}$ all live trees with DBH $\geq$ 10~cm and $\leq$ 35~cm at census $c$ in plot $p$ in site $s$. 
+with $T_{k,i}$ the value of trait $k$ (either $DBH95$, $logSeedMass$, $SLA$, or $WD$) for individual tree $i$, $agb_i$ the aboveground biomass of individual tree $i$, and $I_{c,p,s}$ all live trees with DBH $\geq$ 10 cm and $\leq$ 35 cm at census $c$ in plot $p$ in site $s$. 
 
 The aboveground biomass of each individual was estimated using the package BIOMASS [@Rejou-Mechain2017] (details xx). 
 
@@ -122,11 +128,13 @@ with
 
 - $size_p$ is the size of plot $p$
 
-```{r}
+```{r method_example, fig.cap="Example of predicted relative MWT change (dMWT) after a disturbance."}
 Delta = -2
 tmax = 20
 theta = 2
-curve(Delta * (x/tmax * exp(1-x/tmax) ) ^ theta, xlim = c(0,100), xlab = "Time since logging (yr)", ylab = "dMWT")
+curve(Delta * (x/tmax * exp(1-x/tmax) ) ^ theta, xlim = c(0,100), xlab = "Time since logging (yr)", ylab = "dMWT", lwd=2)
+arrows(x0=tmax, y0=0,y1=Delta*0.99, code=3, length=0.15)
+text(x=tmax, y = Delta/2, pos = 4, labels = expression(Delta), cex=2)
 legend("bottomright", legend = expression(Delta*" = -2; tmax = 20 yr; "*theta*" = 2"))
 ```
 
@@ -141,21 +149,35 @@ We thus modelled it as:
 $loss_p$ is the relative aboveground biomass loss after logging in plot $p$, as a proxy of the disturbance intensity; it is estimated as the difference between the pre-logging aboveground biomass and the minimum biomass in the first 4 years after logging, divided by the pre-logging aboveground biomass. 
 $Cov_{m,s}$ is the value of covariate $m$ (either the mortality rate or the climatic water deficit) in site $s$. 
 
+## Predictions
 
+coarsest resolution of input maps: 1 degree grid (stem mortality) -> final prediction maps resolution
+=> cwd values (xx resolution) aggregated to a 1 degree grid, average value. 
+
+uncertainties: variation in cwd values inside one pixel // stem mortality: distribution of kriged predictions for each pixel
+
++ parameters posterior
+
+=> 1000 iterations : values of covariates and parameters are randomly selected in their distribution and predictions of maximum relative CWD change ($\Delta$) are estimated. 
 
 
 Results
 ============
 
+```{r}
+load("C:/Users/camille.piponiot/gitR/functional_trajectories_TmFO/data/parsCov2.Rdata")
+range_tmax = paste0("[",paste(round(quantile(pars_cov$tmax, c(0.025,0.975))), collapse=", "),"]")
+```
+
 ## Trait change predictions fitness
 
-tmax $\in$ xxx (95% confidence interval)
-
+tmax $\in$ `r range_tmax` yr (95% confidence interval)
 
 
 ## Traits variation and resistance to logging
 
-```{r fig_lambdas, fig.height=3, fig.width=6}
+```{r lambdas, fig.height=3, fig.width=6, fig.cap="\\label{fig:lambdas}Violin plots of covariates effect on maximum relative MWT change per trait. *intercept* is the value when all covariates are null; *smort* is the effect of the stem mortality; *cwd* is the effect of the climatic water deficit. Dots represent the median value, and the segments are the 95% confidence intervals.  All covariates were scaled and centered."}
+
 load("C:/Users/camille.piponiot/gitR/functional_trajectories_TmFO/data/parsCov2.Rdata")
 
 df = unique(pars_cov[, c("iter","trait", grep("lambda", colnames(pars_cov), value = TRUE)), with = F])
@@ -177,64 +199,138 @@ ggplot(lambda_ci, aes(x = covariate)) +
   geom_hline(yintercept = 0, lty= 2) + 
   geom_violin(data = df_lambda, aes(y = value, fill=covariate), colour=NA, alpha=0.3) +
   geom_pointrange(aes(y = med, ymin = inf, ymax = sup, colour = covariate), lwd = 0.5) + 
-  coord_flip() + facet_wrap(~trait) +
-  labs(y = "Parameter value", x = "Covariate") + theme(legend.position = "none")
+  coord_flip() + facet_wrap( ~ trait) +
+  labs(y = "Parameter value", x = "Covariate") + theme(legend.position = "none") + 
+  theme_bw()
 ```
+
+Figure \ref{fig:lambdas}
+
+
+
+## Spatial configuration and predictions
+
+```{r maps_pred, fig.cap="Prediction maps of maximum relative CWD change (i.e. resistance to disturbance) by trait. Warm colors (from yellow to red) show a decreases in MWT; blue colors show an increase in MWT. Black dots are study sites location. Pixels with "}
+load("C:/Users/camille.piponiot/gitR/functional_trajectories_TmFO/data/maps_rticle.Rdata")
+load("C:/Users/camille.piponiot/gitR/functional_trajectories_TmFO/data/site_coord.Rdata")
+
+## keep only sites used in this study
+load("C:/Users/camille.piponiot/gitR/functional_trajectories_TmFO/data/plotInfo_TmFO.Rdata")
+site_coord = merge(site_coord, unique(plotInfo[,"site"]), by = "site")
+
+#### standardize covariates values
+grd_cov$smort = (grd_cov$smort - mean(site_coord$smort))/sd(site_coord$smort)
+grd_cov$cwd = (grd_cov$cwd - mean(site_coord$cwd))/sd(site_coord$cwd)
+
+all_pix = grd_cov[,c("cwd","smort")]
+## observations, scaled
+obs = scale(site_coord[,c("cwd","smort")])
+
+## 1) create convex hull
+ch <- chull(obs)
+coords <- obs[c(ch, ch[1]),]  # closed polygon
+
+## 2) create buffer around convex hull
+p = Polygon(coords)
+ps = Polygons(list(p),1)
+sps = SpatialPolygons(list(ps))
+buff = buffer(sps, width = 1)
+## remove points outside the buffer
+grd_cov = grd_cov[!is.na(over(SpatialPoints(all_pix),buff)),]
+
+
+## prediction data table: pixel id * trait * iteration id
+grd_cov$idpix = 1:nrow(grd_cov)
+df_pred = data.table(expand.grid(idpix = 1:nrow(grd_cov), 
+                                 iter = unique(df_lambda$iter),
+                                 trait = unique(df_lambda$trait)))
+df_pred = merge(df_pred, grd_cov, by = "idpix")  ## + iter
+df_pred = merge(unique(pars_cov[,c("iter","trait","lambda0","lambda_cwd","lambda_smort")]), 
+                df_pred, by = c("iter","trait"))
+df_pred[, Delta := lambda0 + lambda_cwd*cwd + lambda_smort*smort]
+
+grd_pred = df_pred[,.(inf = quantile(Delta, 0.025), 
+                      med = quantile(Delta, 0.5), 
+                      sup = quantile(Delta, 0.975)), 
+                   .(trait, long, lat)]
+
+ggplot(grd_pred) + geom_raster(aes(x = long, y = lat, fill = med*100)) + 
+  scale_fill_gradientn(colours = c("firebrick","red","orange","yellow","white","lightblue","blue")) +
+  facet_wrap( ~ trait) + coord_equal() + geom_point(data = site_coord, aes(x=Long,y=Lat)) + 
+  labs(x = "longitude", y = "latitude", fill = "Maximum relative\nMWT change (%)") + 
+  theme(panel.grid = element_blank(), panel.border = element_rect(color = "black", fill=NA), 
+        strip.background = element_rect(color = "black"))
+
+## error: also integrate the error on input maps
+```
+
+
+Discussion
+============
 
 - direction of changes: expected or not? 
 
 - which traits are predicted to be more resistant
 
 
-## Spatial configuration
-
-```{r fig_maps_pred}
-load("C:/Users/camille.piponiot/gitR/functional_trajectories_TmFO/data/maps_rticle.Rdata")
-
-## keep only pixels with cwd and smort inside our observed range of values
-load("C:/Users/camille.piponiot/gitR/functional_trajectories_TmFO/data/site_coord.Rdata")
-grd_cov = subset(grd_cov, cwd >= min(site_coord$cwd) & cwd <= max(site_coord$cwd) & 
-                   smort >= min(site_coord$smort) & smort <= max(site_coord$smort))
-
-#### standardize covariates values
-load("C:/Users/camille.piponiot/gitR/functional_trajectories_TmFO/data/plotInfo_TmFO.Rdata")
-site_coord2 = merge(site_coord, unique(plotInfo[,"site"]), by = "site")
-
-grd_cov$smort = (grd_cov$smort - mean(site_coord2$smort))/sd(site_coord2$smort)
-grd_cov$cwd = (grd_cov$cwd - mean(site_coord2$cwd))/sd(site_coord2$cwd)
-
-## prediction data table: pixel id * trait * iteration id
-grd_cov$idpix = 1:nrow(grd_cov)
-df_pred = data.table(expand.grid(idpix = 1:nrow(grd_cov), 
-                       iter = unique(df_lambda$iter),
-                       trait = unique(df_lambda$trait)))
-df_pred = merge(df_pred, grd_cov, by = "idpix")  ## + iter
-df_pred = merge(unique(pars_cov[,c("iter","trait","lambda0","lambda_cwd","lambda_smort")]), 
-                 df_pred, by = c("iter","trait"))
-df_pred[, Delta := lambda0 + lambda_cwd*cwd + lambda_smort*smort]
-
-grd_pred = df_pred[,.(inf = quantile(Delta, 0.025), 
-            med = quantile(Delta, 0.5), 
-            sup = quantile(Delta, 0.975)), 
-         .(trait, long, lat)]
-
-ggplot(grd_pred, aes(x = long, y = lat, fill = med)) + 
-  geom_raster() + scale_fill_gradientn(colours = c("firebrick","red","orange","yellow","white","lightblue","blue")) +
-  facet_wrap(~trait) + coord_equal()
-
-## error: also integrate the error on input maps
-```
-
-[predictions -> figure?]
-eg: map of most extreme dT predicted per trait (+95% Ci)
 
 
-
-Discussion
+Supplementary material
 ============
 
+## Choice of pixels on prediction maps
 
+goal: represent only pixels that have covariates values close enough to our range of calibration (ie TmFO sites conditions).
+
+Scaled covariates -> convex hull around TmFO sites values -> buffer of 1 (scaled: equivalent to 1 standard deviation) -> all points outside this buffer were removed.
+
+```{r pixel_choice, fig.height=6, fig.width=6}
+plot(buff, col="grey", axes=TRUE, 
+     xlab = "CWD (centered and scaled)", 
+     ylab = "Stem mortality (centered and scaled)", 
+     xlim = c(-3.2,max(all_pix[,1])), 
+     border = NA)
+points(all_pix, pch=19)
+points(obs, pch=16, col="red")
+lines(coords, col="red")
+```
+
+## Goodness of predictions
+
+```{r make_predictions}
+load("C:/Users/camille.piponiot/gitR/functional_trajectories_TmFO/data/data_FT_TmFO.Rdata")
+data_FT$id = 1:nrow(data_FT)
+site_coord$cwd_sc = scale(site_coord$cwd)
+site_coord$smort_sc = scale(site_coord$smort)
+data_FT = merge(data_FT, site_coord, by = "site")
+
+## tlog: logging year
+data_FT = merge(data_FT, data_FT[,.(tlog = min(year)),.(idplot)], by = "idplot")
+data_FT$tlog[data_FT$site == "prc"] = 1986
+data_FT$tlog[data_FT$site == "tor"] = 2006
+data_FT$tlog[data_FT$site == "cum"] = 2004
+
+## initial value
+data_FT = merge(data_FT, data_FT[year <= tlog,.(WMT0 = mean(WMT)),.(idplot, trait)], by = c("idplot","trait"))
+data_FT[, dWMT := WMT/WMT0 -1 ]
+
+df_pred = data.table(expand.grid(id = 1:nrow(data_FT), iter = 1:1000))
+df_pred = merge(df_pred, subset(data_FT, year > tlog), by = "id")
+df_pred = merge(df_pred, pars_cov, by = c("iter", "trait","site","idplot"))
+df_pred[, pred := Delta * ((year-tlog)/tmax * exp(1-(year - tlog)/tmax))^theta]
+
+df_pred_ci = merge(df_pred[,.(inf = quantile(pred, 0.025), med = quantile(pred, 0.5), sup = quantile(pred, 0.975)), 
+                           .(id, site, idplot,year,trait)], data_FT[,c("id","dWMT")], 
+                   by = "id")
+```
+
+```{r gof, fig.height=7, fig.width=6}
+ggplot(df_pred_ci, aes(x = dWMT, y = med, ymin=inf, ymax=sup, colour=site)) + 
+  geom_abline(slope=1, intercept=0, lty=2) + geom_pointrange() + 
+  facet_wrap( ~ trait, scale="free") + theme_pubr()
+```
 
 
 References {#references .unnumbered}
 ==========
+

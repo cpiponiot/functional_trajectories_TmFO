@@ -1,0 +1,155 @@
+---
+title: "Testing the effect of the initial functional composition and diversity on the functional resistance"
+output: 
+  html_document:
+    theme: yeti
+    keep_md: true
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning=FALSE, message=FALSE, results='hide',
+                      root.dir = "C:/Users/camille.piponiot/gitR/functional_trajectories_TmFO")
+library(rstan)
+rstan_options(auto_write = TRUE)
+options(mc.cores = parallel::detectCores())
+inference_stan = FALSE
+
+library(data.table)
+library(ggplot2)
+library(gridExtra)
+library(knitr)
+library(ggpubr)
+library(factoextra)
+library(GGally)
+```
+
+```{r load_data}
+## study sites
+load("data/site_coord.Rdata")
+load("data/plotInfo_TmFO.Rdata")
+site_coord = subset(site_coord, site %in% unique(plotInfo$site))
+rownames(site_coord) = site_coord$site
+
+## trait data
+load("data/sizeData_TmFO.Rdata")
+name_traits = c("woodDensity","logSeedMass","SLA","DBH95")
+
+plotInfo = merge(plotInfo, sizeData[,.(tlog = min(year)), .(idplot)], by = "idplot")
+plotInfo$tlog[plotInfo$site == "prc"] = 1986
+plotInfo$tlog[plotInfo$site == "tor"] = 2006
+plotInfo$tlog[plotInfo$site == "cum"] = 2004
+
+### reorganize data -> gather dataframes
+sizeData_melt = melt(sizeData, variable.name = "trait_FD", value.name = "value", 
+                     measure.vars = grep("DBH95|wood|Seed|SLA",colnames(sizeData)), 
+                     variable.factor = FALSE)
+sizeData_melt$trait = gsub("FD","",sizeData_melt$trait_FD)
+sizeData_melt$measure = c("WMT","FD")[grepl("FD",sizeData_melt$trait_FD)+1]
+sizeData_melt = dcast(sizeData_melt, idplot + site + year + size + agb + 
+                        FDtot + trait ~ measure, value.var = "value")
+
+dfTraits = sizeData_melt[,.(WMT = weighted.mean(WMT, agb), agb_tot = sum(agb), 
+                            FDtot = mean(FDtot), FD = mean(FD)),.(idplot, year, trait, size)] ## FD must be calculated for each new plot
+
+## add plot info (plot size, treatment)
+dfTraits = merge(dfTraits, plotInfo, by = c("idplot"))
+dfTraits[, agb := agb_tot/idplot.size]
+# size name
+dfTraits$size <- factor(dfTraits$size)
+levels(dfTraits$size) <- c("small", "big")
+
+## df_covar
+load("data/parsSmall.Rdata")
+pars_melt = melt(pars_small, measure.vars = c("Delta","tmax","theta"), 
+                 id.vars = c("iter","site","trait","idplot"), variable.name = "parameter")
+df_covar = merge(pars_melt[,.(mean = mean(value), sd = sd(value)), .(site, trait, parameter, idplot)],
+                 site_coord, by = "site")
+## agb loss
+df_agb = dfTraits[trait == "SLA" & treat != "ctrl",
+                  .(agb = sum(agb_tot)), .(site,idplot,year,tlog)]
+df_dist = df_agb[,.(agb0 = mean(agb[year <= tlog]), 
+                    agbmin = min(agb[year>tlog & year <= tlog + 4])),.(idplot)]
+df_dist[, loss_rel := (agb0-agbmin)/agb0]
+df_dist[, loss_abs := (agb0-agbmin)]
+df_covar = merge(df_covar,  df_dist, by = "idplot")
+
+df_covar = melt(df_covar, id.vars = c("site", "idplot","trait","parameter","mean","sd"), 
+                measure.vars = c(colnames(site_coord)[6:length(site_coord)],"loss_rel","loss_abs"), 
+                variable.name = "covariate")
+df_covar = merge(df_covar, data.table())
+
+## df_Delta
+df_Delta = subset(df_covar, parameter == "Delta")
+df_Delta = dcast(unique(df_Delta[,c("site","idplot","mean","sd","covariate","value","trait")]), 
+                 site + idplot + trait + mean + sd ~ covariate, value.var = "value")
+## scale
+cov_sc = data.table(scale(site_coord[,6:16]))
+colnames(cov_sc) = paste0(colnames(cov_sc), "_sc")
+cov_sc$site = rownames(site_coord)
+df_Delta = merge(df_Delta, cov_sc, by = "site")
+```
+
+```{r}
+# select censuses previous to logging
+md0 = subset(dfTraits, year <= tlog & size == "small")
+md0 = md0[,.(FD = mean(FD), FDtot = mean(FDtot), WMT = mean(WMT)), .(site,idplot,trait)]
+
+# scale covariates
+md0 = merge(md0, md0[, .(FD_sc = (FD-mean(FD))/sd(FD), 
+                         FDtot_sc = (FDtot-mean(FDtot))/sd(FDtot),
+                         WMT_sc = (WMT-mean(WMT))/sd(WMT), 
+                         idplot, site), 
+                     .(trait)],
+            by = c("idplot","site","trait"))
+
+if (length(df_Delta$WMT)==0) 
+  df_Delta = merge(df_Delta, md0, by = c("site","idplot","trait"))
+site_coord_trait = merge(data.table(site_coord), df_Delta[, .(FD = mean(FD), 
+                                                              FDtot = mean(FDtot),
+                                                              WMT = mean(WMT)), 
+                                                          .(site, trait)], by = "site")
+```
+
+# Correlations {.tabset .tabset-pills}
+
+## Wood density
+```{r}
+ggcorr(site_coord_trait[trait=="woodDensity",c(10,16,18:20)], nbreaks = 4, label = TRUE) + labs(title = "Covariates correlation") 
+```
+
+## DBH95
+```{r}
+ggcorr(site_coord_trait[trait=="DBH95",c(10,16,18:20)], nbreaks = 4, label = TRUE) + labs(title = "Covariates correlation") 
+```
+
+## SLA
+```{r}
+ggcorr(site_coord_trait[trait=="SLA",c(10,16,18:20)], nbreaks = 4, label = TRUE) + labs(title = "Covariates correlation") 
+```
+
+## seed mass
+```{r}
+ggcorr(site_coord_trait[trait=="logSeedMass",c(10,16,18:20)], nbreaks = 4, label = TRUE) + labs(title = "Covariates correlation") 
+```
+
+
+# Effect on functional resistance
+
+```{r}
+cov_names = c("FD","FDtot","WMT")
+
+if (inference_stan){
+  source("codes/inference_covariates_model.R")
+  save(pars_cov, file = "data/parsCov_demo.Rdata")
+} else { load("data/parsCov_demo.Rdata")}
+```
+
+```{r}
+df = unique(pars_cov[, c("trait", grep("lambda", colnames(pars_cov), value = TRUE)), with = F])
+source("codes/plot_lambda.R")
+df_covar$covar_typ = 1
+plot_lambda(df$trait, df[,-"trait"], unique(df_covar[,c("covariate","covar_typ")])) + 
+  labs(title = "lambdas") + theme(legend.position="none")
+```

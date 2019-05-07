@@ -1,4 +1,4 @@
-plot_lambda = function(trait, lambdas, cov_type) {
+plot_lambda = function(trait, lambdas, cov_type = 1) {
   df_lambda = melt(data.table(trait, lambdas), 
                  id.vars = "trait", variable.name = "covariate")
   df_lambda[,covariate := gsub("lambda_", "", covariate)]
