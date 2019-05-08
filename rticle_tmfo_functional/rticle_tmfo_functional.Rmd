@@ -21,7 +21,7 @@ abstract: |
 
 journal: "xxx"
 date: "`r Sys.Date()`"
-bibliography: mybibfile.bib
+bibliography: library.bib
 output: rticles::elsevier_article
 ---
 
@@ -69,64 +69,71 @@ Methods
 
 ## Study sites
 
-Our study includes data from twelve long-term (8–30 year) experimental forest sites located in the Amazon Basin and the Guiana Shield (Figure XXX). All sites are located in tropical forests with mean annual precipitation $\geq$ 1000 mm. Sites were logged once and permanent forest plots (xx-xx ha per site) were censused at least once before and at least twice after logging. For each site, we extracted the climatic water deficit from Chave et al. [@Chave2014], at a 30 arc-seconds resolution. [kriging -> smort]
+```{r}
+## logged plots size range 
+load("C:/Users/camille.piponiot/gitR/functional_trajectories_TmFO/data/plotInfo_TmFO.Rdata")
+plot_size_range = paste(range(subset(plotInfo, treat!="ctrl")[,.(tot_size=sum(idplot.size)), .(site)]$tot_size), collapse = "-")
+```
 
-+ environmental covariates: table? maps in SM?
+Our study includes data from twelve long-term (8–30 year) experimental forest sites located in the Amazon Basin and the Guiana Shield (Figure XXX) [@Sist2015]. All sites are located in tropical forests with mean annual precipitation $\geq$ 1000 mm. In each site, permanent forest plots (`{r}plot_size_range` ha per site) were logged, and censused at least once before and at least twice after logging. 
 
-For sites with plots $\leq$ 1 ha, data from those with the same treatment 113 were aggregated to mitigate the small plot effect on the variation in density of large trees.
+For each site, we extracted the climatic water deficit (CWD) from Chave et al. [@Chave2014], at a 2.5 arc-minute resolution. Annual stem mortality rates (as a % of live stems) were based on unlogged plots inside our sites, and on the metadata from Johnson and colleagues [@Johnson2016] extracted from the ForestPlots database [@Lopez-Gonzalez2011]; stem mortality rates were then interpolated with the R package gstat [@gstat] on a 1$^\circ$ resolution grid. Site coordinates, CWD and stem mortality are reported in Table XX.
 
-## Functional trait data compilation
+## Data compilation
 
-Traits chosen: 
+For sites with plots $\leq$ 1 ha, data from those with the same treatment were aggregated to mitigate the small plot effect on the variation in density of large trees. In each census, all trees $\geq$ 10 cm diameter at breast height (dbh) were marked, measured and identified to the lowest taxonomic level (xx% to species, xx% to genus). 
 
-- $DBH95$: DBH 95th percentile (per species) as a proxy of the stature
+Median values of functional traits were calculated at the species level. Four functional traits were chosen, as proxies of complementary ecosystem functions in tropical forests: (i) the DBH 95th percentile as a proxy of tree stature (refxx), (ii) the median seed mass (log-transformed) $logSeedMass$ as a proxy of the dispersal strategy, (iii) the median specific leaf area $SLA$ as a proxy of the assimilation strategy and leaf economic spectrum and (iv) the median wood density $WD$ as a proxy of growth rate and mechanical support.
 
-- $logSeedMass$: median seed mass (log-transformed) as a proxy of the dispersal strategy
+The DBH 95th percentile $DBH95$ was chosen because it is more robust than the maximum DBH which is too sensitive to sampling size. $DBH95$ was calculated for all species for which at least 20 individuals were censused in our permanent forest plots. Seed mass and specific leaf area measurements were retrieved from the TRY database [@Kattge2011] (check other citations xxx). Wood density measurements were retrieved from the global wood density database [@Chave2009,@Zanne2009].
 
-- $SLA$: median specific leaf area, as a proxy of the assimilation strategy and leaf economic spectrum
+Median trait values were calculated per species and genus. Each individual tree in our permanent sample plots was then attributed a value for each trait at the lowest available taxonomic level. Trees with no available species- or genus-specific trait value were given their plot's median trait value. The aboveground biomass of each individual was estimated using the R package BIOMASS [@Rejou-Mechain2017]. 
 
-- $WD$: median wood density, as a proxy of growth rate and mechanical support
+Selective logging typically targets large trees belonging to a small group of species with commercial value. Those species usually have particular functional trait values, such as large maximum diameters and high wood density [xx]. The functional composition of the largest trees is thus artificially modified because of the selectivity of harvests. Because we are more interested in the indirect effects of selective logging disturbance on the functional composition, i.e. the functional changes induced by tree felling and canopy openings, we excluded large trees with DBH > 35 cm from the analysis. 
 
-retrieved from xxx and estimated for each individual: by species or genus or plot mean (see explanation package BIOMASS)
-
-Selective logging typically targets big trees (DBH $\geq$ 40 cm) belonging to a small group of species with commercial value.Those species usually have particular functional trait values, such as large maximum diameters and high wood density [xx]. The functional composition of the biggest trees is thus artificially modified because of the selectivity of harvests. Because we are more interested in the indirect effects of selective logging on the functional composition, i.e. the functional changes induced by tree felling and canopy openings, we excluded trees with DBH > 35 cm from the analysis. 
-
-Mean weighted trait: (weighted with biomass)
+For each functional trait $k$ (either $DBH95$, $logSeedMass$, $SLA$, or $WD$), we computed the mean biomass-weighted trait value at census $c$ in plot $p$ in site $s$ as:
 
 \begin{equation}  
 MWT_{k,c,p,s} = \frac{\sum_{i \in I_{c,p,s}}(T_{k,i}\cdot agb_i)}{\sum_{i \in I_{c,p,s}}(agb_i)}
 \end{equation}
 
-with $T_{k,i}$ the value of trait $k$ (either $DBH95$, $logSeedMass$, $SLA$, or $WD$) for individual tree $i$, $agb_i$ the aboveground biomass of individual tree $i$, and $I_{c,p,s}$ all live trees with DBH $\geq$ 10 cm and $\leq$ 35 cm at census $c$ in plot $p$ in site $s$. 
+with $T_{k,i}$ the value of trait $k$ for individual tree $i$, $agb_i$ the aboveground biomass of individual tree $i$, and $I_{c,p,s}$ all live trees with DBH $\geq$ 10 cm and $\leq$ 35 cm at census $c$ in plot $p$ in site $s$. Mean trait values were weighted by aboveground biomass to reflect the importance of larger trees in forest functioning (refxx). 
 
-The aboveground biomass of each individual was estimated using the package BIOMASS [@Rejou-Mechain2017] (details xx). 
+The distance of a trait value to its initial (pre-logging) value was estimated as: 
 
+\begin{equation}  
+dMWT_{k,c,p,s} = \frac{MWT_{k,c,p,s} - MWT0_{k,p,s}}{T0_{k,p,s}}
+\end{equation}
 
 ## Model calibration
 
-For each trait $k$, the mean biomass-weighted trait of small trees (MWT) trajectory at census $c$ in plot $p$ in site $s$ was modelled as:
+The model presented here aims at capturing the changes in MWT after the disturbance, as well as their recovery. For each trait $k$, the change in MWT at census $c$ in plot $p$ and site $s$  was modelled as:
 
 \begin{equation}  
-dMWT_{k,c,p,s} = \frac{MWT_{k,c,p,s} - MWT0_{k,p,s}}{T0_{k,p,s}} \sim \mathcal{N}\left( \mu_{k,c,p,s}\text{ , } \left(\frac{\sigma_k}{size_p}\right)^2\right)
+dMWT_{k,c,p,s} \sim \mathcal{N}\left( \mu_{k,c,p,s}\text{ , } \left(\frac{\sigma_k}{size_p}\right)^2\right)
 \end{equation}
 
-with 
+where 
 
 \begin{equation}  
 \mu_{k,c,p,s} = \Delta_{k,p,s} \cdot \left( \frac{t_c}{tmax_{k,p,s}} \cdot exp\left(1-\frac{t_c}{tmax_{k,p,s}}\right) \right)^{\theta_{k,p,s}}
 \end{equation}
 
-- $c$ the census, and $t_c$ the time since logging (in years) at census $c$, 
+with $t_c$ the time since logging (in years) at census $c$; $size_p$ is the size of plot $p$; $\Delta_{k,p,s}$ is the maximum post-disturbance change (negative if the MWT decreases, and positive of it increases). $tmax_{k,p,s}$ is the time taken to reach $\Delta_{k,p,s}$; when $t_c > tmax_{k,p,s}$, the MWT starts to get closer to its initial value, entering the recovery phase which is in some plots not yet observed. $\theta_k$ is a shape parameter that controls the width of the hump; when it increases, the hump is narrower.
 
-- $T0_{k,p,s}$ the pre-logging trait value of the community in plot $p$ in site $s$.
+Parameters $\Delta_{k,s,p}$ and $tmax_{k,p}$ were modelled with a normal distribution:
 
-- $\Delta_{k,p,s}$ is the maximum value (relative to the final value) of the hump that follows logging and the creation of logging gaps. $\Delta_{k,p,s} \sim \mathcal{N} (\mu_{\Delta ks}, \sigma_{\Delta}^2)$, with $\mu_{\Delta ks}$ and $\sigma_{\Delta}$ are respectively the mean and standard deviation of $\Delta$ for trait $k$ in site $s$.
+\begin{equation}
+\Delta_{k,p,s} \sim \mathcal{N} (\mu_{\Delta ks}, \sigma_{\Delta}^2)
+\end{equation}
 
-- $tmax_{k,p,s}$ is the time when the maximum value of the hump is reached. $tmax_{k,p} = 0$ for control plots and in logged plots $tmax_{k,p} \sim \mathcal{N} (\mu m_{ k}, \sigma m^2)$ where $\mu m_{k}$ and $\sigma m$ are respectively the mean and standard deviation of $tmax$ for trait $k$.
+with $\mu_{\Delta ks}$ and $\sigma_{\Delta}$ are respectively the mean and standard deviation of $\Delta$ for trait $k$ in site $s$.
 
-- $\theta_k$ is a shape parameter that controls the width of the hump; when it increases, the hump is narrower.  
+\begin{equation}
+tmax_{k,p} \sim \mathcal{N} (\mu m_{ k}, \sigma m^2)
+\end{equation}
 
-- $size_p$ is the size of plot $p$
+where $\mu m_{k}$ and $\sigma m$ are respectively the mean and standard deviation of $tmax$ for trait $k$.
 
 ```{r method_example, fig.cap="Example of predicted relative MWT change (dMWT) after a disturbance."}
 Delta = -2
@@ -146,19 +153,25 @@ We thus modelled it as:
 \Delta_{k,p,s} = loss_p \cdot (\lambda_{0,k} + \sum \lambda_{m,k} Cov_{m,s}) 
 \end{equation}
 
-$loss_p$ is the relative aboveground biomass loss after logging in plot $p$, as a proxy of the disturbance intensity; it is estimated as the difference between the pre-logging aboveground biomass and the minimum biomass in the first 4 years after logging, divided by the pre-logging aboveground biomass. 
+where $loss_p$ is the relative aboveground biomass loss after logging in plot $p$, as a proxy of the disturbance intensity; it is estimated as the difference between the pre-logging aboveground biomass and the minimum biomass in the first 4 years after logging, divided by the pre-logging aboveground biomass (similar to @Piponiot2016). 
 $Cov_{m,s}$ is the value of covariate $m$ (either the mortality rate or the climatic water deficit) in site $s$. 
+
+Bayesian hierarchical models were inferred through MCMC methods using an adaptive form of the Hamiltonian Monte Carlo sampling  using the R language [@RDevelopementTeam2018] and the Rstan package [@Carpenter2015]. A detailed list of priors is provided in Table XXX (informative priors?).
 
 ## Predictions
 
-coarsest resolution of input maps: 1 degree grid (stem mortality) -> final prediction maps resolution
-=> cwd values (xx resolution) aggregated to a 1 degree grid, average value. 
+Predictions of maximum MWT change after the disturbance were made at the Amazonian level on a 1$^\circ$ grid, i.e. the coarsest resolution of input maps, and errors were propagated with the following steps: 
 
-uncertainties: variation in cwd values inside one pixel // stem mortality: distribution of kriged predictions for each pixel
+1. For each cell $j$ of the grid: (i) a value of stem mortality was taken from xxx (cf piponiot 2019); (ii) a value of CWD was taken from the distribution of pixel values in the Chave et al map [@Chave2014] that were inside the cell. 
 
-+ parameters posterior
+2. Parameters $\lambda_{0,k}$ and $\lambda_{m,k}$ were taken from their posterior distribution.
 
-=> 1000 iterations : values of covariates and parameters are randomly selected in their distribution and predictions of maximum relative CWD change ($\Delta$) are estimated. 
+3. For each trait $k$ and grid cell $j$, predictions of maximum MWT change $\Delta_{k,j}$ after a disturbance were calculated using a biomass loss of xxx%: 
+\begin{equation} 
+\Delta_{k,j} = xx \cdot (\lambda_{0,k} + \sum \lambda_{m,k} Cov_{m,j}) 
+\end{equation}
+
+These steps were repeated 1000 times and summary statistcs were calculated for each 1$^\circ$ grid cell. 
 
 
 Results
