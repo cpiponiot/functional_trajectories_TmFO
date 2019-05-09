@@ -32,6 +32,7 @@ knitr::opts_chunk$set(echo = FALSE, warning=FALSE, message=FALSE, results='hide'
 library(data.table)
 library(ggplot2)
 library(gridExtra)
+library(kableExtra)
 library(tidyr)
 library(knitr)
 library(ggpubr)
@@ -44,7 +45,7 @@ library(rgdal)
 Introduction
 ==========================
 
-Tropical forests are crucial for most global ecological cycles. They hold xx% of the total carbon in terrestrial ecosystems and are estimated to have sequestered an annual 1.19 $\pm$ 0.41 Pg of carbon between 1990-2007 [@Pan2011], about 15% of total anthropogenic carbon emissions, playing a major role in climate change mitigation [@IPCC2014]. Tropical forests are also key in water cycles, acting as water pumps through vegetation transpiration and thus buffering droughts in adjacent regions [some numbers] (refs: [@Fisher2009,@Staal2018], etc). Moreover, tropical forests harbour xx% of known terrestial species (ref xx). The future of tropical forests will thus largely determine the functioning of Earth ecosystems and, in turn, human well-being. 
+Tropical forests are crucial for most global ecological cycles. They hold xx% of the total carbon in terrestrial ecosystems and are estimated to have sequestered an annual 1.19 $\pm$ 0.41 Pg of carbon between 1990-2007 [@Pan2011], about 15% of total anthropogenic carbon emissions, playing a major role in climate change mitigation [@IPCC2014]. Tropical forests are also key in water cycles, recycling rainfall through vegetation evapotranspiration and thus buffering droughts in adjacent regions [@Staal2018]. Moreover, tropical forests harbour an exceptional biodiversity and are estimated to contain around half of terrestrial species [@MEA2005,@IPBES2019]. The future of tropical forests will thus largely determine the functioning of Earth ecosystems and, in turn, human well-being. 
 
 The future of tropical forests is however highly uncertain: since the mid-twentieth century, humans have triggered rapid changes in the global environment [@Crutzen2002]. Tropical forests are being clearcut for agricultural or mining purposes at unprecedented rates, and most remaining forests have or will be heavily impacted by human activities [@Malhi2014]. Disturbances such as droughts, fires, selective logging, or hunting, are increasing in intensity and frequency [@Lewis2015]. Human disturbances modify forest functioning, but the intensity, direction and duration of these changes are still largely unknown. 
 
@@ -75,17 +76,17 @@ load("C:/Users/camille.piponiot/gitR/functional_trajectories_TmFO/data/plotInfo_
 plot_size_range = paste(range(subset(plotInfo, treat!="ctrl")[,.(tot_size=sum(idplot.size)), .(site)]$tot_size), collapse = "-")
 ```
 
-Our study includes data from twelve long-term (8–30 year) experimental forest sites located in the Amazon Basin and the Guiana Shield (Figure XXX) [@Sist2015]. All sites are located in tropical forests with mean annual precipitation $\geq$ 1000 mm. In each site, permanent forest plots (`{r}plot_size_range` ha per site) were logged, and censused at least once before and at least twice after logging. 
+Our study includes data from twelve long-term (8–35 year) experimental forest sites located in the Amazon Basin and the Guiana Shield (Figure \ref{fig:smap}) [@Sist2015]. All sites are located in tropical forests with mean annual precipitation $\geq$ 1000 mm. In each site, permanent forest plots (`r plot_size_range` ha per site) were logged, and censused at least once before and at least twice after logging. 
 
-For each site, we extracted the climatic water deficit (CWD) from Chave et al. [@Chave2014], at a 2.5 arc-minute resolution. Annual stem mortality rates (as a % of live stems) were based on unlogged plots inside our sites, and on the metadata from Johnson and colleagues [@Johnson2016] extracted from the ForestPlots database [@Lopez-Gonzalez2011]; stem mortality rates were then interpolated with the R package gstat [@gstat] on a 1$^\circ$ resolution grid. Site coordinates, CWD and stem mortality are reported in Table XX.
+For each site, we extracted the climatic water deficit (CWD) from Chave et al. [@Chave2014], at a 2.5 arc-minute resolution. Annual stem mortality rates (as a % of live stems) were based on data from unlogged plots inside our sites. For the 5 sites in which no unlogged plot was available, stem mortality rates wer extracted from a map based on the metadata from Johnson and colleagues [@Johnson2016] (extracted from the ForestPlots database [@Lopez-Gonzalez2011]) and interpolated with the R package gstat [@gstat] on a 1$^\circ$ resolution grid. Site coordinates, CWD and stem mortality rates are reported in Table \ref{tab:sites}.
 
 ## Data compilation
 
 For sites with plots $\leq$ 1 ha, data from those with the same treatment were aggregated to mitigate the small plot effect on the variation in density of large trees. In each census, all trees $\geq$ 10 cm diameter at breast height (dbh) were marked, measured and identified to the lowest taxonomic level (xx% to species, xx% to genus). 
 
-Median values of functional traits were calculated at the species level. Four functional traits were chosen, as proxies of complementary ecosystem functions in tropical forests: (i) the DBH 95th percentile as a proxy of tree stature (refxx), (ii) the median seed mass (log-transformed) $logSeedMass$ as a proxy of the dispersal strategy, (iii) the median specific leaf area $SLA$ as a proxy of the assimilation strategy and leaf economic spectrum and (iv) the median wood density $WD$ as a proxy of growth rate and mechanical support.
+Median values of functional traits were calculated at the species level. Four functional traits were chosen, as proxies of complementary ecosystem functions in tropical forests: (i) the DBH 95th percentile as a proxy of tree stature (refxx), (ii) the seed mass (log-transformed) as a proxy of the dispersal strategy (ref), (iii) the specific leaf area as a proxy of the assimilation strategy and leaf economic spectrum [@Wright2004] and (iv) the stem wood density as a proxy of growth rate and mechanical support [@Chave2009].
 
-The DBH 95th percentile $DBH95$ was chosen because it is more robust than the maximum DBH which is too sensitive to sampling size. $DBH95$ was calculated for all species for which at least 20 individuals were censused in our permanent forest plots. Seed mass and specific leaf area measurements were retrieved from the TRY database [@Kattge2011] (check other citations xxx). Wood density measurements were retrieved from the global wood density database [@Chave2009,@Zanne2009].
+The DBH 95th percentile was chosen because it is more robust than the maximum DBH which is too sensitive to sampling size. The DBH 95th percentile was calculated for all species for which at least 20 individuals were censused in our permanent forest plots. Seed mass and specific leaf area measurements were retrieved from the TRY database [@Kattge2011] (check other citations xxx). Wood density measurements were retrieved from the global wood density database [@Chave2009,@Zanne2009].
 
 Median trait values were calculated per species and genus. Each individual tree in our permanent sample plots was then attributed a value for each trait at the lowest available taxonomic level. Trees with no available species- or genus-specific trait value were given their plot's median trait value. The aboveground biomass of each individual was estimated using the R package BIOMASS [@Rejou-Mechain2017]. 
 
@@ -291,6 +292,50 @@ Discussion
 Supplementary material
 ============
 
+## TmFO sites: map and covariates values
+
+```{r smap_tmfo_sites, fig.height=6, fig.width=7, fig.cap="\\label{fig:smap}Location of the 15 experimental permanent forest sites used in this study: the size of the points represents the total monitored area, and the color (from yellow to red) represents the total length of the experiment, as the time interval (in years) between the first and the last census."}
+load("C:/Users/camille.piponiot/Google Drive/Data TmFO cleaned/new_data/plot_data.Rdata")
+plot_data= merge(plot_data, site_coord, by = "site")
+
+## plot sizes
+plot_data = subset(plot_data, !(site%in%c("inp","lch")) | plot.size==4) ## use only subplots (1ha*4 per plot) where all trees >10cm have been measured 
+plot_data$plot.size[plot_data$site=="prg"] <- 5.25  ## subplots in paragominas: 5.25ha each
+plot_data = unique(plot_data[,c("site","plot","plot.size")])
+sites_size = plot_data[,.(totsize=sum(plot.size)),.(site)]
+
+## time period
+load("C:/Users/camille.piponiot/gitR/functional_trajectories_TmFO/data/data_FT_TmFO.Rdata")
+diff_year = data_FT[,.(dyear = diff(range(year))),.(site)]
+
+sites_size = merge(sites_size, diff_year,by="site")
+site_info = merge(site_coord, sites_size,by="site")
+
+library(ggmap); library(ggrepel)
+# newmap <- get_map(location=c(-60,-5), zoom=5, maptype="satellite")
+# save(newmap,file="calc_Rdata/sat_map.Rdata")
+load("C:/Users/camille.piponiot/Google Drive/volume_recovery/calc_Rdata/sat_map.Rdata")
+p1 <- ggmap(newmap) + 
+  geom_point(data=site_info, aes(x=Long,y=Lat,  colour=dyear, size=totsize))  +
+  geom_text_repel(data=site_info, aes(x=Long,y=Lat,label=site_name),colour="white")+
+  scale_size_continuous(name = "Total area (ha)") + labs(title="(a) TmFO sites") +
+  theme(axis.title.x=element_blank(),axis.title.y=element_blank()) +
+  scale_colour_gradientn(colours = rev(heat.colors(10)), name="Experiment \nduration (yr)")
+p1
+```
+
+
+```{r, results = "asis"}
+site_table = data.table(site_coord[,c("site_name","Long","Lat","cwd","smort")])
+site_table[, Long := round(Long,2)]
+site_table[, Lat := round(Lat,2)]
+site_table[, cwd := round(cwd)]
+site_table[, smort := round(smort,2)]
+colnames(site_table) <- c("Site", "Longitude","Latitude", "CWD (mm/yr)","Stem mortality (%)")
+kable(site_table, "latex", booktabs = T, caption = "\\label{tab:sites}Summary table of sites' location and covariates value.")
+```
+
+
 ## Choice of pixels on prediction maps
 
 goal: represent only pixels that have covariates values close enough to our range of calibration (ie TmFO sites conditions).
@@ -342,6 +387,7 @@ ggplot(df_pred_ci, aes(x = dWMT, y = med, ymin=inf, ymax=sup, colour=site)) +
   geom_abline(slope=1, intercept=0, lty=2) + geom_pointrange() + 
   facet_wrap( ~ trait, scale="free") + theme_pubr()
 ```
+
 
 
 References {#references .unnumbered}

@@ -40,7 +40,11 @@ CEC = raster("C:/Users/camille.piponiot/Google Drive/maps/soilgrids/CEC/CECSOL_M
 ################################################################################
 ####                            Forest dynamics                             ####
 ################################################################################
-smort = raster("C:/Users/camille.piponiot/Google Drive/maps/stem_mortality/stem_mort_krig.tif")
+smort = raster("C:/Users/camille.piponiot/Google Drive/maps/stem_mortality/stem_mort_krig_tmfo.tif")
+smort_var = raster("C:/Users/camille.piponiot/Google Drive/maps/stem_mortality/stem_mort_var_tmfo.tif")
+## for tmfo sites only
+load("C:/Users/camille.piponiot/Google Drive/biodiversity/newdata/mortality_in_control_plots.Rdata")
+df_mort_site = df_mort[,.(smort = mean(smort), sd_smort = sd(smort)),.(site)]
 
 ################################################################################
 ####                             Extract values                             ####
@@ -63,10 +67,12 @@ site_coord$Depth = raster::extract(Depth, site_coord[,c("Long","Lat")])
 site_coord$CEC = raster::extract(CEC, site_coord[,c("Long","Lat")])
 
 ## forest dynamics
-site_coord$smort = raster::extract(smort, site_coord[,c("Long","Lat")])
+site_coord = merge(site_coord, df_mort_site, by = "site", all = TRUE)
+site_coord$smort[is.na(site_coord$smort)] = raster::extract(smort, site_coord[is.na(site_coord$smort),c("Long","Lat")])
+site_coord$sd_smort = NULL  ## for now
+# site_coord$sd_smort[is.na(site_coord$sd_smort)] = sqrt(raster::extract(smort_var, site_coord[is.na(site_coord$sd_smort),c("Long","Lat")]))
 
-save(site_coord, file = "data/site_coord.Rdata")
-
+save(site_coord, file = "C:/Users/camille.piponiot/gitR/functional_trajectories_TmFO/data/site_coord.Rdata")
 
 ## save maps for figures
 
