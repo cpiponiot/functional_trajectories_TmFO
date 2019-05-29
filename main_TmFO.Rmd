@@ -44,7 +44,7 @@ plotInfo$tlog[plotInfo$site == "cum"] = 2004
 
 ### reorganize data -> gather dataframes
 sizeData_melt = melt(sizeData, variable.name = "trait", value.name = "value", 
-                     measure.vars = grep("D|Seed|SLA",colnames(sizeData)), 
+                     measure.vars = name_traits, 
                      variable.factor = FALSE)
 dfTraits = sizeData_melt[,.(WMT = weighted.mean(value, agb), agb_tot = sum(agb)),.(idplot, year, trait, size)]
 
@@ -54,7 +54,6 @@ dfTraits[, agb := agb_tot/idplot.size]
 
 ## initial value
 md_0 = dfTraits[year <= tlog,.(WMT0 = mean(WMT)),.(site, idplot, trait, treat)]
-
 ```
 
 ## Traits trajectory {.tabset .tabset-fade .tabset-pills}

@@ -15,9 +15,9 @@ address:
   - code: 2
     address: INPHB, Yamoussoukro, Cote d'Ivoire
 abstract: |
-  This is the abstract.
+  Context.
 
-  It consists of two paragraphs.
+  Results.
 
 journal: "xxx"
 date: "`r Sys.Date()`"
@@ -39,29 +39,35 @@ library(ggpubr)
 library(raster)
 library(sp)
 library(rgdal)
+
+### load data 
+load("C:/Users/camille.piponiot/gitR/functional_trajectories_TmFO/data/plotInfo_TmFO.Rdata")
+
 ```
 
 
 Introduction
 ==========================
 
-Tropical forests are crucial for most global ecological cycles. They hold xx% of the total carbon in terrestrial ecosystems and are estimated to have sequestered an annual 1.19 $\pm$ 0.41 Pg of carbon between 1990-2007 [@Pan2011], about 15% of total anthropogenic carbon emissions, playing a major role in climate change mitigation [@IPCC2014]. Tropical forests are also key in water cycles, recycling rainfall through vegetation evapotranspiration and thus buffering droughts in adjacent regions [@Staal2018]. Moreover, tropical forests harbour an exceptional biodiversity and are estimated to contain around half of terrestrial species [@MEA2005,@IPBES2019]. The future of tropical forests will thus largely determine the functioning of Earth ecosystems and, in turn, human well-being. 
+Tropical forests are crucial for most global ecological cycles. They hold 230 Pg of carbon, around 11% of the total carbon in terrestrial ecosystems [@Baccini2012a] and intact tropical forests are estimated to have sequestered an annual 1.19 $\pm$ 0.41 Pg of carbon between 1990-2007 [@Pan2011], about 15% of total anthropogenic carbon emissions, thus playing a major role in climate change mitigation [@IPCC2014]. Tropical forests are also key in the global water cycle, recycling rainfall through vegetation evapotranspiration and thus buffering droughts in adjacent regions [@Staal2018]. Moreover, tropical forests harbour an exceptional biodiversity [@Jenkins2013,@Slik2015], providing species to surrounding regions through biotic interchanges [@Antonelli2018]. The state of tropical forests thus largely determines the functioning of global ecosystems, and hence human well-being. 
 
-The future of tropical forests is however highly uncertain: since the mid-twentieth century, humans have triggered rapid changes in the global environment [@Crutzen2002]. Tropical forests are being clearcut for agricultural or mining purposes at unprecedented rates, and most remaining forests have or will be heavily impacted by human activities [@Malhi2014]. Disturbances such as droughts, fires, selective logging, or hunting, are increasing in intensity and frequency [@Lewis2015]. Human disturbances modify forest functioning, but the intensity, direction and duration of these changes are still largely unknown. 
+The future of tropical forests is however highly uncertain: during the past three centuries, humans activities have triggered rapid changes in global ecosystems, causing massive species extinctions and accelerating climate change through increased carbon emissions [@Crutzen2002]. These changes are particularly intense in the tropics, where forests are being clearcut for agricultural or mining purposes at unprecedented rates, and most remaining forests have or will be heavily impacted by human activities [@Malhi2014]. Disturbances such as droughts, fires, selective logging, or hunting, are increasing in intensity and frequency [@Lewis2015]. Human disturbances modify forest functioning, but the intensity, direction and duration of these changes are still largely unknown. 
 
-One predomininat human activity in tropical forest is the selective logging of a few merchantable trees: xxx Mha are selectively logged every year in the tropics, and XXx% of tropical forests have been logged at least once. Because selective logging focuses on a few individual trees (typically 5-10 trees per ha), XXX% of the forest cover is maintenained after logging operations. Damage to the forest is concentrated in infrastructure (roads and skid trails to get machines in then logs out of the forest), and in logging gaps created by tree felling. 
+One predomininant human activity in tropical forests is the selective logging of a few merchantable trees: around 400 million hectares of tropical forests are designated for timber production [@Blaser2011], and ca. 20% of tropical forests were affected by selective logging between 2000 and 2005 [@Asner2009]. Because selective logging focuses on a few individual trees (typically 5-10 trees per hectare), 65-95% of the forest cover is maintained after logging operations [@Cannon1994,@Pereira2002]. Damage to the forest is concentrated in logging gaps created by tree felling, and in infrastructure (skid trails and, to a lesser extent, roads and log decks) [@Pereira2002,@Asner2004]. 
 
-Disturbances such as selective logging alter the composition and dynamics of tropical forests. A typical disturbance provokes a higher-than-normal tree mortality. This mortality can affect some trees more than others: large trees of commercial value with good mechanical properties and high wood density are the focus of selective loggers (ref xx); droughts affect particularly large trees with low-density wood [@Mcdowell2018,@Aleixo2019]; (other examples: fires?). 
+Disturbances such as selective logging alter the composition and dynamics of tropical forests by provoking a higher-than-normal tree mortality, which can affect some trees more than others. Large trees of commercial value with good mechanical properties are the focus of selective loggers; trees with low-density wood are more vulnerable to droughts [@Mcdowell2018,@Aleixo2019], and trees with thick bark are more resistant to fires [@Brando2012]. Directional mortality has a strait-forward effect on forest composition and structure. 
+The indirect effect of disturbance is the higher recruitment of light-demanding species in canopy gaps [@Carreno-Rocabado2012]: these changes in tree species composition can last for several decades [@DeAvila2015]. 
 
-This high mortality strongly decreases the tree density, and, when large canopy trees are killed, it creates gaps in the forest canopy in which more light gets to the soil. These new local conditions can select for species that have different characteristics such as high growth rates and high light requirements. This indirect effect of the disturbance can modify the forest composition and functioning during several decades [@DeAvila2015] (other ref: functioning xx). 
+Changes in composition and their effects on forest functioning can be quantified with functional traits [@ChapinIII1997]. Functional traits are measures of an induvidual's features that impact its growth, reproduction and survival, and hence its overall fitness [@Violle2007]. In tropical forests, at least four major functional axes have been described: (i) the leaf economic sectrum (short-lived low-investment leaves vs. tough leaves) [@Wright2004], the wood economic spectrum (fast-growing low-density vs. long-lived high-density wood) [@Chave2009], adult tree stature and height (canopy vs. understory trees) linked to light capture [@Poorter2003] and survival strategy [@Johnson2018], and the seed dispersal strategy (large, zoochorous and resource-rich seeds vs. light anemochorous seeds) [@Poorter2005a]. Together, these four axes explain most of the functional variation observed in forest ecosystems [@Baraloto2012a,@Costa-Saura2019].
 
-notion of resilience: measure of how well an ecosystem can cope with disturbances and return to its original (pre-disturbance) state. 2 components = change in state (or resistance to a disturbance) + return time [@Hodgson2015]. [introduce our conceptual framework, disturbance intensity]
+Environmental changes can deeply modify a community's composition, with potential effects on its functioning [@Lavorel2002]. Disturbances such as selective logging provoke the canopy openings where canopy trees died, increasing the quantity of light that gets to the soil. This results in the germination and rapid growth of small-seed light-wood species [@Poorter2005a,@Baraloto2012,@Poorter2019]. These light-demanding pioneer species have high growth rates but generally poor resistance to drought [@Aleixo2019]. It has also been shown that selective logging can decrease the canopy height, and consequently total carbon storage [@Rutishauser2016]. Understanding the effects of disturbances on a community's functional composition will thus be key to predict the future of tropical forests in the context of rapid changes in disturbance regimes [@Wright2005].
 
-functional traits = xxx (definition). characterisation of ecosystem functioning $\rightarrow$ importance to understand how they are affected by disturbances. functional strategies and tradeoffs in forests: leaf and wood economic spectrum, stature, and seed dispersal strategy; explain most of the variation [@Baraloto2012a, @Costa-Saura2019]. selective logging disturbance -> canopy openings, light -> colonisation by small-seed light-wood species [@Poorter2005a,@Poorter2019] cf successional theory -> changes in functional composition [@Carreno-Rocabado2012]. 
+Ecosystem resilience is a measure of an ecosystem's ability to cope with disturbances [@Holling1973]. It is a key concept to understand the long-term changes in forest composition and dynamics following a disturbance. The notion of resilience can be defined with two essential components: the change in state (or resistance to disturbance), and the time to return to a pre-disturbance state (or recovery) [@Hodgson2015]. 
 
-environmental control: soil, climate, disturbance history -> affects functional composition [@Costa-Saura2019] and response to disturbance. => spatial variation. example: Amazon = largest tropical forest biome on Earth (50% of tropical rainforests, total area: 600 Mha).  -> 2 large scale gradients that control the dynamics of old-growth forests: dryness gradient (NW-SE) [@Davidson2012] that constraints vegetation growth, and a tree mortality gradient (SW-NE) [@Johnson2016] due to lower soil stability [@Quesada2012] and higher frequency of windstorms [@Espirito-Santo2014] in the southwestern part of Amazonia. 
+Resilience, and in particular its change-in-state component, depends strongly on the disturbance frequency and intensity. Additionally, ecological memory of past disturbances is a key component of forest resilience [@Johnstone2016,@Ciemer2019]
+In Amazonia, the largest tropical forest biome on Earth (600 million hectares), natural disturbances are mainly driven by drought-related mortality [@Phillips2010] and large windthrows [@Negron-Juarez2018]. Precipitations and windstorms are both spatially structured in Amazonia, with a northwest-southeast precipitation seasonality gradient [@Ciemer2019], and a east-west soil-stability and windstorm-frequency gradient[@Quesada2012,@Espirito-Santo2014]. Understanding how these natural disturbance gradients structure the forest response to a logging disturbance can help improve predictions of Amazonian forests vulnerability to future increases in disturbance regimes [@Davidson2012]. 
 
-Here we assess the resistance of 4 functional traits (namely wood density, seed mass, specific leaf area and maximum tree diameter) to selective logging in Amazonia. We calibrate an original Bayesian hierarchical model with data from xxx permanent forest plots from 12 long-term experimental sites. Our research questions are: (i) how is the functional composition of Amazonian forests affected by disturbances such as selective logging? (ii) are some functional traits more resistant than others? (iii) does the functional resistance vary across Amazonia, and what factors could explain those variations?
+Here we assess the resistance of four functional traits (namely wood density, seed mass, specific leaf area and maximum tree diameter) to selective logging in Amazonia. We calibrate an original Bayesian hierarchical model with data from `r sum(plotInfo$idplot.size/plotInfo$plot.size)` permanent forest plots from `r length(unique(plotInfo$site))` long-term experimental sites (`r round(sum(plotInfo$idplot.size))` ha total). Our research questions are: (i) how is the functional composition of Amazonian forests affected by disturbances such as selective logging? (ii) are some functional traits more resistant than others? (iii) does the functional resistance vary across Amazonia, and what factors could explain those variations?
 
 
 
@@ -72,21 +78,23 @@ Methods
 
 ```{r}
 ## logged plots size range 
-load("C:/Users/camille.piponiot/gitR/functional_trajectories_TmFO/data/plotInfo_TmFO.Rdata")
 plot_size_range = paste(range(subset(plotInfo, treat!="ctrl")[,.(tot_size=sum(idplot.size)), .(site)]$tot_size), collapse = "-")
+## % species identification
+pSpIdent = round(sum(plotInfo$spIdent)/sum(plotInfo$spIdent+plotInfo$genIdent+plotInfo$noIdent)*100)
+pGenIdent = round(sum(plotInfo$genIdent)/sum(plotInfo$spIdent+plotInfo$genIdent+plotInfo$noIdent)*100)
 ```
 
-Our study includes data from twelve long-term (8–35 year) experimental forest sites located in the Amazon Basin and the Guiana Shield (Figure \ref{fig:smap}) [@Sist2015]. All sites are located in tropical forests with mean annual precipitation $\geq$ 1000 mm. In each site, permanent forest plots (`r plot_size_range` ha per site) were logged, and censused at least once before and at least twice after logging. 
+Our study includes data from twelve long-term (8–35 year) experimental forest sites located in the Amazon Basin and the Guiana Shield (Figure \ref{fig:smap}) [@Sist2015]. All sites are located in tropical forests with mean annual precipitation $\geq$ 1000 mm. In each site, permanent forest plots (`r plot_size_range` ha per site) were logged, and censused at least once before and twice after logging. 
 
 For each site, we extracted the climatic water deficit (CWD) from Chave et al. [@Chave2014], at a 2.5 arc-minute resolution. Annual stem mortality rates (as a % of live stems) were based on data from unlogged plots inside our sites. For the 5 sites in which no unlogged plot was available, stem mortality rates wer extracted from a map based on the metadata from Johnson and colleagues [@Johnson2016] (extracted from the ForestPlots database [@Lopez-Gonzalez2011]) and interpolated with the R package gstat [@gstat] on a 1$^\circ$ resolution grid. Site coordinates, CWD and stem mortality rates are reported in Table \ref{tab:sites}.
 
 ## Data compilation
 
-For sites with plots $\leq$ 1 ha, data from those with the same treatment were aggregated to mitigate the small plot effect on the variation in density of large trees. In each census, all trees $\geq$ 10 cm diameter at breast height (dbh) were marked, measured and identified to the lowest taxonomic level (xx% to species, xx% to genus). 
+For sites with plots $\leq$ 1 ha, data from those with the same treatment were aggregated to mitigate the small plot effect on the variation in density of large trees. In each census, all trees $\geq$ 10 cm diameter at breast height (dbh) were marked, measured and identified to the lowest taxonomic level (`r pSpIdent`% to species, `r pGenIdent`% to genus). 
 
-Median values of functional traits were calculated at the species level. Four functional traits were chosen, as proxies of complementary ecosystem functions in tropical forests: (i) the DBH 95th percentile as a proxy of tree stature (refxx), (ii) the seed mass (log-transformed) as a proxy of the dispersal strategy (ref), (iii) the specific leaf area as a proxy of the assimilation strategy and leaf economic spectrum [@Wright2004] and (iv) the stem wood density as a proxy of growth rate and mechanical support [@Chave2009].
+Median values of functional traits were calculated at the species level. Four functional traits were chosen, as proxies of complementary ecosystem functions in tropical forests: (i) the DBH 95th percentile as a proxy of adult tree stature and light demand [@Poorter2003], (ii) the seed mass (log-transformed) as a proxy of the dispersal strategy [@Poorter2005a], (iii) the specific leaf area as a proxy of the assimilation strategy and leaf economic spectrum [@Wright2004] and (iv) the stem wood density as a proxy of growth rate and mechanical support [@Chave2009].
 
-The DBH 95th percentile was chosen because it is more robust than the maximum DBH which is too sensitive to sampling size. The DBH 95th percentile was calculated for all species for which at least 20 individuals were censused in our permanent forest plots. Seed mass and specific leaf area measurements were retrieved from the TRY database [@Kattge2011] (check other citations xxx). Wood density measurements were retrieved from the global wood density database [@Chave2009,@Zanne2009].
+The DBH 95th percentile was chosen because it is more robust than the maximum DBH which is too sensitive to sampling size. The DBH 95th percentile was calculated for all species for which at least 20 individuals were censused in our permanent forest plots. Seed mass and specific leaf area measurements were retrieved from the TRY database [@Kattge2011] (datasets citations xxx). Wood density measurements were retrieved from the global wood density database [@Chave2009,@Zanne2009].
 
 Median trait values were calculated per species and genus. Each individual tree in our permanent sample plots was then attributed a value for each trait at the lowest available taxonomic level. Trees with no available species- or genus-specific trait value were given their plot's median trait value. The aboveground biomass of each individual was estimated using the R package BIOMASS [@Rejou-Mechain2017]. 
 
@@ -254,6 +262,7 @@ grd_cov = grd_cov[!is.na(over(SpatialPoints(all_pix),buff)),]
 
 
 ## prediction data table: pixel id * trait * iteration id
+loss_pred = 0.40 # agb loss in %
 grd_cov$idpix = 1:nrow(grd_cov)
 df_pred = data.table(expand.grid(idpix = 1:nrow(grd_cov), 
                                  iter = unique(df_lambda$iter),
@@ -261,7 +270,7 @@ df_pred = data.table(expand.grid(idpix = 1:nrow(grd_cov),
 df_pred = merge(df_pred, grd_cov, by = "idpix")  ## + iter
 df_pred = merge(unique(pars_cov[,c("iter","trait","lambda0","lambda_cwd","lambda_smort")]), 
                 df_pred, by = c("iter","trait"))
-df_pred[, Delta := lambda0 + lambda_cwd*cwd + lambda_smort*smort]
+df_pred[, Delta := loss_pred*(lambda0 + lambda_cwd*cwd + lambda_smort*smort)]
 
 grd_pred = df_pred[,.(inf = quantile(Delta, 0.025), 
                       med = quantile(Delta, 0.5), 
@@ -287,6 +296,17 @@ Discussion
 - which traits are predicted to be more resistant
 
 
+Conclusion
+============
+
+
+Acknowledgements
+============
+The study has been supported by the TRY initiative on plant traits (http://www.try-db.org).
+The TRY initiative and database is hosted, developed and maintained by J. Kattge and G.
+Boenisch (Max Planck Institute for Biogeochemistry, Jena, Germany). TRY is currently
+supported by Future Earth/bioDISCOVERY and the German Centre for Integrative
+Biodiversity Research (iDiv) Halle-Jena-Leipzig.
 
 
 Supplementary material
@@ -387,7 +407,6 @@ ggplot(df_pred_ci, aes(x = dWMT, y = med, ymin=inf, ymax=sup, colour=site)) +
   geom_abline(slope=1, intercept=0, lty=2) + geom_pointrange() + 
   facet_wrap( ~ trait, scale="free") + theme_pubr()
 ```
-
 
 
 References {#references .unnumbered}

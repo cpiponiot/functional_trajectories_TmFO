@@ -67,10 +67,7 @@ site_coord$Depth = raster::extract(Depth, site_coord[,c("Long","Lat")])
 site_coord$CEC = raster::extract(CEC, site_coord[,c("Long","Lat")])
 
 ## forest dynamics
-site_coord = merge(site_coord, df_mort_site, by = "site", all = TRUE)
-site_coord$smort[is.na(site_coord$smort)] = raster::extract(smort, site_coord[is.na(site_coord$smort),c("Long","Lat")])
-site_coord$sd_smort = NULL  ## for now
-# site_coord$sd_smort[is.na(site_coord$sd_smort)] = sqrt(raster::extract(smort_var, site_coord[is.na(site_coord$sd_smort),c("Long","Lat")]))
+site_coord$smort = raster::extract(smort, site_coord[,c("Long","Lat")])
 
 save(site_coord, file = "C:/Users/camille.piponiot/gitR/functional_trajectories_TmFO/data/site_coord.Rdata")
 
@@ -89,7 +86,7 @@ CWD_map = aggregate(crop(cwd, extent(-80,-44,-20,10)), fac = 1/res(cwd)[1])
 grd_cov = merge(as.data.frame(sMort_map, xy = T), 
                 as.data.frame(CWD_map, xy = T), 
                 by = c("x","y"))
-grd_cov = data.table(subset(grd_cov, !is.na(stem_mort_krig) & !is.na(CWD)))
+grd_cov = data.table(subset(grd_cov, !is.na(stem_mort_krig_tmfo) & !is.na(CWD)))
 colnames(grd_cov) = c("long","lat","smort","cwd")
 
 save(grd_cov, file = "data/maps_rticle.Rdata")

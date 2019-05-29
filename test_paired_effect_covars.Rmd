@@ -1,5 +1,5 @@
 ---
-title: "Testing the effect of the initial functional composition and diversity on the functional resistance"
+title: "Testing all covariates effect on the functional resistance"
 output: 
   html_document:
     theme: yeti
@@ -7,6 +7,7 @@ output:
     toc: true
     toc_float: true
 ---
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, warning=FALSE, message=FALSE, results='hide',
@@ -78,7 +79,6 @@ df_covar = merge(df_covar,  df_dist, by = "idplot")
 df_covar = melt(df_covar, id.vars = c("site", "idplot","trait","parameter","mean","sd"), 
                 measure.vars = c(colnames(site_coord)[6:length(site_coord)],"loss_rel","loss_abs"), 
                 variable.name = "covariate")
-# df_covar = merge(df_covar, data.table())
 
 ## df_Delta
 df_Delta = subset(df_covar, parameter == "Delta")
@@ -110,40 +110,93 @@ site_coord_trait = merge(data.table(site_coord), df_Delta[, .(FD = mean(FD),
                                                               FDtot = mean(FDtot),
                                                               WMT = mean(WMT)), 
                                                           .(site, trait)], by = "site")
+site_coord = merge(site_coord, dcast(site_coord_trait, site ~ trait, value.var = "WMT"), by = "site")
+dfFD = dcast(site_coord_trait, site ~ trait, value.var = "FD")
+colnames(dfFD) = c("site",paste0("FD", c("dbh","sla","seed","wd")))
+site_coord = merge(site_coord, dfFD, by = "site")
 ```
 
-# Correlations {.tabset .tabset-pills}
+# Correlations 
 
-## Wood density
-```{r}
-ggcorr(site_coord_trait[trait=="woodDensity",c(10,16,18:20)], nbreaks = 4, label = TRUE) + labs(title = "Covariates correlation") 
-```
-
-## DBH95
-```{r}
-ggcorr(site_coord_trait[trait=="DBH95",c(10,16,18:20)], nbreaks = 4, label = TRUE) + labs(title = "Covariates correlation") 
-```
-
-## SLA
-```{r}
-ggcorr(site_coord_trait[trait=="SLA",c(10,16,18:20)], nbreaks = 4, label = TRUE) + labs(title = "Covariates correlation") 
-```
-
-## seed mass
-```{r}
-ggcorr(site_coord_trait[trait=="logSeedMass",c(10,16,18:20)], nbreaks = 4, label = TRUE) + labs(title = "Covariates correlation") 
+```{r, fig.height=10, fig.width=10}
+ggcorr(site_coord[,6:ncol(site_coord)], nbreaks = 5, label = TRUE, high="red",low="red",middle = "blue") + 
+  labs(title = "Covariates correlation") 
 ```
 
 
-# Effect on functional resistance
+# Effect of covariates (pairwise)
 
 ```{r}
-cov_names = c("FD","FDtot","WMT")
+all_covariates = gsub("_sc", "", grep("_sc", colnames(df_Delta), value = T))
+
+if (inference_stan){
+  for(cov_names in all_covariates) {
+    source("codes/inference_covariates_model.R")
+    save(pars_cov, file = paste0("data/temp/parsCov_", cov_names,".Rdata"))
+  }
+}
+
+df_lambda = data.table(expand.grid(iter = 1:1000, trait = c("DBH95","SLA","logSeedMass","woodDensity")))
+
+for(cov_names in all_covariates) {
+  load(paste0("data/temp/parsCov_", cov_names,".Rdata"))
+  df_lambda = merge(df_lambda, 
+                    unique(pars_cov[,c("iter","trait",grep("lambda_", colnames(pars_cov), value=T)), with = FALSE]), 
+                    by = c("iter","trait"))
+}
+colnames(df_lambda) = gsub(pattern = "lambda_", replacement = "", x = colnames(df_lambda))
+
+df_lambda = melt(df_lambda, id.vars = c("iter","trait"), value.name = "lambda", variable.name = "covar")
+
+df_lambda = merge(df_lambda, 
+                  df_lambda[,.(sign = (quantile(lambda, 0.05) > 0 | 
+                                         quantile(lambda, 0.95) < 0)),
+                      .(trait,covar)], by = c("trait","covar"))
+```
+
+```{r, fig.height=10, fig.width = 10}
+ggplot(df_lambda, aes(x=trait, fill=sign, y = lambda)) + 
+  geom_hline(yintercept = 0, lty=2) + 
+  geom_violin() + 
+  facet_wrap(~ covar)
+```
+
+# By pairs {.tabset .tabset-pills}
+
+smort and Psand are the only good predictor of the WD resistance.
+We test the effect of smort with seas or CEC (not too correlated)
+[ maybe add in supp mat the results with WMT -> not only due to initial trait value]
+
+## smort + seas 
+
+```{r}
+cov_names = c("seas","smort")
 
 if (inference_stan){
   source("codes/inference_covariates_model.R")
-  save(pars_cov, file = "data/parsCov_demo.Rdata")
-} else { load("data/parsCov_demo.Rdata")}
+  save(pars_cov, file = "data/parsCov_seas_smort.Rdata")
+} else { load("data/parsCov_seas_smort.Rdata")}
+
+```
+
+```{r}
+df = unique(pars_cov[, c("trait", grep("lambda", colnames(pars_cov), value = TRUE)), with = F])
+source("codes/plot_lambda.R")
+df_covar$covar_typ = 1
+plot_lambda(df$trait, df[,-"trait"], unique(df_covar[,c("covariate","covar_typ")])) + 
+  labs(title = "lambdas") + theme(legend.position="none")
+```
+
+## smort + CEC
+
+```{r}
+cov_names = c("CEC","smort")
+
+if (inference_stan){
+  source("codes/inference_covariates_model.R")
+  save(pars_cov, file = "data/parsCov_CEC_smort.Rdata")
+} else { load("data/parsCov_CEC_smort.Rdata")}
+
 ```
 
 ```{r}

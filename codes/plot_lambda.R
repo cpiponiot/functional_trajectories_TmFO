@@ -8,6 +8,7 @@ plot_lambda = function(trait, lambdas, cov_type = 1) {
   lambda_ci = merge(lambda_ci, cov_type, by = "covariate", all.x = TRUE)
   lambda_ci[is.na(covar_typ), covar_typ := "intercept"]
   lambda_ci$covariate = factor(lambda_ci$covariate, levels = rev(gsub("lambda_","",colnames(lambdas))))
-  ggplot(lambda_ci, aes(x = covariate, y = med, ymin = inf, ymax = sup, colour = covar_typ, group = covariate)) + 
+  lambda_ci$signif = lambda_ci$sup < 0 | lambda_ci$inf > 0
+  ggplot(lambda_ci, aes(x = covariate, y = med, ymin = inf, ymax = sup, colour = signif, group = covariate)) + 
     geom_hline(yintercept = 0, lty= 2) + geom_pointrange() + coord_flip() + facet_wrap(~trait)
 }
