@@ -31,17 +31,22 @@ rad = calc(ls_rad, mean)
 ####                       Soils -- 100 cm - Soilgrids                      ####
 ################################################################################
 # bulk density
+## rm: soil variables at 1m depth (what is the max depth in tropical forest, or xxth percentile?)
 BkD = raster("C:/Users/camille.piponiot/Google Drive/maps/soilgrids/bulk density -- 100cm/BLDFIE_M_sl6_250m.tif")
 Psand = raster("C:/Users/camille.piponiot/Google Drive/maps/soilgrids/Sand proportion/SNDPPT_M_sl6_250m.tif.tif")
 CFr = raster("C:/Users/camille.piponiot/Google Drive/maps/soilgrids/Coarse fragments/CRFVOL_M_sl6_250m.tif")
 Depth = raster("C:/Users/camille.piponiot/Google Drive/maps/soilgrids/soil absolute depth/BDTICM_M_250m_Amazonia.tif.tif")
 CEC = raster("C:/Users/camille.piponiot/Google Drive/maps/soilgrids/CEC/CECSOL_M_sl6_250m.tif")
 
+
 ################################################################################
 ####                            Forest dynamics                             ####
 ################################################################################
 smort = raster("C:/Users/camille.piponiot/Google Drive/maps/stem_mortality/stem_mort_krig_tmfo.tif")
 smort_var = raster("C:/Users/camille.piponiot/Google Drive/maps/stem_mortality/stem_mort_var_tmfo.tif")
+## woody productivity, rainfor sites
+agbp = raster("C:/Users/camille.piponiot/Google Drive/maps/stem_mortality/AGB_prod_krig.tif")
+agbp_var = raster("C:/Users/camille.piponiot/Google Drive/maps/stem_mortality/AGB_prod_var.tif")
 ## for tmfo sites only
 load("C:/Users/camille.piponiot/Google Drive/biodiversity/newdata/mortality_in_control_plots.Rdata")
 df_mort_site = df_mort[,.(smort = mean(smort), sd_smort = sd(smort)),.(site)]
@@ -60,14 +65,20 @@ site_coord$rad = raster::extract(rad, site_coord[,c("Long","Lat")])
 site_coord$cwd = raster::extract(cwd, site_coord[,c("Long","Lat")])
 
 ## soil 
-site_coord$BkD = raster::extract(BkD, site_coord[,c("Long","Lat")])
-site_coord$Psand = raster::extract(Psand, site_coord[,c("Long","Lat")])
-site_coord$CFr = raster::extract(CFr, site_coord[,c("Long","Lat")])
-site_coord$Depth = raster::extract(Depth, site_coord[,c("Long","Lat")])
-site_coord$CEC = raster::extract(CEC, site_coord[,c("Long","Lat")])
+## extract values of pixels around site (-> lower resolution)
+mean_surround = function(coord, raster, res = 0.1){
+  x = extent(c(coord[1] + c(-res/2,+res/2), coord[2] + c(-res/2,+res/2)))
+  return(mean(values(crop(raster, x)), na.rm = TRUE))
+}
+site_coord$BkD = apply(site_coord[,c("Long","Lat")], 1, function(x) mean_surround(x, BkD))
+site_coord$Psand = apply(site_coord[,c("Long","Lat")], 1, function(x) mean_surround(x, Psand))
+site_coord$CFr = apply(site_coord[,c("Long","Lat")], 1, function(x) mean_surround(x, CFr))
+site_coord$Depth = apply(site_coord[,c("Long","Lat")], 1, function(x) mean_surround(x, Depth))
+site_coord$CEC = apply(site_coord[,c("Long","Lat")], 1, function(x) mean_surround(x, CEC))
 
 ## forest dynamics
 site_coord$smort = raster::extract(smort, site_coord[,c("Long","Lat")])
+site_coord$agbp = raster::extract(agbp, site_coord[,c("Long","Lat")])
 
 save(site_coord, file = "C:/Users/camille.piponiot/gitR/functional_trajectories_TmFO/data/site_coord.Rdata")
 
@@ -81,12 +92,19 @@ amazonia = spTransform(amazonia, crs(cwd))
 sMort_map = mask(smort, amazonia)
 
 ## reduce resolution of CWD map and remove pixels outside amazonia
-CWD_map = aggregate(crop(cwd, extent(-80,-44,-20,10)), fac = 1/res(cwd)[1])
+seas_map = aggregate(crop(seas, extent(-80,-44,-20,10)), fac = 1/res(seas)[1])
 
 grd_cov = merge(as.data.frame(sMort_map, xy = T), 
-                as.data.frame(CWD_map, xy = T), 
+                as.data.frame(seas_map, xy = T), 
                 by = c("x","y"))
-grd_cov = data.table(subset(grd_cov, !is.na(stem_mort_krig_tmfo) & !is.na(CWD)))
-colnames(grd_cov) = c("long","lat","smort","cwd")
+grd_cov = data.table(subset(grd_cov, !is.na(stem_mort_krig_tmfo) & !is.na(wc2.0_bio_2.5m_15)))
+colnames(grd_cov) = c("long","lat","smort","seas")
 
 save(grd_cov, file = "data/maps_rticle.Rdata")
+
+library(ggplot2)
+library(ggfortify)
+
+amazonDF = fortify(amazonia)
+ggplot() + geom_polygon(data = amazonDF, aes(long,lat), fill=NA, colour="black") + 
+  coord_equal() + geom_point(data = site_coord, aes(Long, Lat, colour=CEC, size = 3))

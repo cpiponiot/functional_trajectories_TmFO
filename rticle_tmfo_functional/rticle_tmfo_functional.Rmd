@@ -42,9 +42,11 @@ library(rgdal)
 
 ### load data 
 load("C:/Users/camille.piponiot/gitR/functional_trajectories_TmFO/data/plotInfo_TmFO.Rdata")
-
 ```
 
+```{r, define_params}
+agb_loss = 0.4
+```
 
 Introduction
 ==========================
@@ -94,11 +96,11 @@ For sites with plots $\leq$ 1 ha, data from those with the same treatment were a
 
 Median values of functional traits were calculated at the species level. Four functional traits were chosen, as proxies of complementary ecosystem functions in tropical forests: (i) the DBH 95th percentile as a proxy of adult tree stature and light demand [@Poorter2003], (ii) the seed mass (log-transformed) as a proxy of the dispersal strategy [@Poorter2005a], (iii) the specific leaf area as a proxy of the assimilation strategy and leaf economic spectrum [@Wright2004] and (iv) the stem wood density as a proxy of growth rate and mechanical support [@Chave2009].
 
-The DBH 95th percentile was chosen because it is more robust than the maximum DBH which is too sensitive to sampling size. The DBH 95th percentile was calculated for all species for which at least 20 individuals were censused in our permanent forest plots. Seed mass and specific leaf area measurements were retrieved from the TRY database [@Kattge2011] (datasets citations xxx). Wood density measurements were retrieved from the global wood density database [@Chave2009,@Zanne2009].
+The DBH 95th percentile was chosen because it is more robust than the maximum DBH which is too sensitive to sampling size. The DBH 95th percentile was calculated for all species for which at least 20 individuals were censused in our permanent forest plots. Seed mass and specific leaf area measurements were retrieved from the TRY database [@Kattge2011] (datasets citations xx). Wood density measurements were retrieved from the global wood density database [@Chave2009,@Zanne2009].
 
 Median trait values were calculated per species and genus. Each individual tree in our permanent sample plots was then attributed a value for each trait at the lowest available taxonomic level. Trees with no available species- or genus-specific trait value were given their plot's median trait value. The aboveground biomass of each individual was estimated using the R package BIOMASS [@Rejou-Mechain2017]. 
 
-Selective logging typically targets large trees belonging to a small group of species with commercial value. Those species usually have particular functional trait values, such as large maximum diameters and high wood density [xx]. The functional composition of the largest trees is thus artificially modified because of the selectivity of harvests. Because we are more interested in the indirect effects of selective logging disturbance on the functional composition, i.e. the functional changes induced by tree felling and canopy openings, we excluded large trees with DBH > 35 cm from the analysis. 
+Selective logging typically targets large trees belonging to a small group of species with commercial value. Those species usually have particular functional trait values, such as large maximum diameters. The functional composition of the largest trees is thus artificially modified because of the selectivity of harvests. Because we are more interested in the indirect effects of selective logging disturbance on the functional composition, i.e. the functional changes induced by tree felling and canopy openings, we excluded large trees with DBH > 35 cm from the analysis. 
 
 For each functional trait $k$ (either $DBH95$, $logSeedMass$, $SLA$, or $WD$), we computed the mean biomass-weighted trait value at census $c$ in plot $p$ in site $s$ as:
 
@@ -106,7 +108,7 @@ For each functional trait $k$ (either $DBH95$, $logSeedMass$, $SLA$, or $WD$), w
 MWT_{k,c,p,s} = \frac{\sum_{i \in I_{c,p,s}}(T_{k,i}\cdot agb_i)}{\sum_{i \in I_{c,p,s}}(agb_i)}
 \end{equation}
 
-with $T_{k,i}$ the value of trait $k$ for individual tree $i$, $agb_i$ the aboveground biomass of individual tree $i$, and $I_{c,p,s}$ all live trees with DBH $\geq$ 10 cm and $\leq$ 35 cm at census $c$ in plot $p$ in site $s$. Mean trait values were weighted by aboveground biomass to reflect the importance of larger trees in forest functioning (refxx). 
+with $T_{k,i}$ the value of trait $k$ for individual tree $i$, $agb_i$ the aboveground biomass of individual tree $i$, and $I_{c,p,s}$ all live trees with DBH $\geq$ 10 cm and $\leq$ 35 cm at census $c$ in plot $p$ in site $s$. Mean trait values were weighted by aboveground biomass to reflect the importance of larger trees in forest functioning (e.g. carbon cycling). 
 
 The distance of a trait value to its initial (pre-logging) value was estimated as: 
 
@@ -171,36 +173,29 @@ Bayesian hierarchical models were inferred through MCMC methods using an adaptiv
 
 Predictions of maximum MWT change after the disturbance were made at the Amazonian level on a 1$^\circ$ grid, i.e. the coarsest resolution of input maps, and errors were propagated with the following steps: 
 
-1. For each cell $j$ of the grid: (i) a value of stem mortality was taken from xxx (cf piponiot 2019); (ii) a value of CWD was taken from the distribution of pixel values in the Chave et al map [@Chave2014] that were inside the cell. 
+1. For each cell $j$ of the grid: (i) a value of stem mortality was taken from the map of stem mortality fitted with the data from [@Johnson2016] (see [@Piponiot2019]); (ii) a value of precipitation seasonality was taken from the distribution of pixel values in the Worldclim map [@Chave2014] that were inside the cell. 
 
 2. Parameters $\lambda_{0,k}$ and $\lambda_{m,k}$ were taken from their posterior distribution.
 
-3. For each trait $k$ and grid cell $j$, predictions of maximum MWT change $\Delta_{k,j}$ after a disturbance were calculated using a biomass loss of xxx%: 
+3. For each trait $k$ and grid cell $j$, predictions of maximum MWT change $\Delta_{k,j}$ after a disturbance were calculated using a biomass loss of $loss =$ `r  agb_loss*100`%: 
 \begin{equation} 
-\Delta_{k,j} = xx \cdot (\lambda_{0,k} + \sum \lambda_{m,k} Cov_{m,j}) 
+\Delta_{k,j} = loss \cdot (\lambda_{0,k} + \sum \lambda_{m,k} Cov_{m,j}) 
 \end{equation}
 
 These steps were repeated 1000 times and summary statistcs were calculated for each 1$^\circ$ grid cell. 
 
 
-Results
+Results and discussion
 ============
 
 ```{r}
-load("C:/Users/camille.piponiot/gitR/functional_trajectories_TmFO/data/parsCov2.Rdata")
+load("C:/Users/camille.piponiot/gitR/functional_trajectories_TmFO/data/parsCov_seas_smort.Rdata")
 range_tmax = paste0("[",paste(round(quantile(pars_cov$tmax, c(0.025,0.975))), collapse=", "),"]")
 ```
 
-## Trait change predictions fitness
+```{r lambdas, fig.height=3, fig.width=6, fig.cap="\\label{fig:lambdas}Violin plots of covariates effect on maximum relative MWT change per trait. *intercept* is the value when all covariates are null; *smort* is the effect of the stem mortality rate; *seas* is the effect of the precipitation seasonality. Dots represent the median value, and the segments are the 95% confidence intervals.  All covariates were scaled and centered."}
 
-tmax $\in$ `r range_tmax` yr (95% confidence interval)
-
-
-## Traits variation and resistance to logging
-
-```{r lambdas, fig.height=3, fig.width=6, fig.cap="\\label{fig:lambdas}Violin plots of covariates effect on maximum relative MWT change per trait. *intercept* is the value when all covariates are null; *smort* is the effect of the stem mortality; *cwd* is the effect of the climatic water deficit. Dots represent the median value, and the segments are the 95% confidence intervals.  All covariates were scaled and centered."}
-
-load("C:/Users/camille.piponiot/gitR/functional_trajectories_TmFO/data/parsCov2.Rdata")
+load("C:/Users/camille.piponiot/gitR/functional_trajectories_TmFO/data/parsCov_seas_smort.Rdata")
 
 df = unique(pars_cov[, c("iter","trait", grep("lambda", colnames(pars_cov), value = TRUE)), with = F])
 df_lambda = melt(df, id.vars = c("iter","trait"), variable.name = "covariate")
@@ -214,8 +209,8 @@ lambda_ci = df_lambda[, .(inf = quantile(value, 0.025),
                           sup = quantile(value, 0.975)), .(trait, covariate)]
 
 ## order covariates in graph
-lambda_ci$covariate = factor(lambda_ci$covariate, levels = c("smort","cwd","intercept"))
-df_lambda$covariate = factor(df_lambda$covariate, levels = c("smort","cwd","intercept"))
+lambda_ci$covariate = factor(lambda_ci$covariate, levels = c("smort","seas","intercept"))
+df_lambda$covariate = factor(df_lambda$covariate, levels = c("smort","seas","intercept"))
 # plot
 ggplot(lambda_ci, aes(x = covariate)) + 
   geom_hline(yintercept = 0, lty= 2) + 
@@ -226,11 +221,6 @@ ggplot(lambda_ci, aes(x = covariate)) +
   theme_bw()
 ```
 
-Figure \ref{fig:lambdas}
-
-
-
-## Spatial configuration and predictions
 
 ```{r maps_pred, fig.cap="Prediction maps of maximum relative CWD change (i.e. resistance to disturbance) by trait. Warm colors (from yellow to red) show a decreases in MWT; blue colors show an increase in MWT. Black dots are study sites location. Pixels with "}
 load("C:/Users/camille.piponiot/gitR/functional_trajectories_TmFO/data/maps_rticle.Rdata")
@@ -242,11 +232,11 @@ site_coord = merge(site_coord, unique(plotInfo[,"site"]), by = "site")
 
 #### standardize covariates values
 grd_cov$smort = (grd_cov$smort - mean(site_coord$smort))/sd(site_coord$smort)
-grd_cov$cwd = (grd_cov$cwd - mean(site_coord$cwd))/sd(site_coord$cwd)
+grd_cov$seas = (grd_cov$seas - mean(site_coord$seas))/sd(site_coord$seas)
 
-all_pix = grd_cov[,c("cwd","smort")]
+all_pix = grd_cov[,c("seas","smort")]
 ## observations, scaled
-obs = scale(site_coord[,c("cwd","smort")])
+obs = scale(site_coord[,c("seas","smort")])
 
 ## 1) create convex hull
 ch <- chull(obs)
@@ -262,15 +252,14 @@ grd_cov = grd_cov[!is.na(over(SpatialPoints(all_pix),buff)),]
 
 
 ## prediction data table: pixel id * trait * iteration id
-loss_pred = 0.40 # agb loss in %
 grd_cov$idpix = 1:nrow(grd_cov)
 df_pred = data.table(expand.grid(idpix = 1:nrow(grd_cov), 
                                  iter = unique(df_lambda$iter),
                                  trait = unique(df_lambda$trait)))
 df_pred = merge(df_pred, grd_cov, by = "idpix")  ## + iter
-df_pred = merge(unique(pars_cov[,c("iter","trait","lambda0","lambda_cwd","lambda_smort")]), 
+df_pred = merge(unique(pars_cov[,c("iter","trait","lambda0","lambda_seas","lambda_smort")]), 
                 df_pred, by = c("iter","trait"))
-df_pred[, Delta := loss_pred*(lambda0 + lambda_cwd*cwd + lambda_smort*smort)]
+df_pred[, Delta := agb_loss*(lambda0 + lambda_seas*seas + lambda_smort*smort)]
 
 grd_pred = df_pred[,.(inf = quantile(Delta, 0.025), 
                       med = quantile(Delta, 0.5), 
@@ -288,12 +277,47 @@ ggplot(grd_pred) + geom_raster(aes(x = long, y = lat, fill = med*100)) +
 ```
 
 
-Discussion
-============
+# Model structure and limitations
 
-- direction of changes: expected or not? 
+Model structure: 
 
-- which traits are predicted to be more resistant
+The time to reach the maximum trait change was $tmax \in$ `r range_tmax` yr (95% confidence interval), with a median value of `r round(median(pars_cov$tmax))` yr. This value is higher than the total experiment duration in several of our sites. The maximum trait change was therefore not always observed in the data, resulting in large uncertainties over the estimated parameters in our models (Figure xx). The hierarchical structure of our model can partially offset this lack of long-term data in some of our sites, but cannot replace real observations. Unfortunately, long-term permanent forest plots are scarce in the tropics, mainly because they are expensive to repeatedly recensus [@Verburg2003]. Investing in long-term experiments (> 20 years) such as the forest plots used in this study will be extremely valuable to validate our results, and more generally to greatly improve the understanding of tropical forest resilience to disturbances. 
+
+Only trees < 35 cm, but trees > 35 cm constitute xx % of the biomass and have a large weight in forest functioning (e.g. carbon cycling refxx). 
+
+Functional trait measures: high intraspecific variation (eg for SLA [@Derroire2018]), but few individual measures, usually in one location, and no control for ontogeny effect and measurement type (eg for SLA: with our without petiole, rachis, etc, not always reported) (refxx). This can lead to some variability in the data that is difficult to control for. We thus believe that overall trends carry some valuable information, but that plot trajectories are not to be interpreted with to much detail.  
+
+# A consistant functional response to logging disturbance
+
+directional changes in functional composition and comparision to what we already know 
+
+DBH95: decrease
+
+Seed Mass: decrease 
+
+SLA: increase
+
+WD: decrease
+[@Verburg2003]: incremement of soft-wood species after logging
+[@Baraloto2012]
+
+# Functional resistance and vulnerability
+
+what traits are more vulnerable?
+
+-> vulnerability of wood density in highly seasonal forests (+more exposure to climate change and disturbances in SE Amazonia)
+
+# Functional response to logging is spatially structured in Amazonian forests
+
+- Effect of precipitation regime?
+
+- Naturally disturbed forests may be more functionally resistant
+
+-> ecological memory [@Johnstone2016]
+
+-> wood density and stem mortality [@Fauset2019]
+
+
 
 
 Conclusion
@@ -302,7 +326,10 @@ Conclusion
 
 Acknowledgements
 ============
-The study has been supported by the TRY initiative on plant traits (http://www.try-db.org).
+
+This study was partially funded by the GFclim project (FEDER 20142020, Project GY0006894), two Investissement d’Avenir grants of the ANR (CEBA: ANR-10-LABEX-0025, and the REsilience of Managed Amazonian FORests project funded by LabEx Agropolis: ANR-10-LABX-0001), the Sao Paulo Research Foun- dation (FAPESP: 2013/16262-4 and 2013/50718-5), and Embrapa, and carried out in the framework of the Tropical managed Forests Observatory (TmFO), supported by the Sentinel Landscape program of CGIAR (Consultative Group on International Agricultural Research) Forest Tree and Agroforestry Research Program.
+
+The study has also been supported by the TRY initiative on plant traits (http://www.try-db.org).
 The TRY initiative and database is hosted, developed and maintained by J. Kattge and G.
 Boenisch (Max Planck Institute for Biogeochemistry, Jena, Germany). TRY is currently
 supported by Future Earth/bioDISCOVERY and the German Centre for Integrative
@@ -314,7 +341,7 @@ Supplementary material
 
 ## TmFO sites: map and covariates values
 
-```{r smap_tmfo_sites, fig.height=6, fig.width=7, fig.cap="\\label{fig:smap}Location of the 15 experimental permanent forest sites used in this study: the size of the points represents the total monitored area, and the color (from yellow to red) represents the total length of the experiment, as the time interval (in years) between the first and the last census."}
+```{r smap_tmfo_sites, fig.height=6, fig.width=7, fig.cap="\\label{fig:smap}Location of the 12 experimental permanent forest sites used in this study: the size of the points represents the total monitored area, and the color (from yellow to red) represents the total length of the experiment, as the time interval (in years) between the first and the last census."}
 load("C:/Users/camille.piponiot/Google Drive/Data TmFO cleaned/new_data/plot_data.Rdata")
 plot_data= merge(plot_data, site_coord, by = "site")
 
@@ -330,6 +357,8 @@ diff_year = data_FT[,.(dyear = diff(range(year))),.(site)]
 
 sites_size = merge(sites_size, diff_year,by="site")
 site_info = merge(site_coord, sites_size,by="site")
+site_info$site_name = as.character(site_info$site_name)
+site_info$site_name[site_info$site=="bsl"] <- "Jenaro"
 
 library(ggmap); library(ggrepel)
 # newmap <- get_map(location=c(-60,-5), zoom=5, maptype="satellite")
@@ -338,7 +367,7 @@ load("C:/Users/camille.piponiot/Google Drive/volume_recovery/calc_Rdata/sat_map.
 p1 <- ggmap(newmap) + 
   geom_point(data=site_info, aes(x=Long,y=Lat,  colour=dyear, size=totsize))  +
   geom_text_repel(data=site_info, aes(x=Long,y=Lat,label=site_name),colour="white")+
-  scale_size_continuous(name = "Total area (ha)") + labs(title="(a) TmFO sites") +
+  scale_size_continuous(name = "Total area (ha)") + 
   theme(axis.title.x=element_blank(),axis.title.y=element_blank()) +
   scale_colour_gradientn(colours = rev(heat.colors(10)), name="Experiment \nduration (yr)")
 p1
@@ -407,6 +436,44 @@ ggplot(df_pred_ci, aes(x = dWMT, y = med, ymin=inf, ymax=sup, colour=site)) +
   geom_abline(slope=1, intercept=0, lty=2) + geom_pointrange() + 
   facet_wrap( ~ trait, scale="free") + theme_pubr()
 ```
+
+## Cross validation
+
+```{r}
+with_initial_traits = FALSE
+cov_names = c("seas","smort")
+
+load("C:/Users/camille.piponiot/gitR/functional_trajectories_TmFO/data/parsCov_seas_smort_traits.Rdata")
+pars_loo = data.table(site = "all",
+                      unique(pars_cov[,c("iter", "k","lambda0", "lambda_seas", 
+                                         "lambda_smort", "trait")]))
+
+for (sit in unique(data_FT$site)) {
+  load(paste0("C:/Users/camille.piponiot/gitR/functional_trajectories_TmFO/data/pars_cov_without_", sit, ".Rdata"))
+  pars_loo = rbind(pars_loo, data.table(site = sit, pars_cov))
+} 
+
+pars_loo = melt(pars_loo, variable.name = "covar", value.name = "lambda",
+                measure.vars = grep("lambda", colnames(pars_loo), value = TRUE))
+pars_loo$covar = gsub("lambda|_", "", pars_loo$covar)
+pars_loo$covar[pars_loo$covar == "0"] = "intercept"
+
+ci_loo = pars_loo[, .(inf = quantile(lambda, 0.025), 
+                      med = quantile(lambda, 0.5), 
+                      sup = quantile(lambda, 0.975)), 
+                  .(covar, site, trait)]
+```
+
+Here we tested the effect of removing one site on final parameter posteriors. All sites were removed sequentially and the model was recalibrated with this new subset of the original data. Covariates effects (intercept, *seas*: seasonality of precipitations and *smort*: stem mortality rate) are reported for each site removal (y axis), for each trait. 
+
+```{r, fig.height = 10, fig.width = 8}
+ggplot(ci_loo, aes(x = site, y = med, ymin = inf, ymax = sup)) + 
+  geom_hline(yintercept = 0, lty = 2) +
+  coord_flip() + 
+  geom_pointrange() +
+  facet_grid( trait ~ covar)
+```
+
 
 
 References {#references .unnumbered}

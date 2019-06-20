@@ -651,6 +651,30 @@ source("codes/plot_lambda.R")
 plot_lambda(df$trait, df[,-"trait"], unique(df_covar[,c("covariate","covar_typ")])) + labs(title = "lambdas")
 ```
 
+### Option 4
+```{r, fig.height=2, fig.width=3}
+cov_names = c("smort","CEC")
+ggcorr(site_coord[,cov_names], nbreaks = 4, label = TRUE)
+```
+
+```{r}
+source("codes/map_covariates.R")
+map_covariates(site_coord[,cov_names], site_coord[,c("Long","Lat")])
+```
+
+```{r}
+if (inference_stan){
+  source("codes/inference_covariates_model.R")
+  save(pars_cov, file = "data/parsCov3.Rdata")
+} else { load("data/parsCov3.Rdata")}
+```
+
+```{r}
+df = unique(pars_cov[, c("trait", grep("lambda", colnames(pars_cov), value = TRUE)), with = F])
+source("codes/plot_lambda.R")
+plot_lambda(df$trait, df[,-"trait"], unique(df_covar[,c("covariate","covar_typ")])) + labs(title = "lambdas")
+```
+
 ## Testing the initial composition and diversity of the community of resistance 
 
 ```{r}

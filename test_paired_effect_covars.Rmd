@@ -16,6 +16,7 @@ library(rstan)
 rstan_options(auto_write = TRUE)
 options(mc.cores = parallel::detectCores())
 inference_stan = FALSE
+with_initial_traits = FALSE ## inference does not include initial trait value (changed later)
 
 library(data.table)
 library(ggplot2)
@@ -85,7 +86,7 @@ df_Delta = subset(df_covar, parameter == "Delta")
 df_Delta = dcast(unique(df_Delta[,c("site","idplot","mean","sd","covariate","value","trait")]), 
                  site + idplot + trait + mean + sd ~ covariate, value.var = "value")
 ## scale
-cov_sc = data.table(scale(site_coord[,6:16]))
+cov_sc = data.table(scale(site_coord[,6:ncol(site_coord)]))
 colnames(cov_sc) = paste0(colnames(cov_sc), "_sc")
 cov_sc$site = rownames(site_coord)
 df_Delta = merge(df_Delta, cov_sc, by = "site")
@@ -118,16 +119,22 @@ site_coord = merge(site_coord, dfFD, by = "site")
 
 # Correlations 
 
+```{r}
+## change cec value in Paracou: too high
+## find better estimate later?
+site_coord$CEC[site_coord$site=="prc"] = site_coord$CEC[site_coord$site=="tor"]
+```
+
 ```{r, fig.height=10, fig.width=10}
 ggcorr(site_coord[,6:ncol(site_coord)], nbreaks = 5, label = TRUE, high="red",low="red",middle = "blue") + 
   labs(title = "Covariates correlation") 
 ```
 
-
 # Effect of covariates (pairwise)
 
 ```{r}
 all_covariates = gsub("_sc", "", grep("_sc", colnames(df_Delta), value = T))
+all_covariates = all_covariates[-grep(c("WMT|FD"), all_covariates)]
 
 if (inference_stan){
   for(cov_names in all_covariates) {
@@ -151,14 +158,14 @@ df_lambda = melt(df_lambda, id.vars = c("iter","trait"), value.name = "lambda", 
 df_lambda = merge(df_lambda, 
                   df_lambda[,.(sign = (quantile(lambda, 0.05) > 0 | 
                                          quantile(lambda, 0.95) < 0)),
-                      .(trait,covar)], by = c("trait","covar"))
+                            .(trait,covar)], by = c("trait","covar"))
 ```
 
 ```{r, fig.height=10, fig.width = 10}
 ggplot(df_lambda, aes(x=trait, fill=sign, y = lambda)) + 
   geom_hline(yintercept = 0, lty=2) + 
   geom_violin() + 
-  facet_wrap(~ covar)
+  facet_wrap(~ covar, ncol = 4)
 ```
 
 # By pairs {.tabset .tabset-pills}
@@ -166,6 +173,26 @@ ggplot(df_lambda, aes(x=trait, fill=sign, y = lambda)) +
 smort and Psand are the only good predictor of the WD resistance.
 We test the effect of smort with seas or CEC (not too correlated)
 [ maybe add in supp mat the results with WMT -> not only due to initial trait value]
+
+## smort + agb productivity 
+
+```{r}
+cov_names = c("agbp","smort")
+
+if (inference_stan){
+  source("codes/inference_covariates_model.R")
+  save(pars_cov, file = "data/parsCov_agbp_smort.Rdata")
+} else { load("data/parsCov_agbp_smort.Rdata")}
+
+```
+
+```{r}
+df = unique(pars_cov[, c("trait", grep("lambda", colnames(pars_cov), value = TRUE)), with = F])
+source("codes/plot_lambda.R")
+df_covar$covar_typ = 1
+plot_lambda(df$trait, df[,-"trait"], unique(df_covar[,c("covariate","covar_typ")])) + 
+  labs(title = "lambdas") + theme(legend.position="none")
+```
 
 ## smort + seas 
 
@@ -195,7 +222,7 @@ cov_names = c("CEC","smort")
 if (inference_stan){
   source("codes/inference_covariates_model.R")
   save(pars_cov, file = "data/parsCov_CEC_smort.Rdata")
-} else { load("data/parsCov_CEC_smort.Rdata")}
+} else { load("data/parsCov_CEC_smort.Rdata") }
 
 ```
 
@@ -206,3 +233,162 @@ df_covar$covar_typ = 1
 plot_lambda(df$trait, df[,-"trait"], unique(df_covar[,c("covariate","covar_typ")])) + 
   labs(title = "lambdas") + theme(legend.position="none")
 ```
+
+## smort + CWD
+
+```{r}
+cov_names = c("cwd","smort")
+
+if (inference_stan){
+  source("codes/inference_covariates_model.R")
+  save(pars_cov, file = "data/parsCov_cwd_smort.Rdata")
+} else { load("data/parsCov_cwd_smort.Rdata")}
+
+```
+
+```{r}
+df = unique(pars_cov[, c("trait", grep("lambda", colnames(pars_cov), value = TRUE)), with = F])
+source("codes/plot_lambda.R")
+df_covar$covar_typ = 1
+plot_lambda(df$trait, df[,-"trait"], unique(df_covar[,c("covariate","covar_typ")])) + 
+  labs(title = "lambdas") + theme(legend.position="none")
+```
+
+## smort + rad
+
+```{r}
+cov_names = c("rad","smort")
+
+if (inference_stan){
+  source("codes/inference_covariates_model.R")
+  save(pars_cov, file = "data/parsCov_rad_smort.Rdata")
+} else { load("data/parsCov_rad_smort.Rdata")}
+
+```
+
+```{r}
+df = unique(pars_cov[, c("trait", grep("lambda", colnames(pars_cov), value = TRUE)), with = F])
+source("codes/plot_lambda.R")
+df_covar$covar_typ = 1
+plot_lambda(df$trait, df[,-"trait"], unique(df_covar[,c("covariate","covar_typ")])) + 
+  labs(title = "lambdas") + theme(legend.position="none")
+```
+
+# with initial trait value
+
+## with initial trait value only (no other covariate)
+
+```{r}
+if (inference_stan) {
+  model_covar = stan("codes/model_traits.stan")
+  
+  pars_cov = data.table(iter = 1:1000, do.call(cbind, rstan::extract(model_covar, 
+                                                                     pars = c("sigma_Delta", "sigma_tmax", 
+                                                                              "mu_theta", "sigma_theta", "lp__" )))[1:1000])
+  pars_covb = data.table(Delta = c(rstan::extract(model_covar, pars= "Delta")[[1]][1:1000,,]), 
+                         theta = c(rstan::extract(model_covar, pars= "theta")[[1]][1:1000,,]),
+                         tmax = c(rstan::extract(model_covar, pars= "tmax")[[1]][1:1000,,]), 
+                         iter = rep(1:1000, P*K), 
+                         p = rep(rep(1:P, each = 1000), K), 
+                         s = rep(rep(ps, each = 1000), K), 
+                         k = rep(1:K, each = 1000*P))
+  pars_cov = merge(pars_cov, pars_covb, by = "iter")
+  pars_covb = data.table(sigmaT = c(rstan::extract(model_covar, pars= "sigmaT")[[1]][1:1000,]),
+                         sigma_Delta = c(rstan::extract(model_covar, pars= "sigma_Delta")[[1]][1:1000,]),
+                         lambda0 = c(rstan::extract(model_covar, pars= "lambda0")[[1]][1:1000,]),
+                         iter = rep(1:1000, K), 
+                         k = rep(1:K, each = 1000))
+  pars_covb$lambda_WMT = c(rstan::extract(model_covar, pars= "gamma")[[1]][1:1000,])
+  
+  
+  pars_cov = merge(pars_cov, pars_covb, by = c("iter", "k"))
+  pars_covb = data.table(mu_tmax = c(rstan::extract(model_covar, pars= "mu_tmax")[[1]][1:1000,,]), 
+                         iter = rep(1:1000, S*K), 
+                         s = rep(rep(1:S, each = 1000), K), 
+                         k = rep(1:K, each = 1000*S))
+  pars_cov = merge(pars_cov, pars_covb, by = c("iter","s","k"))
+  pars_cov$trait = name_traits[pars_cov$k]
+  pars_cov$site = levels(as.factor(as.character(df$site)))[pars_cov$s]
+  pars_cov$idplot = levels(as.factor(as.character(df$idplot)))[pars_cov$p]
+  save(pars_cov, file = "data/parsCov_traitsOnly.Rdata")
+} else {load("data/parsCov_traitsOnly.Rdata")}
+```
+
+```{r}
+df = unique(pars_cov[, c("trait", grep("lambda", colnames(pars_cov), value = TRUE)), with = F])
+source("codes/plot_lambda.R")
+df_covar$covar_typ = 1
+plot_lambda(df$trait, df[,-"trait"], unique(df_covar[,c("covariate","covar_typ")])) + 
+  labs(title = "lambdas") + theme(legend.position="none")
+```
+
+
+## with trait value and covariates
+
+```{r}
+with_initial_traits = TRUE
+cov_names = c("seas","smort")
+
+if (inference_stan){
+  source("codes/inference_covariates_model.R")
+  save(pars_cov, file = "data/parsCov_seas_smort_traits.Rdata")
+} else { load("data/parsCov_seas_smort_traits.Rdata")}
+
+```
+
+```{r}
+df = unique(pars_cov[, c("trait", grep("lambda", colnames(pars_cov), value = TRUE)), with = F])
+source("codes/plot_lambda.R")
+df_covar$covar_typ = 1
+plot_lambda(df$trait, df[,-"trait"], unique(df_covar[,c("covariate","covar_typ")])) + 
+  labs(title = "lambdas") + theme(legend.position="none")
+```
+
+> After checking that adding the initial trait value does not modify previous results, I choose to remove them. The 2 reasons are: (i) I do not want to comment on their effect; (ii) their effect may be poorly estimated, as the value is different when we add the covariates or not. The only trait that has an effect when only intial WMT are considered is the DBH95, but this effect disappears when covariates are added, so it could be an effect of intersite differences explained by environamental gradients, rather than the trait itself.  
+
+# Cross validation
+
+## seas + smort 
+
+```{r}
+with_initial_traits = FALSE
+cov_names = c("seas","smort")
+
+if (inference_stan){
+  source("codes/inference_covariates_model.R")
+} 
+
+load("data/parsCov_seas_smort_traits.Rdata")
+pars_loo = data.table(site = "all",
+                      unique(pars_cov[,c("iter", "k","lambda0", "lambda_seas", 
+                                         "lambda_smort", "trait")]))
+
+for (sit in unique(df_covar$site)) {
+  load(paste0("data/pars_cov_without_", sit, ".Rdata"))
+  pars_loo = rbind(pars_loo, data.table(site = sit, pars_cov))
+} 
+
+pars_loo = melt(pars_loo, variable.name = "covar", value.name = "lambda",
+                measure.vars = grep("lambda", colnames(pars_loo), value = TRUE))
+pars_loo$covar = gsub("lambda|_", "", pars_loo$covar)
+pars_loo$covar[pars_loo$covar == "0"] = "intercept"
+
+ci_loo = pars_loo[, .(inf = quantile(lambda, 0.025), 
+                      med = quantile(lambda, 0.5), 
+                      sup = quantile(lambda, 0.975)), 
+                  .(covar, site, trait)]
+```
+
+```{r, fig.height = 10, fig.width = 8}
+ggplot(ci_loo, aes(x = site, y = med, ymin = inf, ymax = sup)) + 
+  geom_hline(yintercept = 0, lty = 2) +
+  coord_flip() + 
+  geom_pointrange() +
+  facet_grid( trait ~ covar)
+```
+
+> Paragominas has some strange results, and I do not have a high confidence in raw data from this site (problem with small-tree subplot design): maybe we should remove it. 
+
+> La Chonta seems to be a very unique site and has a large impact on final results (removing it results in large differences in parameter estimation). 
+
+> Alternative idea: fit the model with all sites, but one site without covariates, and test how well the Delta is estimated with new lambda values

@@ -22,9 +22,17 @@ t = df$year - df$tlog
 TR = as.matrix(df[, name_traits, with = FALSE])
 dfT0 = melt(df0, measure.vars = name_traits, id.vars = "idplot")
 dfT0 = dfT0[,.(value = mean(value)),.(variable,idplot)]
-T0 = as.matrix(dcast(dfT0, idplot ~variable, value.var = "value")[,-"idplot"])
+T0 = as.matrix(dcast(dfT0, idplot ~ variable, value.var = "value")[,-"idplot"])
+T0_sc = scale(T0)
 
-model_covar = stan("codes/model_covariates.stan")
+
+if (!with_initial_traits) {  ## when we do not include initial trait value to the covariates
+  model_covar = stan("codes/model_covariates.stan")
+} else {
+  model_covar = stan("codes/model_covariates_traits.stan")
+}
+
+## extract parameters values
 pars_cov = data.table(iter = 1:1000, do.call(cbind, rstan::extract(model_covar, 
                                                                    pars = c("sigma_Delta", "sigma_tmax", 
                                                                             "mu_theta", "sigma_theta", "lp__" )))[1:1000])
@@ -41,9 +49,17 @@ pars_covb = data.table(sigmaT = c(rstan::extract(model_covar, pars= "sigmaT")[[1
                        lambda0 = c(rstan::extract(model_covar, pars= "lambda0")[[1]][1:1000,]),
                        iter = rep(1:1000, K), 
                        k = rep(1:K, each = 1000))
+
+## covariates effect
 lambda = sapply(1:M, function(m) c(rstan::extract(model_covar, pars= "lambda")[[1]][1:1000,m,]))
 colnames(lambda) = paste0("lambda_", cov_names)
 pars_covb = cbind(pars_covb, lambda)
+
+## trait effect
+if (with_initial_traits) {  
+  pars_covb$lambda_WMT = c(rstan::extract(model_covar, pars= "gamma")[[1]][1:1000,])
+}
+
 pars_cov = merge(pars_cov, pars_covb, by = c("iter", "k"))
 pars_covb = data.table(mu_tmax = c(rstan::extract(model_covar, pars= "mu_tmax")[[1]][1:1000,,]), 
                        iter = rep(1:1000, S*K), 
@@ -53,3 +69,4 @@ pars_cov = merge(pars_cov, pars_covb, by = c("iter","s","k"))
 pars_cov$trait = name_traits[pars_cov$k]
 pars_cov$site = levels(as.factor(as.character(df$site)))[pars_cov$s]
 pars_cov$idplot = levels(as.factor(as.character(df$idplot)))[pars_cov$p]
+
