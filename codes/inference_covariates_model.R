@@ -25,11 +25,18 @@ dfT0 = dfT0[,.(value = mean(value)),.(variable,idplot)]
 T0 = as.matrix(dcast(dfT0, idplot ~ variable, value.var = "value")[,-"idplot"])
 T0_sc = scale(T0)
 
+df_FD = df_Delta[,c("site","idplot","trait","FD_sc")]
+df_FD = dcast(df_FD, site + idplot ~ trait, value.var = "FD_sc")[,-c("site","idplot")]
+FD_sc = as.matrix(scale(df_FD))
 
 if (!with_initial_traits) {  ## when we do not include initial trait value to the covariates
   model_covar = stan("codes/model_covariates.stan")
 } else {
+  if (!with_initial_FD) {
   model_covar = stan("codes/model_covariates_traits.stan")
+  } else {
+    model_covar = stan("codes/model_covariates_traits_FD.stan")
+  }
 }
 
 ## extract parameters values
@@ -57,7 +64,12 @@ pars_covb = cbind(pars_covb, lambda)
 
 ## trait effect
 if (with_initial_traits) {  
+  if (!with_initial_FD){
   pars_covb$lambda_WMT = c(rstan::extract(model_covar, pars= "gamma")[[1]][1:1000,])
+  } else {
+    pars_covb$lambda_WMT = c(rstan::extract(model_covar, pars= "gamma")[[1]][1:1000,1,])
+    pars_covb$lambda_FD = c(rstan::extract(model_covar, pars= "gamma")[[1]][1:1000,2,])
+  }
 }
 
 pars_cov = merge(pars_cov, pars_covb, by = c("iter", "k"))

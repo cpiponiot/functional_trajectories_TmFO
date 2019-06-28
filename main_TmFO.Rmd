@@ -675,7 +675,7 @@ source("codes/plot_lambda.R")
 plot_lambda(df$trait, df[,-"trait"], unique(df_covar[,c("covariate","covar_typ")])) + labs(title = "lambdas")
 ```
 
-## Testing the initial composition and diversity of the community of resistance 
+## Testing the effect of initial composition and diversity of the community on resistance 
 
 ```{r}
 # select censuses previous to logging
