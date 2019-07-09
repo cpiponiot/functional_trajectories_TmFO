@@ -15,9 +15,9 @@ address:
   - code: 2
     address: INPHB, Yamoussoukro, Cote d'Ivoire
 abstract: |
-  Context.
+  Tropical forests bring numerous benefits for humanity, but they suffer from increasing human disturbance that can lastingly modify their functioning. In this study we evaluate the effect of selective logging, one of the most widespread human disturbances in tropical forests, on Amazonian forests' functional composition. We develop a model of post-logging trajectory of community weighted mean traits and calibrate it in a Bayesian framework using data from 12 experimentally logged sites (264 ha total) spread over the Amazon biome. We test the effect of the initial composotion and functional diversity as well as the precipitation seasonality and stem turnover rate on the functional resistance to a logging disturbance (i.e. the maximum relative change in functional composition after logging). 
 
-  Results.
+  Our results show that, contrary to expectations, the intital composition and functional diversity have no significant effect on the functional resistance in our plots. The stem turnover rate was the best predictor of post-logging resistance for two traits, namely the 95^th^ percentile of a species diameter distribution (as a proxy of adult tree stature) and wood density. Forests with high turnover rates were predicted to be the more resistant to logging. Overall, adult tree stature and SLA seem to be more resistant to logging, while seed mass and wood density show consistent decreases after a logging disturbance. Forests in northeastern Amazonia are predicted to experience the strongest decreases in wood density after logging (-10%). These forests are especially important for water cycles and carbon sequestration, and a decrease in wood density may lower their ability to provide these benefits. 
 
 journal: "Global Change Biology (?)"
 date: "`r Sys.Date()`"
@@ -53,25 +53,29 @@ agb_loss = 0.4
 Introduction
 ==========================
 
-Tropical forests are crucial for most global ecological cycles. They hold 230 Pg of carbon, around 11% of the total carbon in terrestrial ecosystems [@Baccini2012a] and intact tropical forests are estimated to have sequestered an annual 1.19 $\pm$ 0.41 Pg of carbon between 1990-2007 [@Pan2011], about 15% of total anthropogenic carbon emissions, thus playing a major role in climate change mitigation [@IPCC2014]. Tropical forests are also key in the global water cycle, recycling rainfall through vegetation evapotranspiration and thus buffering droughts in adjacent regions [@Staal2018]. Moreover, tropical forests harbour an exceptional biodiversity [@Jenkins2013,@Slik2015], providing species to surrounding regions through biotic interchanges [@Antonelli2018]. The state of tropical forests thus largely determines the functioning of global ecosystems, and hence human well-being. 
+Tropical forests are crucial for most global ecological cycles. They hold 230 Pg of carbon, around 11% of the total carbon in terrestrial ecosystems [@Baccini2012a] and intact tropical forests are estimated to have sequestered an annual 1.19 $\pm$ 0.41 Pg of carbon between 1990-2007 [@Pan2011], about 15% of total anthropogenic carbon emissions, thus playing a major role in climate change mitigation [@IPCC2014]. Tropical forests are also key in the global water cycle, recycling rainfall through vegetation evapotranspiration and thus buffering droughts in adjacent regions [@Staal2018]. Moreover, tropical forests harbor an exceptional biodiversity [@Jenkins2013,@Slik2015], providing species to surrounding regions through biotic interchanges [@Antonelli2018]. The state of tropical forests thus largely determines the functioning of global ecosystems, and hence human well-being. 
 
-The future of tropical forests is however highly uncertain: during the past three centuries, humans activities have triggered rapid changes in global ecosystems, causing massive species extinctions and accelerating climate change through increased carbon emissions [@Crutzen2002]. These changes are particularly intense in the tropics, where forests are being clearcut for agricultural or mining purposes at unprecedented rates, and most remaining forests have or will be heavily impacted by human activities [@Malhi2014]. Disturbances such as droughts, fires, selective logging, or hunting, are increasing in intensity and frequency [@Lewis2015]. Human disturbances modify forest functioning, but the intensity, direction and duration of these changes are still largely unknown. 
+The future of tropical forests is however highly uncertain: during the past three centuries, humans activities have triggered rapid changes in global ecosystems, causing massive species extinctions and accelerating climate change through increased carbon emissions [@Crutzen2002]. During the past century these changes are particularly intense in the tropics, where forests are being clearcut for agricultural or mining purposes at unprecedented rates, and where most remaining forests have or will be heavily impacted by human activities [@Malhi2014]. 
 
 One predominant human activity in tropical forests is the selective logging of a few merchantable trees: around 400 million hectares of tropical forests are designated for timber production [@Blaser2011], and ca. 20% of tropical forests were affected by selective logging between 2000 and 2005 [@Asner2009]. Because selective logging focuses on a few individual trees (typically 5-10 trees per hectare), 65-95% of the forest cover is maintained after logging operations [@Cannon1994,@Pereira2002]. Damage to the forest is concentrated in logging gaps created by tree felling, and in infrastructure (skid trails and, to a lesser extent, roads and log decks) [@Pereira2002,@Asner2004]. 
 
-Disturbances such as selective logging alter the composition and dynamics of tropical forests by provoking a higher-than-normal tree mortality, which can affect some trees more than others. Large trees of commercial value with good mechanical properties are the focus of selective loggers; trees with low-density wood are more vulnerable to droughts [@Mcdowell2018,@Aleixo2019], and trees with thick bark are more resistant to fires [@Brando2012]. Directional mortality has a strait-forward effect on forest composition and structure. 
+Disturbances such as selective logging, droughts, fires, or hunting, are increasing in intensity and frequency [@Lewis2015]. 
+Human disturbances alter the composition and dynamics of tropical forests by provoking a higher-than-normal tree mortality, which can affect some trees more than others. Large trees of commercial value with good mechanical properties are the focus of loggers; trees with low-density wood are more vulnerable to droughts [@Mcdowell2018,@Aleixo2019], and trees with thick bark are more resistant to fires [@Brando2012]. Directional mortality has a strait-forward effect on forest composition and structure. 
 The indirect effect of disturbance is the higher recruitment of light-demanding species in canopy gaps [@Carreno-Rocabado2012]: these changes in tree species composition can last for several decades [@DeAvila2015]. 
 
-Changes in composition and their effects on forest functioning can be quantified with functional traits [@ChapinIII1997]. Functional traits are measures of an individual's features that impact its growth, reproduction and survival, and hence its overall fitness [@Violle2007]. In tropical forests, at least four major functional axes have been described: (i) the leaf economic spectrum (short-lived low-investment leaves vs. tough leaves) [@Wright2004], the wood economic spectrum (fast-growing low-density vs. long-lived high-density wood) [@Chave2009], adult tree stature and height (canopy vs. understory trees) linked to light capture [@Poorter2003] and survival strategy [@Johnson2018], and the seed dispersal strategy (large, zoochorous and resource-rich seeds vs. light anemochorous seeds) [@Poorter2005a]. Together, these four axes explain most of the functional variation observed in forest ecosystems [@Baraloto2012a,@Costa-Saura2019].
+Changes in composition and their effects on forest functioning can be quantified with functional traits [@ChapinIII1997,@Lavorel2002]. Functional traits are measures of an individual's features that impact its growth, reproduction and survival, and hence its overall fitness [@Violle2007]. In tropical forests, at least four major functional axes have been described: (i) the leaf economic spectrum (short-lived low-investment leaves vs. tough leaves) [@Wright2004], the wood economic spectrum (fast-growing low-density vs. long-lived high-density wood) [@Chave2009], adult tree stature and height (canopy vs. understory trees) linked to light capture [@Poorter2003] and survival strategy [@Johnson2018], and the seed dispersal strategy (large, zoochorous and resource-rich seeds vs. light anemochorous seeds) [@Poorter2005a]. Together, these four axes explain most of the functional variation observed in forest ecosystems [@Baraloto2012a,@Costa-Saura2019].
 
-Environmental changes can deeply modify a community's composition, with potential effects on its functioning [@Lavorel2002]. Disturbances such as selective logging provoke the canopy openings where canopy trees died, increasing the quantity of light that gets to the soil. This results in the germination and rapid growth of small-seed light-wood species [@Poorter2005a,@Baraloto2012,@Poorter2019]. These light-demanding pioneer species have high growth rates but generally poor resistance to drought [@Aleixo2019]. It has also been shown that selective logging can decrease the canopy height, and consequently total carbon storage [@Rutishauser2016]. Understanding the effects of disturbances on a community's functional composition will thus be key to predict the future of tropical forests in the context of rapid changes in disturbance regimes [@Wright2005].
+Disturbances such as selective logging change local conditions by creating canopy gaps and thus increasing the quantity of light that gets to the soil. 
+The new light conditions favor the germination and rapid growth of small-seeded, light-wooded species [@Poorter2005a,@Baraloto2012,@Baker2016,@Poorter2019]. These light-demanding pioneer species have high growth rates but generally poor resistance to drought [@Aleixo2019]. It has also been shown that selective logging can decrease the canopy height, and consequently total carbon storage [@Rutishauser2016]. Understanding the long-term effects of disturbances on a community's functional composition will thus be key to predict the future of tropical forests in the context of rapid changes in disturbance regimes [@Wright2005].
 
 Ecosystem resilience is a measure of an ecosystem's ability to cope with disturbances [@Holling1973]. It is a key concept to understand the long-term changes in forest composition and dynamics following a disturbance. The notion of resilience can be defined with two essential components: the change in state (or resistance to disturbance), and the time to return to a pre-disturbance state (or recovery) [@Hodgson2015]. 
+Resilience, and in particular its change-in-state component, depends strongly on the disturbance frequency and intensity. Additionally, ecological memory of past disturbances is a key component of forest resilience [@Johnstone2016,@Ciemer2019]. Ecological memory translates into the presence and diversity of trees and seeds of species with life-history traits adapted to disturbances, which in turn can shape forest demographics, and especially vegetation turnover rates [@Lavorel2002,@Flores2014]. Environmental constraints such as water limitations have also been shown to affect the functional resistance of Neotropical forests to disturbances [@Enquist2011].
 
-Resilience, and in particular its change-in-state component, depends strongly on the disturbance frequency and intensity. Additionally, ecological memory of past disturbances is a key component of forest resilience [@Johnstone2016,@Ciemer2019]
-In Amazonia, the largest tropical forest biome on Earth (600 million hectares), natural disturbances are mainly driven by drought-related mortality [@Phillips2010] and large windthrows [@Negron-Juarez2018]. Precipitations and windstorms are both spatially structured in Amazonia, with a Northwest-southeast precipitation seasonality gradient [@Ciemer2019], and a east-west soil-stability and windstorm-frequency gradient[@Quesada2012,@Espirito-Santo2014]. Understanding how these natural disturbance gradients structure the forest response to a logging disturbance can help improve predictions of Amazonian forests vulnerability to future increases in disturbance regimes [@Davidson2012]. 
+In Amazonia, the largest tropical forest biome on Earth (600 million hectares), at least two large gradients explain regional patterns of forest dynamics [@Johnson2016]. Vegetation productivity is strongly correlated to the precipitation regime [@Fauset2019], being higher in northwestern forests with high levels of precipitation and lower in southeastern forests which suffer from a long dry season [@Davidson2012,@Johnson2016]. Stem turnover rates describe a Northeast-Southwest gradient [@Johson2016], mainly driven by soil stability [@Quesada2012], and the frequency and intensity of natural disturbances such as windstorms [@Espirito-Santo2014,@Negron-Juarez2018] and droughts [@Phillips2010]. Understanding how these gradients structure the forest response to a logging disturbance can help improve predictions of Amazonian forests vulnerability to future increases in disturbance regimes. 
 
-Here we assess the resistance of four functional traits (namely wood density, seed mass, specific leaf area and maximum tree diameter) to selective logging in Amazonia. We calibrate an original Bayesian hierarchical model with data from `r sum(plotInfo$idplot.size/plotInfo$plot.size)` permanent forest plots from `r length(unique(plotInfo$site))` long-term experimental sites (`r round(sum(plotInfo$idplot.size))` ha total). Our research questions are: (i) how is the functional composition of Amazonian forests affected by disturbances such as selective logging? (ii) are some functional traits more resistant than others? (iii) does the functional resistance vary across Amazonia, and what factors could explain those variations?
+Here we assess the resistance of four functional traits (namely wood density, seed mass, specific leaf area and maximum tree diameter) to selective logging in Amazonia. Our research questions are: (i) how is the functional composition of Amazonian forests affected by disturbances such as selective logging? (ii) are some functional traits more resistant than others? (ii) what is the effect of initial functional composition and diversity on the functional resistance? and (iv) how does functional resistance vary across Amazonia, and is it related to regional patterns of natural disturbances? 
+
+To bring light on these questions, we modeled the post-disturbance trajectory of four key community mean traits within an original Bayesian hierarchical model. We calibrated the model using data from `r sum(plotInfo$idplot.size/plotInfo$plot.size)` permanent forest plots from `r length(unique(plotInfo$site))` long-term experimentally logged sites (`r round(sum(plotInfo$idplot.size))` ha total) spread over Amazonia. We tested the effect of the initial (pre-disturbance) trait value and functional diversity, and of regional patterns of forest demographics (stem turnover rate as a proxy of natural disturbance regimes) and precipitation seasonality. 
 
 
 
@@ -130,7 +134,7 @@ load("C:/Users/camille.piponiot/Google Drive/volume_recovery/calc_Rdata/sat_map.
 p1 <- ggplot() + theme_bw() +
   coord_equal() + #ggmap(newmap) +  
   # geom_polygon(data=fortify(borders), aes(x=long, y=lat, group=group), alpha = 0, colour = "grey") +
-  geom_polygon(data=fortify(amazonia), aes(x=long, y=lat, group=group), fill = "forestgreen", alpha = 0.5) +
+  geom_polygon(data=fortify(amazonia), aes(x=long, y=lat, group=group), fill = "forestgreen", alpha = 0.8) +
   geom_polygon(data=fortify(ecoregions), aes(x=long, y=lat, group=group), alpha = 0, lwd = 1, colour = "darkgrey") +
   geom_text(data = coords_ecoregions,  aes(x=long, y = lat, label = ID), colour = "white") +
   geom_point(data=site_info, aes(x=Long,y=Lat, colour=dyear, size=totsize))  +
@@ -143,7 +147,7 @@ p1
 
 Our study includes data from twelve long-term (8–35 year) experimental forest sites located in the Amazon Basin and the Guiana Shield (Figure \ref{fig:map_tmfo}) [@Sist2015]. All sites are located in tropical forests with mean annual precipitation $\geq$ 1000 mm. In each site, permanent forest plots (`r plot_size_range` ha per site) were logged, and censused at least once before and twice after logging. 
 
-For each site, we extracted the precipitation seasonality from Worldclim database (bioclimatic variable 15) [@Fick2017], at a 2.5 arc-minute resolution. Annual stem mortality rates (as a % of live stems) were based on data from unlogged plots inside our sites. For the 5 sites in which no unlogged plot was available, stem mortality rates were extracted from a map based on the metadata from Johnson and colleagues [@Johnson2016] (extracted from the ForestPlots database [@Lopez-Gonzalez2011]) and interpolated with the R package gstat [@gstat] on a 1$^\circ$ resolution grid. Site coordinates, precipitation seasonality and stem mortality rates are reported in Table \ref{tab:sites}.
+For each site, we extracted the precipitation seasonality from Worldclim database (bioclimatic variable 15) [@Fick2017], at a 2.5 arc-minute resolution. Annual stem turnover rates (as a % of live stems) were based on data from unlogged plots inside our sites. For the 5 sites in which no unlogged plot was available, stem turnover rates were extracted from a map based on the metadata from Johnson and colleagues [@Johnson2016] (extracted from the ForestPlots database [@Lopez-Gonzalez2011]) and interpolated with the R package gstat [@gstat] on a 1$^\circ$ resolution grid. Site coordinates, precipitation seasonality and stem turnover rates are reported in Table \ref{tab:sites}.
 
 ## Data compilation
 
@@ -157,7 +161,7 @@ Median trait values were calculated per species and genus. Each individual tree 
 
 Selective logging typically targets large trees belonging to a small group of species with commercial value. Those species usually have particular functional trait values, such as large maximum diameters. The functional composition of the largest trees is thus artificially modified because of the selectivity of harvests. Because we are more interested in the indirect effects of selective logging disturbance on the functional composition, i.e. the functional changes induced by tree felling and canopy openings, we excluded large trees with DBH > 35 cm from the analysis. 
 
-For each functional trait $k$ (either $DBH95$, $logSeedMass$, $SLA$, or $WD$), we computed the community's mean biomass-weighted trait value at census $c$ in plot $p$ in site $s$ as:
+For each functional trait $k$ (either $DBH95$, $logSeedMass$, $SLA$, or $WD$), we computed the community's mean biomass-weighted trait (CMT) value at census $c$ in plot $p$ in site $s$ as:
 
 \begin{equation}  
 CMT_{k,c,p,s} = \frac{\sum_{i \in I_{c,p,s}}(T_{k,i}\cdot agb_i)}{\sum_{i \in I_{c,p,s}}(agb_i)}
@@ -171,11 +175,11 @@ The distance of a trait value to its initial (pre-logging) value was estimated a
 dCMT_{k,c,p,s} = \frac{CMT_{k,c,p,s} - CMT0_{k,p,s}}{CMT0_{k,p,s}}
 \end{equation}
 
-The functional diversity $FD_{k,c,p,s}$  for a given trait $k$ was calculated as the similarity-based diversity of order 1 of all trees $>$ 10 cm dbh at census $c$ in plot $p$ and site $s$, and was calculated with the function $Dqz$ in the R package entropart [@Marcon2015].  
+The functional diversity $FD_{k,c,p,s}$  for a given trait $k$ was calculated as the similarity-based diversity of order 1 of all trees with dbh between 10 and 35 cm at census $c$ in plot $p$ and site $s$, and was calculated with the function $Dqz$ in the R package *entropart* [@Marcon2015].  
 
 ## Model calibration
 
-The model presented here aims at capturing the changes in the commmunity's mean traits (CMT) after the disturbance, as well as their recovery. For each trait $k$, the change in CMT at census $c$ in plot $p$ and site $s$  was modelled as:
+The model presented here aims at capturing the changes in the community's mean biomass-weighted traits (CMT) after the disturbance, as well as their recovery. For each trait $k$, the change in CMT at census $c$ in plot $p$ and site $s$  was modeled as:
 
 \begin{equation}  
 dCMT_{k,c,p,s} \sim \mathcal{N}\left( \mu_{k,c,p,s}\text{ , } \left(\frac{\sigma_k}{size_p}\right)^2\right)
@@ -189,19 +193,19 @@ where
 
 with $t_c$ the time since logging (in years) at census $c$; $size_p$ is the size of plot $p$; $\Delta_{k,p,s}$ is the maximum post-disturbance change (negative if the CMT decreases, and positive of it increases). $tmax_{k,p,s}$ is the time taken to reach $\Delta_{k,p,s}$; when $t_c > tmax_{k,p,s}$, the CMT starts to get closer to its initial value, entering the recovery phase which is in some plots not yet observed. $\theta_k$ is a shape parameter that controls the width of the hump; when it increases, the hump is narrower.
 
-Parameters $\Delta_{k,s,p}$ and $tmax_{k,p}$ were modelled with a normal distribution:
+Parameters $\Delta_{k,s,p}$ and $tmax_{k,p}$ were modeled with a normal distribution:
 
 \begin{equation}
 tmax_{k,p,s} \sim \mathcal{N} (\mu m1_{s,k}, \sigma m1^2)
 \end{equation}
 
-where $\sigma m$ is the standard deviation of $tmax$ and $\mu m1_{s,k}$ is the mean of $tmax$ for trait $k$ in site $s$. To benefit from the information from sites with long experiment duration and help infer $tmax$ in sites where it had not been reached during the experiment duration (i.e. no observed return to initial CMT because of short experiment duration), we added one hierarchical level to $tmax$: 
+where $\sigma m1$ is the standard deviation of $tmax$ and $\mu m1_{s,k}$ is the mean of $tmax$ for trait $k$ in site $s$. To benefit from the information from sites with long experiment duration and help infer $tmax$ in sites where it had not been reached during the experiment duration (i.e. no observed return to initial CMT because of short experiment duration), we added one hierarchical level to $tmax$: 
 
 \begin{equation}
 \mu m1_{s,k} \sim \mathcal{N} (\mu m2_{k}, \sigma m2^2)
 \end{equation}
 
-with $\mu m2_{k}$ and $\sigma m2^2$ the mean and standard deviation of $\mu m1{s,k}$. 
+with $\mu m2_{k}$ and $\sigma m2$ the mean and standard deviation of $\mu m1{s,k}$. 
 
 ```{r method_example, fig.cap="Example of predicted relative CMT change (dCMT) after a disturbance."}
 Delta = -2
@@ -214,14 +218,14 @@ legend("bottomright", legend = expression(Delta*" = -2; tmax = 20 yr; "*theta*" 
 ```
 
 
-$\Delta_{k,p,s}$ is the maximum change of trait $k$ after the disturbance: its absolute value is expected to increase with disturbance intensity. We thus modelled it as: 
+$\Delta_{k,p,s}$ is the maximum change of trait $k$ after the disturbance: its absolute value is expected to increase with disturbance intensity. We thus modeled it as: 
 
 \begin{equation} 
 \Delta_{k,p,s} \sim \mathcal{N} \left( loss_p \cdot (\lambda_{0,k} + \sum \lambda_{m,k} Cov_{m,k,p,s} )  , \sigma_{\Delta}^2 \right)
 \end{equation}
 
 where $loss_p$ is the relative aboveground biomass loss after logging in plot $p$, as a proxy of the disturbance intensity; it is estimated as the difference between the pre-logging aboveground biomass and the minimum biomass in the first 4 years after logging, divided by the pre-logging aboveground biomass (similar to @Piponiot2016). 
-$Cov_{m,k,p,s}$ is the value of covariate $m$ for trait $k$ in plot $p$ in site $s$. Covariates are (i) the mortality rate and the precipitation seasonality defined for each site from Amazonian-wide maps, and (ii) initial community mean trait and functional diversity, defined for each trait and plot with pre-logging censuses. 
+$Cov_{m,k,p,s}$ is the value of covariate $m$ for trait $k$ in plot $p$ in site $s$. Covariates are (i) the stem turnover rate, (ii) the precipitation seasonality (both defined for each site from Amazonian-wide maps), (iii) the initial community mean trait and (iv) the initial functional diversity, both defined for each trait and plot with pre-logging censuses. 
 $\sigma_{\Delta}$ is the standard deviation of $\Delta$ for trait $k$ in site $s$.
 
 Bayesian hierarchical models were inferred through MCMC methods using an adaptive form of the Hamiltonian Monte Carlo sampling  using the R language [@RDevelopementTeam2018] and the Rstan package [@Carpenter2015]. A detailed list of priors is provided in Table XXX (informative priors?).
@@ -230,12 +234,13 @@ Bayesian hierarchical models were inferred through MCMC methods using an adaptiv
 
 Predictions of maximum CMT change after the disturbance were made at the Amazonian level on a 1$^\circ$ grid, i.e. the coarsest resolution of input maps, and errors were propagated with the following steps: 
 
-1. For each cell $j$ of the grid: (i) a value of stem mortality was taken from the map of stem mortality fitted with the data from [@Johnson2016] (see [@Piponiot2019]); (ii) a value of precipitation seasonality was taken from the distribution of pixel values in the Worldclim map [@Fick2017] that were inside the cell. 
+1. For each cell $j$ of the grid: (i) a value of stem turnover was taken from the map of stem turnover fitted with the data from [@Johnson2016] (see [@Piponiot2019]); (ii) a value of precipitation seasonality was taken from the distribution of pixel values in the Worldclim map [@Fick2017] that were inside the cell. 
 
 2. Parameters $\lambda_{0,k}$ and $\lambda_{m,k}$ were taken from their posterior distribution.
 
 3. For each trait $k$ and grid cell $j$, predictions of maximum CMT change $\Delta_{k,j}$ after a disturbance were calculated using a biomass loss of $loss =$ `r  agb_loss*100`%: 
 \begin{equation} 
+\label{eq:lambdas}
 \Delta_{k,j} = loss \cdot (\lambda_{0,k} + \sum \lambda_{m,k} Cov_{m,j}) 
 \end{equation}
 
@@ -257,15 +262,6 @@ range_tmax = paste0("[",paste(round(quantile(pars_cov$tmax, c(0.025,0.975))), co
 range_Delta = paste0("[",paste(round( quantile(pars_cov$Delta, c(0.025,0.975)) * 100 ), collapse=", "),"]")
 ```
 
-The estimated time to reach the maximum trait change is similar between traits (Figure \ref{fig:tmax_delta}) and is estimated to be between `r range_tmax` yr (95% confidence interval). 
-
-The maximum relative trait change ($\Delta$) was between `r range_Delta`%, with large differences between traits and sites (Figure \ref{fig:tmax_delta}).
-The community mean adult tree stature (*DBH95*) decreased after the disturbance in almost all sites except the two sites in Bolivia: La Chonta and, to a lesser extent, INPA (Figure \ref{fig:tmax_delta}). 
-The community mean seed mass (*logSeedMass*) decreased in most sites after the disturbance ($\Delta \in$ `r paste0("[",paste(round( quantile(pars_cov$Delta[pars_cov$trait=="logSeedMass"], c(0.025,0.975)) * 100 ), collapse=", "),"]")`%), except for two sites in western Amazonia, Cumaru and Chico Bocão.
-The community mean specific leaf area (*SLA*) increased or stayed close to its initial value in most sites after the disturbance, except in INPA, Bolivia (see full trajectories in Figure Sxxx). The increase in the community mean SLA was especially high in Tapajos where it gained +`r round(median(pars_cov$Delta[pars_cov$trait=="SLA" & pars_cov$site_name=="Tapajos"])*100)`% compared to its initial value. 
-The community mean wood density (*woodDensity*) decreased in most sites after the disturbance ($\Delta \in$ `r paste0("[",paste(round( quantile(pars_cov$Delta[pars_cov$trait=="woodDensity"], c(0.025,0.975)) * 100 ), collapse=", "),"]")`%), except for two sites: .
-
-
 ```{r fig_tmax, fig.width = 6, fig.height= 10, fig.cap="\\label{fig:tmax_delta}Posterior distribution of parameters *tmax* (left panels) and Delta (right panels) per site (x-axis) and trait (top to bottom panels). The wider the posterior, the larger the uncertainty on its estimation. Functional traits are: *DBH95* community mean 95th percentile of the diameter at breast height (a proxy of the adult stature); *logSeedMass* community mean seed mass (log-transformed); *SLA* community mean specific leaf area; *woodDensity* community mean wood density. Ecoregions (as defined in Ter Steege et al., 2013) are: CA: central Amazonia, EA: eastern Amazonia, GS: Guiana shield, SWA: southewestern Amazonia and WA: western Amazonia. "}
 
 df_pars = melt(pars_cov, id.vars = c("site_name","trait","idplot","iter","ecoregion"), 
@@ -285,12 +281,17 @@ ggplot(df_pars, aes(x = site_name, y = value)) +
         axis.title.y = element_blank())
 ```
 
+The estimated time to reach the maximum trait change is similar between traits (Figure \ref{fig:tmax_delta}) and is estimated to be between `r range_tmax` yr (95% confidence interval). 
+
+The maximum relative trait change ($\Delta$) was between `r range_Delta`%, with large differences between traits and sites (Figure \ref{fig:tmax_delta}).
+The community mean adult tree stature (*DBH95*) decreased after the disturbance in almost all sites except the two sites in Bolivia: La Chonta and, to a lesser extent, INPA (Figure \ref{fig:tmax_delta}). 
+The community mean seed mass (*logSeedMass*) decreased in most sites after the disturbance ($\Delta \in$ `r paste0("[",paste(round( quantile(pars_cov$Delta[pars_cov$trait=="logSeedMass"], c(0.025,0.975)) * 100 ), collapse=", "),"]")`%), except for two sites in western Amazonia, Cumaru and Chico Bocão.
+The community mean specific leaf area (*SLA*) increased or stayed close to its initial value in most sites after the disturbance, except in INPA, Bolivia (see full trajectories in supplementary Figure \ref{sfig:pred_traj}). The increase in the community mean SLA was especially high in Tapajos where it gained +`r round(median(pars_cov$Delta[pars_cov$trait=="SLA" & pars_cov$site_name=="Tapajos"])*100)`% compared to its initial value. 
+The community mean wood density (*woodDensity*) decreased in most sites after the disturbance ($\Delta \in$ `r paste0("[",paste(round( quantile(pars_cov$Delta[pars_cov$trait=="woodDensity"], c(0.025,0.975)) * 100 ), collapse=", "),"]")`%), except for three sites: INPA, Peteco and Tabocal, where it stayed close to its initial value.
 
 ## Effect of covariates on functional resistance 
 
-The intercept $\lambda0$ is significantly different from zero for all traits except for *DBH95*. A site with average conditions would not have a change in DBH95/tree stature, ... 
-
-```{r lambdas, fig.height=5, fig.width=6, fig.cap="\\label{fig:lambdas}Violin plots of covariates effect on maximum relative CMT change per trait. *intercept* is the value when all covariates are null; *smort* is the effect of the stem mortality rate; *seas* is the effect of the precipitation seasonality. Dots represent the median value, and the segments are the 95% confidence intervals.  All covariates were scaled and centered. COlours indicate if zero is in the confidence interal: black when zero is in the 80% interval, dark blue when its in the 958% interval but not the 80% interval, and light blue when its in neither."}
+```{r lambdas, fig.height=5, fig.width=6, fig.cap="\\label{fig:lambdas}Covariates effect on maximum relative CMT change per trait. *intercept* is the value when all covariates are null; *seasonality* is the effect of the precipitation seasonality; *turnover* is the effect of the stem turnover rate; *CMT* is the effect of the initial community wbiomass-weighted mean trait; and *FD* is the effect of the initial functional diversity. Dots represent the median value, and the segments are the 95% confidence intervals.  All covariates were scaled and centered. Colours indicate if zero is in the confidence interal: black when zero is in the 80% interval, dark blue when its in the 958% interval but not the 80% interval, and light blue when its in neither."}
 
 load("C:/Users/camille.piponiot/gitR/functional_trajectories_TmFO/data/parsCov_seas_smort_traits_FD.Rdata")
 
@@ -310,8 +311,10 @@ lambda_ci = df_lambda[, .(inf95 = quantile(value, 0.025),
 
 ## order covariates in graph
 lambda_ci[covariate == "WMT", covariate := "CMT"]
+lambda_ci[covariate == "smort", covariate := "turnover"]
+lambda_ci[covariate == "seas", covariate := "seasonality"]
 lambda_ci$covariate = factor(lambda_ci$covariate, 
-                             levels = c("FD","CMT","smort","seas","intercept"))
+                             levels = c("FD","CMT","turnover","seasonality","intercept"))
 
 ## significance level 
 lambda_ci$signif = "< 80%"
@@ -332,6 +335,13 @@ ggplot(lambda_ci, aes(x = covariate)) +
   scale_colour_manual(values = c("black","royalblue","lightblue"))
 ```
 
+
+The intercept $\lambda0$ is significantly different from zero for all traits except for *DBH95* (Figure \ref{fig:lambdas}). A site with average stem turnover rate and precipitation seasonality is thus predicted to have a small non-significant decrease in *DBH95* (as a proxy of tree stature). Both the seasonality of precipitations and the stem turnover rate have a significant positive effect on mean *DBH95*: highly seasonal forests with high turnover rates are predicted to favor larger trees (on average) after a logging disturbance, while forests with low precipitation seasonality and turnover rates are predicted to have a decrease in mean *DBH95*. The initial functional composition (*CMT*) and diversity (*FD*) have no significant effect on post-disturbance *DBH95* changes. 
+The intercept is significantly negative for *logSeedMass* and positive for *SLA*, but no significant covariate effect was detected for either of these traits (Figure \ref{fig:lambdas}): seed mass is predicted to decrease and SLA is predicted to increase after a logging disturbance. 
+For *woodDensity*, the intercept is significantly negative: wood density is predicted to decrease after a logging disturbance (Figure \ref{fig:lambdas}). The effect of precipitation seasonality is significantly negative and the effect of stem turnover rate and the initial wood density (*CMT*) have a significantly positive effect on post-disturbance wood density change. A forest with high precipitation seasonality, low stem mortality and low initial wood density is thus predicted to have a stronger decrease of mean wood density after a logging disturbance.
+
+
+## Predictions of regional variability in functional resistance
 
 ```{r maps_pred, fig.cap="\\label{fig:predmap}Prediction maps of maximum relative community mean trait (CMT) change (i.e. resistance to disturbance) by trait. Warm colors (from yellow to red) show a decreases in CMT; blue colors show an increase in CMT. Black dots are study sites location. "}
 load("C:/Users/camille.piponiot/gitR/functional_trajectories_TmFO/data/maps_rticle.Rdata")
@@ -387,64 +397,55 @@ ggplot(grd_pred) + geom_raster(aes(x = long, y = lat, fill = med*100)) +
 ## error: also integrate the error on input maps
 ```
 
+Functional resistance is predicted to vary strongly between traits and across the Amazonian biome (Figure \ref{fig:predmap}). *DBH95* is predicted to decrease strongly in northern regions of Amazonia (up to -`r `xx), and to increase slightly in the most southern regions of Amazonia (Figure \ref{fig:predmap}a). Seed mass is predicted to strongly decrease everywhere in Amazonia after selective logging, and especially in southeastern regions (Figure \ref{fig:predmap}b). SLA is predicted to increase, and in particular in southern Amazonia, except in northern regions where it is expected to decrease slightly (Figure \ref{fig:predmap}c). Wood density is predicted to decrease everywhere in Amazonia after logging, ans especially in northeastern and eastern Amazonia (Figure \ref{fig:predmap}d). 
+
 
 Discussion
 ==========
 
 ## Model structure and limitations
 
-Model structure: 
+This study presents, to our knowledge, the first explicit model of post-disturbance stand-level functional trajectory in tropical forests. This model describes two phases of the trajectory: first a change in the functional composition ($t_c \in [0,tmax]$) triggered by an increase light availability that favors fast-growing pioneer trees, and second a progressive return to initial functional composition ($t_c > tmax$) once the canopy gaps have closed and pioneer trees start to die. The advantage of this framework is that it relies on a small set of parameters to describe the trajectory, while accurately predicting observations (see supplementary figure \ref{sfig:gof}). This makes the predictions more robust, limiting the risks of over-fitting. One other advantage is that results are easier to interpret. $\Delta$ (i.e. the maximum change in CMT) can be interpreted as the functional resistance of the forest to logging; $tmax$ is the time taken to reach this maximum change; $\theta$ is a non-dimensional rate of recovery : the higher the value of $\theta$, the faster the return to the initial CMT value during the recovery phase ($t_c > tmax$). Together, these three parameters summarize the functional resilience to logging. This framework could be applied to describe and predict the resilience of ecosystems to other disturbance types.  
 
-Originality of this framework
-- no other explicit model (to our knowledge) of post-disturbance functional trajectory = 2 phases (1) change in environment (here, more light) provokes functional response ($t_c \in [0,tmax]$) and (2) progressive return to initial environmental conditions and functional composition ($t_c > tmax$)
-- few parameters (only 3) to describe the trajectory: $tmax$, $\Delta$ and $\theta$ $\Rightarrow$ easier to interprete. $\Delta$: resistance, $tmax$: timelag, $\theta$: recovery "rate"
-- goodness of fit (Figure xxx): model fits the data 
-- hierarchical framework: use information from higher hierarchical levels to infer parameters in lower hierarchical models, which is very important in this study because some sites have missing data (long periods between 2 censuses, short experiment duration). 
+One major problem of this study is the lack of long-term data that hampers our ability to correctly predict the long-term recovery of functional traits. 
+The time to reach the maximum trait change (median value: `r round(median(pars_cov$tmax))` yr) is higher than the total experiment duration in several of our sites. The maximum trait change was therefore not always observed in the data, resulting in large uncertainties over the estimated parameters in our models (Figure \ref{fig:tmax_delta}). The hierarchical structure of our model can partially offset this lack of long-term data in some of our sites by integrating information from other sites where the information is available, but cannot replace real observations. 
+One other issue with short experiment duration is that we cannot be sure that changes are not permanent and that functional traits will recover their initial value where this recovery has not been observed. This issue could be more serious with ongoing climate changes and increasing disturbance intensity that can cause a shift to another state of the forest and a new composition [@Hirota2011,@Johnstone2016].
+Unfortunately, long-term permanent forest plots are scarce in the tropics, mainly because they are expensive to repeatedly re-census [@Verburg2003]. Investing in long-term experiments (> 20 years) such as the forest plots used in this study will be extremely valuable to validate our results, and more generally to greatly improve the understanding of tropical forest resilience to disturbances and climate change.
 
-The time to reach the maximum trait change was $tmax \in$ `r range_tmax` yr (95% confidence interval), with a median value of `r round(median(pars_cov$tmax))` yr. This value is higher than the total experiment duration in several of our sites. The maximum trait change was therefore not always observed in the data, resulting in large uncertainties over the estimated parameters in our models (Figure xx). The hierarchical structure of our model can partially offset this lack of long-term data in some of our sites, but cannot replace real observations. Unfortunately, long-term permanent forest plots are scarce in the tropics, mainly because they are expensive to repeatedly re-census [@Verburg2003]. Investing in long-term experiments (> 20 years) such as the forest plots used in this study will be extremely valuable to validate our results, and more generally to greatly improve the understanding of tropical forest resilience to disturbances. [+ is change permanent? not in plots with > 20 years of measurements but in some regions or under cliamte change scenarios: there could be a shift to a new functional composition]
+In our framework we decided to use data only from trees < 35 cm to avoid interpreting the direct (and artificial) effects of tree selection on the functional composition. Nonetheless, trees > 35 cm dbh constitute on average 57 % of the biomass in our plots and have thus a large weight in forest functioning (e.g. carbon cycling refxx). In the supplementary material, we show plotted the trajectory of CMT for trees > 35 cm dbh (supplementary figure xxx). These trajectories were highly variable and showed no consistent pattern. [en rajouter? pas très convaincant xx ]
 
-Only trees < 35 cm, but trees > 35 cm constitute xx % of the biomass and have a large weight in forest functioning (e.g. carbon cycling refxx). 
-
-Functional trait measures: high intra-specific variation (e.g. for SLA [@Derroire2018]), but few individual measures, usually in one location, and no control for ontogeny effect and measurement type (e.g. for SLA: with our without petiole, rachis, etc, not always reported) (refxx). This can lead to some variability in the data that is difficult to control for. We thus believe that overall trends carry some valuable information, but that plot trajectories are not to be interpreted with to much detail.  
+Finally, there is a high uncertainty around functional trait estimation. To estimate the community's weighted mean trait, each individual was given a species-specific trait value (or the lowest taxonomic level available) retrieved from global databases [@Kattge2011]. High intra-specific variations in trait value have been observed (e.g. for SLA [@Derroire2018]) due to local environmental conditions (e.g. soil or light environment), ontogeny, or differences in measurement protocols (e.g. SLA measured in leaves with or without the petiole and rachis). Tropical forests have high species richness, and extensive trait measurements are expensive, so for most species there are only a few (< 5) measurements of each trait in the database. This is a potential source of error in the data that is difficult to control for. We thus believe that overall trends provide some valuable information, but that individual plot trajectories should not be interpreted in too much detail.  
 
 ## A consistant functional response to logging disturbance
 
-directional changes in functional composition and comparison to what we already know 
+The changes in functional traits after logging are consistent with what has already been described in tropical forests. 
+Community mean seed mass and wood density are the most affected by selective logging in our data (Figure \ref{fig:lambdas}): their decrease after a logging disturbance has been reported in previous studies [@Poorter2005a,@Verburg2003,@Baraloto2012] and correspond to specific strategies of the pioneer species that appear after a disturbance. It is interesting to note that across the Amazon biome, the response to logging relies on a small group of genuses (*Cecropia* and *Inga* in northern and central Amazonia, *Urera* in southwestern Amazonia) that have developed a similar opportunist strategy to colonize logging gaps, that reflects on functional traits. 
 
-DBH95: decrease in most sites, except in Bolivian sites (La Chonta and INPA) where spieces with large adult trees have an increased growth after logging (supplementary Figure xx).
--> 
+Seed mass is inversely correlated to the number of seeds that an individual can produce: small-seeded species can produce a lot of seeds that will easily be dispersed by wind, but that have a lower tolerance for shady and generally resource-limited environments during the establishment phase [@Muller-Landau2010]. Small-seeded species usually develop an opportunistic strategy by being able to spread dormant seeds efficiently that germinate in high-light environments such as logging gaps where they are highly competitive [@Poorter2005a]. This explains the sharp decrease in mean seed mass observed in most of our plots after logging.
 
+The increase in the abundance of light-wooded species after logging is also consistent with results from previous studies [@Verburg2003,@Baraloto2012,@Both2018]. The relationship between wood density and individual growth and mortality rates has been well established in tropical forests [@Poorter2008a,@Chave2009]: light-wooded species grow and die faster, and are thus particularly competitive in environments with high resource availability. In most Amazonian forests the limiting resource is light [@Wagner2017], and light-wooded species are thus particularly competitive in logging gaps. The main exception in our data is the site INPA in southern Bolivia (Figure \ref{fig:map_tmfo}) where wood density is particularly high prior to logging and increases slightly after a logging disturbance (Figure \ref{fig:tmax_delta}). This may be explained by the fact that this site is located in a transitional forest that is particularly constrained by water rather than light availability [@Wagner2017]. Because light-wooded species have a lower resistance to water stress [@Aleixo2019], they may not be favored is such environmental conditions. 
 
-Seed Mass: decrease 
-pioneer species: opportunistic strategy = numerous small seeds with lower tolerance for shady understory environments during the establishment phase, [@Muller-Landau2010], but that can rapidly colonise logging gaps because they thrive in high-light environments [@Poorter2005a]
+The observed increase in SLA can be interpreted as an increase in the light-acquisition potential [@Wright2004]. Species with high SLA can rapidly grow low-investment and efficient leaves in conditions of high light availability, which is typical of an opportunistic pioneer strategy and has already been described in other logged tropical forests [@Both2018]. In some sites the community mean SLA decreases after logging (e.g. La Chonta in Bolivia and Jenaro in Peru). This variability of post-logging SLA changes may be caused either by differences in species strategies or inconsistencies in SLA measures. Indeed,  SLA has been shown to present high intraspecific variation [@Derroire2018] and is particularly sensitive to ontogeny and measurement protocols. 
 
-SLA: increase, as expected (pioneer strategy: recruitment of short-lived species with productivity related traits such as high SLA favour fast post-logging recovery of carbon stocks)
-// [@Both2018] in Bornean forests: logging decreases (branch) wood density and SLA. [limitation of their study: chronosequence, substituting time for space: different plots // no time effect]
--> not the same response as our plots, maybe because of species composition. SLA is not the most consistent trait response in our study, plots in western Amazonia (Jenaro in Peru and INPA in Bolivia) have decreasing SLA after logging (see supplemenraty Figure xx [data and predictions] and Figure \ref{fig:predmap}).
+## Community pre-logging characteristics explain little of the functional resistance to logging
 
-WD: decrease
-[@Verburg2003]: increment of soft-wood species after logging
-[@Baraloto2012] (site: Paracou, one of our study sites)
-[@Both2018]: same response
+Contrary to expectations, the initial CMT and functional diversity had little to no effect on the functional resistance to a logging disturbance (Figure \ref{fig:lambdas}). The only exception is the effect of the initial community weighted wood density (Figure \ref{fig:lambdas}d), but even this effect might be overestimated: in fact, when the model is calibrated only with the initial CMT and functional diversity as covariates (no turnover rate nor precipitation seasonality), there is no significant covariate effect (see supplementary material xxx). 
+These results are particularly surprising if compared to ecological theory [@Oliver2015,@Johstone2016] and previous studies showing that the pre-disturbance functional composition affects post-disturbance ecosystem dynamics [@Bernhardt-Romermann2011,@Herault2019]. 
 
-Wood density is one of the traits that has been consistently linked to post-disturbance functional changes in all tropical forests, and in our dataset. 
-The relationship between wood density and individual growth and mortality rates has been well established in tropical forests [@Poorter2008a,@Chave2009].
-
-## Functional resistance and vulnerability
-
-what traits are more vulnerable?
-
--> vulnerability of wood density in highly seasonal forests (+more exposure to climate change and disturbances in SE Amazonia)
+[explanations? not enough precision to detect the effect of initial composition? so why do we detect the effect of spatially-explicit variables?]
 
 ## Functional response to logging is spatially structured in Amazonian forests
 
-- Effect of precipitation regime?
+Precipitation seasonality has only a relatively weak effect on the functional resistance of tree stature (*DBH95*) and wood density to logging (Figure \ref{fig:lambdas}). [other studies? expectations? xx]
+Stem turnover rate has a much stronger effect on the response of those two traits to logging. For both traits, the median intercept is negative and the effect of the stem turnover rate is positive. This means that forests with high turnover rates show lower decreases in wood density and tree stature after logging. In other terms, forests with high turnover rates seem to be more functionally resistant to logging. Stem turnover rates are a proxy of natural disturbance regimes: forets with high turnover rates have a history of natural disturbances, that may have selected for species adapted to disturbances, thus explaining the higher resistance to a logging disturbance [@Johnstone2016]. 
 
-- Naturally disturbed forests may be more functionally resistant
+-> wood density and stem turnover [@Fauset2019]
 
--> ecological memory [@Johnstone2016]
 
--> wood density and stem mortality [@Fauset2019]
+Even though the SLA is expected to increase (Figure \ref{fig:lambdas}), the predicted variations in Amazonia are limited (Figure \ref{fig:predmap}c). In contrast, the seed mass is expected to decrease sharply after logging (Figure \ref{fig:lambdas} and  \ref{fig:predmap}b), as well as tree stature and wood density in northern and western Amazonian forests (Figure \ref{fig:predmap}).
+
+-> vulnerability of wood density in highly seasonal forests (+more exposure to climate change and disturbances in SE Amazonia)
+
 
 
 
@@ -479,9 +480,12 @@ site_table[, smort := round(smort,2)]
 site_table$site_name = as.character(site_table$site_name)
 site_table$site_name[site_table$site_name == "Braga Supay y Lobillo"] <- "Jenaro"
 
-colnames(site_table) <- c("Site", "Longitude","Latitude", "Precipitaton seasonality (%)","Stem mortality (%)")
+colnames(site_table) <- c("Site", "Longitude","Latitude", "Precipitaton seasonality (%)","Stem turnover rate (%)")
 kable(site_table, "latex", booktabs = T, caption = "\\label{tab:sites}Summary table of sites' location and covariates value.")
 ```
+
+## Parameters priors
+
 
 
 ## Choice of pixels on prediction maps
@@ -493,7 +497,7 @@ Scaled covariates -> convex hull around TmFO sites values -> buffer of 1 (scaled
 ```{r pixel_choice, fig.height=6, fig.width=6}
 plot(buff, col="grey", axes=TRUE, 
      xlab = "Seasonality (centered and scaled)", 
-     ylab = "Stem mortality (centered and scaled)", 
+     ylab = "Stem turnover rate (centered and scaled)", 
      xlim = c(-3.2,max(all_pix[,1])), 
      border = NA)
 points(all_pix, pch=19)
@@ -503,8 +507,9 @@ lines(coords, col="red")
 
 ## Goodness of predictions
 
-```{r make_predictions}
+```{r make_predictions, fig.cap="\\label{sfig:gof} Goodness of fit xx"}
 load("C:/Users/camille.piponiot/gitR/functional_trajectories_TmFO/data/data_FT_TmFO.Rdata")
+data_FT = subset(data_FT, size == "(0,35]")
 data_FT$id = 1:nrow(data_FT)
 site_coord$seas_sc = scale(site_coord$seas)
 site_coord$smort_sc = scale(site_coord$smort)
@@ -566,7 +571,7 @@ df_ci = merge(unique(dfTraits[,c("site","site_name")]), df_ci, by = "site")
 ```
 
 
-```{r pred_obs, fig.width = 12, fig.height=8}
+```{r pred_obs, fig.width = 12, fig.height=8, fig.cap="\\label{sfig:pred_traj} Observed values against trajectories of CMT predicted with our model."}
 ggplot(subset(dfTraits, treat != "ctrl"), 
        aes(x = year - tlog, y = dtr, colour = treat)) + 
   geom_ribbon(data = df_ci, 
@@ -581,7 +586,36 @@ ggplot(subset(dfTraits, treat != "ctrl"),
 ```
 
 
-## Cross validation
+
+## Large trees' CMT trajectories 
+
+```{r obs_large, fig.width = 12, fig.height=8, fig.cap="\\label{sfig:pred_traj} Observed CMT trajectories of large trees (> 35 cm dbh)."}
+load("C:/Users/camille.piponiot/gitR/functional_trajectories_TmFO/data/data_FT_TmFO.Rdata")
+data_large = subset(data_FT, size == "(35,300]")
+
+data_large = merge(data_large, site_coord, by = "site")
+data_large = merge(data_large, plotInfo, by = c("idplot","site"))
+
+## tlog: logging year
+data_large = merge(data_large, data_large[,.(tlog = min(year)),.(idplot)], by = "idplot")
+data_large$tlog[data_large$site == "prc"] = 1986
+data_large$tlog[data_large$site == "tor"] = 2006
+data_large$tlog[data_large$site == "cum"] = 2004
+
+dfT0 = subset(data_large, year <= tlog)[,.(T0 = mean(WMT)), .(idplot, trait)]
+data_large = merge(data_large, dfT0, by = c("idplot","trait"))
+data_large[, dtr := (WMT-T0)/T0]
+
+
+ggplot(subset(data_large, treat != "ctrl"), 
+       aes(x = year - tlog, y = WMT, colour = treat, group = idplot)) + 
+  geom_point() + geom_line() +
+  facet_grid(trait ~ site_name, scales = "free") +
+  labs(y = "CMT", x = "Time since logging (yr)") +
+  theme_pubclean()
+
+```
+
 
 ```{r}
 with_initial_traits = FALSE
@@ -608,7 +642,7 @@ ci_loo = pars_loo[, .(inf = quantile(lambda, 0.025),
                   .(covar, site, trait)]
 ```
 
-Here we tested the effect of removing one site on final parameter posteriors. All sites were removed sequentially and the model was recalibrated with this new subset of the original data. Covariates effects (intercept, *seas*: seasonality of precipitations and *smort*: stem mortality rate) are reported for each site removal (y axis), for each trait. 
+Here we tested the effect of removing one site on final parameter posteriors. All sites were removed sequentially and the model was re-calibrated with this new subset of the original data. Covariates effects (intercept, *seas*: seasonality of precipitations and *smort*: stem turnover rate) are reported for each site removal (y axis), for each trait. 
 
 ```{r loo, fig.height = 10, fig.width = 8}
 ggplot(ci_loo, aes(x = site, y = med, ymin = inf, ymax = sup)) + 

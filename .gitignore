@@ -1,7 +1,10 @@
 .Rproj.user
-.Rhistory
-.Rdata
-.Ruserdata
-.html
+*.Rhistory
+*.Rdata
+*.Ruserdata
+*.html
+*.md
+*.pdf
+*.png
 *.rds
 graphs/
