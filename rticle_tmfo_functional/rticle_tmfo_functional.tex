@@ -94,25 +94,29 @@ forests}
   post-logging trajectory of community weighted mean traits and calibrate
   it in a Bayesian framework using data from 12 experimentally logged
   sites (264 ha total) spread over the Amazon biome. We test the effect of
-  the initial composotion and functional diversity as well as the
-  precipitation seasonality and stem turnover rate on the functional
-  resistance to a logging disturbance (i.e.~the maximum relative change in
-  functional composition after logging).
+  the initial composition and functional diversity as well as regional
+  patterns of precipitation seasonality and stem turnover rate on the
+  functional resistance to a logging disturbance (i.e.~the maximum
+  relative change in community mean traits after logging). We use four
+  functional traits that together capture important tradeoffs and
+  strategies in tropical forests: (i) the 95\textsuperscript{th}
+  percentile of a species diameter distribution (as a proxy of adult tree
+  stature), (ii) the specific leaf area (SLA), (iii) the (log-transformed)
+  seed mass, and (iv) the wood density.
   
   Our results show that, contrary to expectations, the intital composition
   and functional diversity have no significant effect on the functional
   resistance in our plots. The stem turnover rate was the best predictor
-  of post-logging resistance for two traits, namely the
-  95\textsuperscript{th} percentile of a species diameter distribution (as
-  a proxy of adult tree stature) and wood density. Forests with high
-  turnover rates were predicted to be the more resistant to logging.
-  Overall, adult tree stature and SLA seem to be more resistant to
-  logging, while seed mass and wood density show consistent decreases
-  after a logging disturbance. Forests in northeastern Amazonia are
-  predicted to experience the strongest decreases in wood density after
-  logging (-10\%). These forests are especially important for water cycles
-  and carbon sequestration, and a decrease in wood density may lower their
-  ability to provide these benefits.
+  of post-logging resistance for two traits, namely adult tree stature and
+  wood density: forests with high turnover rates were predicted to be the
+  more resistant to logging for these two traits. Overall, adult tree
+  stature and specific leaf area seem to be less impacted by logging,
+  while seed mass and wood density show consistent decreases after a
+  logging disturbance. Forests in northeastern Amazonia are predicted to
+  experience the strongest decreases in wood density after logging
+  (-10\%). These forests are especially important for regional water
+  cycles and carbon sequestration, and a decrease in wood density may
+  lower their ability to provide these benefits.
   \end{abstract}
   
  \end{frontmatter}
@@ -213,10 +217,10 @@ key component of forest resilience (Johnstone et al. 2016,Ciemer et al.
 (2019)). Ecological memory translates into the presence and diversity of
 trees and seeds of species with life-history traits adapted to
 disturbances, which in turn can shape forest demographics, and
-especially vegetation turnover rates (Lavorel and Garnier
-2002,({\textbf{???}})). Environmental constraints such as water
-limitations have also been shown to affect the functional resistance of
-Neotropical forests to disturbances ({\textbf{???}}).
+especially vegetation turnover rates (Lavorel and Garnier 2002,Flores et
+al. (2014)). Environmental constraints such as water limitations have
+also been shown to affect the functional resistance of Neotropical
+forests to disturbances (Enquist and Enquist 2011).
 
 In Amazonia, the largest tropical forest biome on Earth (600 million
 hectares), at least two large gradients explain regional patterns of
@@ -225,13 +229,13 @@ strongly correlated to the precipitation regime (Fauset et al. 2019),
 being higher in northwestern forests with high levels of precipitation
 and lower in southeastern forests which suffer from a long dry season
 (Davidson et al. 2012,Johnson et al. (2016)). Stem turnover rates
-describe a Northeast-Southwest gradient ({\textbf{???}}), mainly driven
-by soil stability (Quesada et al. 2012), and the frequency and intensity
-of natural disturbances such as windstorms (Espírito-Santo et al.
-2014,Negrón-Juárez et al. (2018)) and droughts (Phillips et al. 2010).
-Understanding how these gradients structure the forest response to a
-logging disturbance can help improve predictions of Amazonian forests
-vulnerability to future increases in disturbance regimes.
+describe a Northeast-Southwest gradient (Johnson et al. 2016), mainly
+driven by soil stability (Quesada et al. 2012), and the frequency and
+intensity of natural disturbances such as windstorms (Espírito-Santo et
+al. 2014,Negrón-Juárez et al. (2018)) and droughts (Phillips et al.
+2010). Understanding how these gradients structure the forest response
+to a logging disturbance can help improve predictions of Amazonian
+forests vulnerability to future increases in disturbance regimes.
 
 Here we assess the resistance of four functional traits (namely wood
 density, seed mass, specific leaf area and maximum tree diameter) to
@@ -264,8 +268,8 @@ forest sites used in this study: the size of the points represents the
 total monitored area, and the color (from yellow to red) represents the
 total length of the experiment, as the time interval (in years) between
 the first and the last census. Grey boundaries define 6 ecoregions and
-were retrieved from Ter Steege et al., 2013 (Ter Steege et al. 2013),
-CA: central Amazonia, EA: eastern Amazonia, GS: Guiana shield, SEA:
+were retrieved from Ter Steege et al., 2013 \cite{TerSteege2013}, CA:
+central Amazonia, EA: eastern Amazonia, GS: Guiana shield, SEA:
 southeastern Amazonian, SWA: southewestern Amazonia, and WA: western
 Amazonia. Green areas define the Amazonian biome.}
 \end{figure}
@@ -322,7 +326,7 @@ individual tree in our permanent sample plots was then attributed a
 value for each trait at the lowest available taxonomic level. Trees with
 no available species- or genus-specific trait value were given their
 plot's median trait value. The aboveground biomass of each individual
-was estimated using the R package BIOMASS (Réjou-Méchain et al., n.d.).
+was estimated using the R package BIOMASS (Réjou-Méchain et al. 2017).
 
 Selective logging typically targets large trees belonging to a small
 group of species with commercial value. Those species usually have
@@ -578,16 +582,16 @@ colors show an increase in CMT. Black dots are study sites location.}
 
 Functional resistance is predicted to vary strongly between traits and
 across the Amazonian biome (Figure \ref{fig:predmap}). \emph{DBH95} is
-predicted to decrease strongly in northern regions of Amazonia (up to
--\texttt{r}xx), and to increase slightly in the most southern regions of
-Amazonia (Figure \ref{fig:predmap}a). Seed mass is predicted to strongly
-decrease everywhere in Amazonia after selective logging, and especially
-in southeastern regions (Figure \ref{fig:predmap}b). SLA is predicted to
-increase, and in particular in southern Amazonia, except in northern
-regions where it is expected to decrease slightly (Figure
+predicted to decrease in northern regions of Amazonia (down to -10\%),
+and to increase slightly in the most southern regions of Amazonia
+(Figure \ref{fig:predmap}a). Seed mass is predicted to strongly decrease
+everywhere in Amazonia after selective logging (down to -14\%), and
+especially in southeastern regions (Figure \ref{fig:predmap}b). SLA is
+predicted to increase, and in particular in southern Amazonia, except in
+northern regions where it is expected to decrease slightly (Figure
 \ref{fig:predmap}c). Wood density is predicted to decrease everywhere in
-Amazonia after logging, ans especially in northeastern and eastern
-Amazonia (Figure \ref{fig:predmap}d).
+Amazonia after logging (down to -13\%), ans especially in northeastern
+and eastern Amazonia (Figure \ref{fig:predmap}d).
 
 \section{Discussion}\label{discussion}
 
@@ -599,21 +603,22 @@ post-disturbance stand-level functional trajectory in tropical forests.
 This model describes two phases of the trajectory: first a change in the
 functional composition (\(t_c \in [0,tmax]\)) triggered by an increase
 light availability that favors fast-growing pioneer trees, and second a
-progressive return to initial functional composition (\(t_c > tmax\))
-once the canopy gaps have closed and pioneer trees start to die. The
-advantage of this framework is that it relies on a small set of
-parameters to describe the trajectory, while accurately predicting
-observations (see supplementary figure \ref{sfig:gof}). This makes the
-predictions more robust, limiting the risks of over-fitting. One other
-advantage is that results are easier to interpret. \(\Delta\) (i.e.~the
-maximum change in CMT) can be interpreted as the functional resistance
-of the forest to logging; \(tmax\) is the time taken to reach this
-maximum change; \(\theta\) is a non-dimensional rate of recovery : the
-higher the value of \(\theta\), the faster the return to the initial CMT
-value during the recovery phase (\(t_c > tmax\)). Together, these three
-parameters summarize the functional resilience to logging. This
-framework could be applied to describe and predict the resilience of
-ecosystems to other disturbance types.
+recovery phase with a progressive return to initial functional
+composition (\(t_c > tmax\)) once the canopy gaps have closed and
+pioneer trees start to die. The advantage of this framework is that it
+relies on a small set of parameters to describe the trajectory, while
+accurately predicting observations (see supplementary figure
+\ref{sfig:gof}). This makes the predictions more robust, limiting the
+risks of over-fitting. One other advantage is that results are easier to
+interpret. \(\Delta\) (i.e.~the maximum change in CMT) can be
+interpreted as the functional resistance of the forest to logging;
+\(tmax\) is the time taken to reach this maximum change; \(\theta\) is a
+non-dimensional rate of recovery : the higher the value of \(\theta\),
+the faster the return to the initial CMT value during the recovery phase
+(when \(t_c > tmax\)). Together, these three parameters summarize the
+functional resilience to logging. This framework could be applied to
+describe and predict the resilience of ecosystems to other disturbance
+types.
 
 One major problem of this study is the lack of long-term data that
 hampers our ability to correctly predict the long-term recovery of
@@ -626,26 +631,26 @@ of our model can partially offset this lack of long-term data in some of
 our sites by integrating information from other sites where the
 information is available, but cannot replace real observations. One
 other issue with short experiment duration is that we cannot be sure
-that changes are not permanent and that functional traits will recover
-their initial value where this recovery has not been observed. This
-issue could be more serious with ongoing climate changes and increasing
-disturbance intensity that can cause a shift to another state of the
-forest and a new composition (Hirota et al. 2011,Johnstone et al.
-(2016)). Unfortunately, long-term permanent forest plots are scarce in
-the tropics, mainly because they are expensive to repeatedly re-census
-(Verburg and Eijk-Bos 2003). Investing in long-term experiments
-(\textgreater{} 20 years) such as the forest plots used in this study
-will be extremely valuable to validate our results, and more generally
-to greatly improve the understanding of tropical forest resilience to
-disturbances and climate change.
+that changes are not permanent and that functional traits will really
+recover their initial value. This issue could become more serious with
+ongoing climate changes and increasing disturbance intensity that can
+cause a shift to another state of the forest and a thus new functional
+composition (Hirota et al. 2011,Johnstone et al. (2016)). Unfortunately,
+long-term permanent forest plots are scarce in the tropics, mainly
+because they are expensive to repeatedly re-census (Verburg and Eijk-Bos
+2003). Investing in long-term experiments (\textgreater{} 20 years) such
+as the forest plots used in this study will be extremely valuable to
+validate our results, and more generally to greatly improve the
+understanding of tropical forest resilience to disturbances and climate
+change.
 
 In our framework we decided to use data only from trees \textless{} 35
 cm to avoid interpreting the direct (and artificial) effects of tree
-selection on the functional composition. Nonetheless, trees
+selective harvest on the functional composition. Nonetheless, trees
 \textgreater{} 35 cm dbh constitute on average 57 \% of the biomass in
 our plots and have thus a large weight in forest functioning
-(e.g.~carbon cycling refxx). In the supplementary material, we show
-plotted the trajectory of CMT for trees \textgreater{} 35 cm dbh
+(e.g.~carbon cycling (Lutz et al. 2018)). In the supplementary material,
+we show plotted the trajectory of CMT for trees \textgreater{} 35 cm dbh
 (supplementary figure xxx). These trajectories were highly variable and
 showed no consistent pattern. {[}en rajouter? pas très convaincant xx
 {]}
@@ -701,15 +706,15 @@ rates has been well established in tropical forests (Poorter et al.
 2008,Chave et al. (2009)): light-wooded species grow and die faster, and
 are thus particularly competitive in environments with high resource
 availability. In most Amazonian forests the limiting resource is light
-({\textbf{???}}), and light-wooded species are thus particularly
+(Wagner et al. 2017), and light-wooded species are thus particularly
 competitive in logging gaps. The main exception in our data is the site
 INPA in southern Bolivia (Figure \ref{fig:map_tmfo}) where wood density
 is particularly high prior to logging and increases slightly after a
 logging disturbance (Figure \ref{fig:tmax_delta}). This may be explained
 by the fact that this site is located in a transitional forest that is
-particularly constrained by water rather than light availability
-({\textbf{???}}). Because light-wooded species have a lower resistance
-to water stress (Aleixo et al. 2019), they may not be favored is such
+particularly constrained by water rather than light availability (Wagner
+et al. 2017). Because light-wooded species have a lower resistance to
+water stress (Aleixo et al. 2019), they may not be favored is such
 environmental conditions.
 
 The observed increase in SLA can be interpreted as an increase in the
@@ -738,10 +743,10 @@ fact, when the model is calibrated only with the initial CMT and
 functional diversity as covariates (no turnover rate nor precipitation
 seasonality), there is no significant covariate effect (see
 supplementary material xxx). These results are particularly surprising
-if compared to ecological theory (Oliver et al. 2015,({\textbf{???}}))
-and previous studies showing that the pre-disturbance functional
+if compared to ecological theory (Oliver et al. 2015,Johnstone et al.
+(2016)) and previous studies showing that the pre-disturbance functional
 composition affects post-disturbance ecosystem dynamics
-(Bernhardt-Römermann et al. 2011,({\textbf{???}})).
+(Bernhardt-Römermann et al. 2011,Hérault and Piponiot (2018)).
 
 {[}explanations? not enough precision to detect the effect of initial
 composition? so why do we detect the effect of spatially-explicit
@@ -754,28 +759,41 @@ forests}\label{functional-response-to-logging-is-spatially-structured-in-amazoni
 Precipitation seasonality has only a relatively weak effect on the
 functional resistance of tree stature (\emph{DBH95}) and wood density to
 logging (Figure \ref{fig:lambdas}). {[}other studies? expectations?
-xx{]} Stem turnover rate has a much stronger effect on the response of
-those two traits to logging. For both traits, the median intercept is
-negative and the effect of the stem turnover rate is positive. This
-means that forests with high turnover rates show lower decreases in wood
-density and tree stature after logging. In other terms, forests with
-high turnover rates seem to be more functionally resistant to logging.
-Stem turnover rates are a proxy of natural disturbance regimes: forets
-with high turnover rates have a history of natural disturbances, that
-may have selected for species adapted to disturbances, thus explaining
-the higher resistance to a logging disturbance (Johnstone et al. 2016).
-
--\textgreater{} wood density and stem turnover (Fauset et al. 2019)
+seasonal forests are less resilient for wood density?{]} Stem turnover
+rate has a much stronger effect on the response of those two traits to
+logging. For both traits, the median intercept is negative and the
+effect of the stem turnover rate is positive. This means that forests
+with high turnover rates show lower decreases in wood density and tree
+stature after logging. In other terms, forests with high turnover rates
+seem to be more functionally resistant to logging. Stem turnover rates
+are a proxy of natural disturbance regimes: forets with high turnover
+rates have a history of natural disturbances, that may have selected for
+species adapted to disturbances, thus explaining the higher resistance
+to a logging disturbance (Johnstone et al. 2016).
 
 Even though the SLA is expected to increase (Figure \ref{fig:lambdas}),
 the predicted variations in Amazonia are limited (Figure
 \ref{fig:predmap}c). In contrast, the seed mass is expected to decrease
 sharply after logging (Figure \ref{fig:lambdas} and \ref{fig:predmap}b),
-as well as tree stature and wood density in northern and western
-Amazonian forests (Figure \ref{fig:predmap}).
-
--\textgreater{} vulnerability of wood density in highly seasonal forests
-(+more exposure to climate change and disturbances in SE Amazonia)
+as well as wood density, and, to a lower extent, adult tree stature, in
+northern and western Amazonian forests (Figure \ref{fig:predmap}). The
+functional composition of Amazonian forests is thus likely to shift
+towards small-seeded, light-wooded (and in some cases smaller) species
+in a context of increasing frequency of human disturbances. Functional
+changes are predicted to be stronger in northeastern Amazonia,
+especially for wood density that is expected to decrease by more than
+-10\% in the Guiana Shield and eastern Amazonia (Figure
+\ref{fig:predmap}d). Decreases in wood density can have many
+consequence, among which a lower carbon storage capacity, and a lower
+resistance to drought (Aleixo et al. 2019). The Guiana Shield plays a
+key role in Amazonian water cycle (Staal et al. 2018), carbon storage
+(Avitabile et al. 2016) and biodiversity (Barthe et al. 2017). A
+composition shift towards light-wooded species could thus be
+particularly worrying for the future of the region. The observed
+vulnerability to post-logging compositional changes in the region could
+thus be an almarm to reduce as much as possible the rate of human
+disturbances in the region, although more studies are neede to confirm
+these results.
 
 \section{Conclusion}\label{conclusion}
 
@@ -915,6 +933,13 @@ silvicultural intervention intensities in a tropical rain forest.''
 \emph{Biological Conservation} 191. Elsevier B.V.: 577--86.
 doi:\href{https://doi.org/10.1016/j.biocon.2015.08.004}{10.1016/j.biocon.2015.08.004}.
 
+\hypertarget{ref-Avitabile2016}{}
+Avitabile, Valerio, Martin Herold, Gerard B. M. Heuvelink, Simon L.
+Lewis, Oliver L. Phillips, Gregory P. Asner, John Armston, et al. 2016.
+``An integrated pan-tropical biomass map using multiple reference
+datasets.'' \emph{Global Change Biology} 22 (4): 1406--20.
+doi:\href{https://doi.org/10.1111/gcb.13139}{10.1111/gcb.13139}.
+
 \hypertarget{ref-Baccini2012a}{}
 Baccini, a., S. J. Goetz, W. S. Walker, N. T. Laporte, M. Sun, D.
 Sulla-Menashe, J. Hackler, et al. 2012. ``Estimated carbon dioxide
@@ -945,6 +970,14 @@ functional responses of a tropical tree community to selective
 logging.'' \emph{Journal of Applied Ecology} 49 (4): 861--70.
 doi:\href{https://doi.org/10.1111/j.1365-2664.2012.02164.x}{10.1111/j.1365-2664.2012.02164.x}.
 
+\hypertarget{ref-Barthe2017}{}
+Barthe, Stéphanie, Giorgio Binelli, Bruno Hérault, Caroline
+Scotti-Saintagne, Daniel Sabatier, and Ivan Scotti. 2017. ``Tropical
+rainforests that persisted: inferences from the Quaternary demographic
+history of eight tree species in the Guiana shield.'' \emph{Molecular
+Ecology} 26 (4): 1161--74.
+doi:\href{https://doi.org/10.1111/mec.13949}{10.1111/mec.13949}.
+
 \hypertarget{ref-Bernhardt-Romermann2011}{}
 Bernhardt-Römermann, Markus, Alan Gray, Adam J. Vanbergen, Laurent
 Bergès, Andreas Bohner, Rob W. Brooker, Luc De Bruyn, et al. 2011.
@@ -956,7 +989,7 @@ doi:\href{https://doi.org/10.1111/j.1365-2745.2011.01794.x}{10.1111/j.1365-2745.
 \hypertarget{ref-Blaser2011}{}
 Blaser, Juergen, Alastair Sarre, Duncan Poore, and Steven Johnson. 2011.
 ``Status of Tropical Forest Management 2011.'' Vol. 38.
-\href{http://www.itto.int/news\%7B/_\%7Dreleases/id=2663}{http://www.itto.int/news\{\textbackslash{}\_\}releases/id=2663}.
+doi:\href{https://doi.org/10.1017/S0032247400051135}{10.1017/S0032247400051135}.
 
 \hypertarget{ref-Both2018}{}
 Both, Sabine, Terhi Riutta, C. E. Timothy Paine, Dafydd M. O. Elias, R.
@@ -974,10 +1007,10 @@ Biology} 18 (2): 630--41.
 doi:\href{https://doi.org/10.1111/j.1365-2486.2011.02533.x}{10.1111/j.1365-2486.2011.02533.x}.
 
 \hypertarget{ref-Cannon1994}{}
-Cannon, Chuck H, David R Peart, Mark Leighton, Kuswata Kartawinata, Mark
-Leighton, and R Peart David. 1994. ``The structure of lowland rainforest
-after selective logging in West Kalimantan, Indonesia.'' \emph{Forest
-Ecology and Management} 67 (1-3): 49--68.
+Cannon, Chuck, Kuswata Kartawinata, Mark Leighton, and R. Peart David.
+1994. ``The structure of lowland rainforest after selective logging in
+West Kalimantan, Indonesia.'' \emph{Forest Ecology and Management} 67
+(1-3): 49--68.
 doi:\href{https://doi.org/10.1016/0378-1127(94)90007-8}{10.1016/0378-1127(94)90007-8}.
 
 \hypertarget{ref-Carpenter2015}{}
@@ -1039,6 +1072,13 @@ leaf trait variation among and within species during tropical dry forest
 succession in Costa Rica.'' \emph{Scientific Reports} 8 (1): 1--11.
 doi:\href{https://doi.org/10.1038/s41598-017-18525-1}{10.1038/s41598-017-18525-1}.
 
+\hypertarget{ref-Enquist2011}{}
+Enquist, Brian J., and Carolyn A. F. Enquist. 2011. ``Long-term change
+within a Neotropical forest: assessing differential functional and
+floristic responses to disturbance and drought.'' \emph{Global Change
+Biology} 17 (3): 1408--24.
+doi:\href{https://doi.org/10.1111/j.1365-2486.2010.02326.x}{10.1111/j.1365-2486.2010.02326.x}.
+
 \hypertarget{ref-Espirito-Santo2014}{}
 Espírito-Santo, Fernando D.B., Manuel Gloor, Michael Keller, Yadvinder
 Malhi, Sassan Saatchi, Bruce Nelson, Raimundo C Oliveira Junior, et al.
@@ -1059,6 +1099,19 @@ Fick, Stephen E, and Robert J Hijmans. 2017. ``WorldClim 2: New 1-km
 spatial resolution climate surfaces for global land areas.''
 \emph{International Journal of Climatology} 4315 (May): 4302--15.
 doi:\href{https://doi.org/10.1002/joc.5086}{10.1002/joc.5086}.
+
+\hypertarget{ref-Flores2014}{}
+Flores, Olivier, Bruno Hérault, Matthieu Delcamp, Éric Garnier, and
+Sylvie Gourlet-Fleury. 2014. ``Functional Traits Help Predict
+Post-Disturbance Demography of Tropical Trees.'' Edited by Francesco de
+Bello. \emph{PLoS ONE} 9 (9): e105022.
+doi:\href{https://doi.org/10.1371/journal.pone.0105022}{10.1371/journal.pone.0105022}.
+
+\hypertarget{ref-Herault2018}{}
+Hérault, Bruno, and Camille Piponiot. 2018. ``Key drivers of ecosystem
+recovery after disturbance in a neotropical forest.'' \emph{Forest
+Ecosystems} 5 (1). Forest Ecosystems: 2.
+doi:\href{https://doi.org/10.1186/s40663-017-0126-7}{10.1186/s40663-017-0126-7}.
 
 \hypertarget{ref-Hirota2011}{}
 Hirota, M., M. Holmgren, E. H. Van Nes, and M. Scheffer. 2011. ``Global
@@ -1128,7 +1181,6 @@ doi:\href{https://doi.org/10.1046/j.1365-2435.2002.00664.x}{10.1046/j.1365-2435.
 Lewis, Simon L, David P Edwards, and David Galbraith. 2015. ``Increasing
 human dominance of tropical forests.'' \emph{Science} 349 (6250):
 827--32.
-doi:\href{https://doi.org/10.1126/science.aaa9932}{10.1126/science.aaa9932}.
 
 \hypertarget{ref-Lopez-Gonzalez2011}{}
 Lopez-Gonzalez, Gabriela, Simon L Lewis, Mark Burkitt, and Oliver L
@@ -1137,9 +1189,16 @@ to manage and analyse tropical forest plot data.'' \emph{Journal of
 Vegetation Science} 22 (4): 610--13.
 doi:\href{https://doi.org/10.1111/j.1654-1103.2011.01312.x}{10.1111/j.1654-1103.2011.01312.x}.
 
+\hypertarget{ref-Lutz2018}{}
+Lutz, James A, Tucker J Furniss, Daniel J Johnson, Stuart J Davies,
+David Allen, Alfonso Alonso, Kristina J. Anderson-Teixeira, et al. 2018.
+``Global importance of large-diameter trees.'' \emph{Global Ecology and
+Biogeography}, May.
+doi:\href{https://doi.org/10.1111/geb.12747}{10.1111/geb.12747}.
+
 \hypertarget{ref-Malhi2014}{}
-Malhi, Yadvinder, Toby A. Gardner, Gregory R. Goldsmith, Miles R.
-Silman, and Przemyslaw Zelazowski. 2014. ``Tropical Forests in the
+Malhi, Yadvinder, Toby A Gardner, Gregory R Goldsmith, Miles R Silman,
+and Przemyslaw Zelazowski. 2014. ``Tropical Forests in the
 Anthropocene.'' \emph{Annual Review of Environment and Resources} 39
 (1): 125--59.
 doi:\href{https://doi.org/10.1146/annurev-environ-030713-155141}{10.1146/annurev-environ-030713-155141}.
@@ -1263,9 +1322,10 @@ doi:\href{https://doi.org/10.1007/978-3-540-74686-7}{10.1007/978-3-540-74686-7}.
 
 \hypertarget{ref-Rejou-Mechain2017}{}
 Réjou-Méchain, Maxime, Ariane Tanguy, Camille Piponiot, Jérôme Chave,
-and Bruno Hérault. n.d. ``BIOMASS: An R Package for estimating
-above-ground biomass and its uncertainty in tropical forests.''
-\emph{Methods in Ecology and Evolution}.
+and Bruno Hérault. 2017. ``Biomass: an R Package for Estimating
+Above-Ground Biomass and Its Uncertainty in Tropical Forests.''
+\emph{Methods in Ecology and Evolution} 8 (9): 1163--7.
+doi:\href{https://doi.org/10.1111/2041-210X.12753}{10.1111/2041-210X.12753}.
 
 \hypertarget{ref-Rutishauser2016}{}
 Rutishauser, Ervan, Bruno Hérault, Pascal Petronelli, and Plinio Sist.
@@ -1295,13 +1355,6 @@ Dekker. 2018. ``Forest-rainfall cascades buffer against drought across
 the Amazon.'' \emph{Nature Climate Change} 8 (June). Springer US: 1.
 doi:\href{https://doi.org/10.1038/s41558-018-0177-y}{10.1038/s41558-018-0177-y}.
 
-\hypertarget{ref-TerSteege2013}{}
-Ter Steege, Hans, Nigel C a Pitman, Daniel Sabatier, Christopher
-Baraloto, R. P. Salomao, Juan Ernesto Guevara, O. L. Phillips, et al.
-2013. ``Hyperdominance in the Amazonian Tree Flora.'' \emph{Science} 342
-(6156): 1243092--2.
-doi:\href{https://doi.org/10.1126/science.1243092}{10.1126/science.1243092}.
-
 \hypertarget{ref-Verburg2003}{}
 Verburg, René, and Clara van Eijk-Bos. 2003. ``Effects of selective
 logging on tree diversity, composition and plant functional type
@@ -1314,6 +1367,14 @@ Violle, Cyrille, Marie-laure Navas, Denis Vile, Elena Kazakou, Claire
 Fortunel, Irène Hummel, and Eric Garnier. 2007. ``Let the concept of
 trait be functional!'' \emph{Oikos} 116 (5): 882--92.
 doi:\href{https://doi.org/10.1111/j.2007.0030-1299.15559.x}{10.1111/j.2007.0030-1299.15559.x}.
+
+\hypertarget{ref-Wagner2017}{}
+Wagner, Fabien Hubert, Bruno Hérault, Vivien Rossi, Thomas Hilker,
+Eduardo Eiji Maeda, Alber Sanchez, Alexei I Lyapustin, Lênio Soares
+Galvão, Yujie Wang, and Luiz E. O. C. Aragão. 2017. ``Climate drivers of
+the Amazon forest greening.'' Edited by Benjamin Poulter. \emph{PLOS
+ONE} 12 (7): e0180932.
+doi:\href{https://doi.org/10.1371/journal.pone.0180932}{10.1371/journal.pone.0180932}.
 
 \hypertarget{ref-Wright2004}{}
 Wright, Ian J., Peter B. Reich, Mark Westoby, David D. Ackerly, Zdravko
